@@ -1,0 +1,10 @@
+PREFIX ontouml: <https://w3id.org/ontouml#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?stereotype (COUNT(?class) AS ?count)
+WHERE {
+  ?class rdf:type ontouml:Class ;
+         ontouml:stereotype ?stereotype .
+}
+GROUP BY ?stereotype
+ORDER BY DESC(?count)

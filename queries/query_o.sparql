@@ -1,0 +1,10 @@
+PREFIX ontouml: <https://w3id.org/ontouml#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?element (COUNT(?element) AS ?count)
+WHERE {
+  ?subject ?predicate ?element .
+  FILTER(STRSTARTS(STR(?element), "https://w3id.org/ontouml#"))
+}
+GROUP BY ?element
+ORDER BY DESC(?count)

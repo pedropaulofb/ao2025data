@@ -1,0 +1,10 @@
+PREFIX ontouml: <https://w3id.org/ontouml#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?type (COUNT(?element) AS ?count)
+WHERE {
+  ?element rdf:type ?type .
+  FILTER(STRSTARTS(STR(?type), "https://w3id.org/ontouml#"))
+}
+GROUP BY ?type
+ORDER BY DESC(?count)
