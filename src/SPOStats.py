@@ -1,7 +1,7 @@
-class ModelStats:
+class SPOStats:
     def __init__(self, name: str, **kwargs: int) -> None:
         """
-        Initialize a ModelStats instance with a name and optional attributes.
+        Initialize a SPOStats instance with a name and optional attributes.
 
         :param name: The name of the model.
         :type name: str

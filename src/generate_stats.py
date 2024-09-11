@@ -1,19 +1,18 @@
 import csv
-from os.path import isfile
 from pathlib import Path
 from typing import Union
 
-from src.OntoUMLElement import ModelStats
+from src.SPOStats import SPOStats
 
 
-def read_csv_and_update_instances(file_path: Union[str, Path], instances: dict[str, ModelStats]) -> None:
+def read_csv_and_update_instances(file_path: Union[str, Path], instances: dict[str, SPOStats]) -> None:
     """
     Reads a CSV file and updates ModelStats instances based on the CSV content.
 
     :param file_path: Path to the CSV file.
     :type file_path: Union[str, Path]
     :param instances: Dictionary holding instances of ModelStats by name.
-    :type instances: dict[str, ModelStats]
+    :type instances: dict[str, SPOStats]
 
     :raises FileNotFoundError: If the specified CSV file path does not exist.
     :raises ValueError: If the CSV contains invalid data that cannot be processed.
@@ -38,7 +37,7 @@ def read_csv_and_update_instances(file_path: Union[str, Path], instances: dict[s
                         instances[model_id].stats[element] += count
                 else:
                     # Create a new instance if it does not exist
-                    new_instance = ModelStats(name=model_id)
+                    new_instance = SPOStats(name=model_id)
                     if element in new_instance.stats:
                         new_instance.stats[element] = count
                     instances[model_id] = new_instance
@@ -49,12 +48,12 @@ def read_csv_and_update_instances(file_path: Union[str, Path], instances: dict[s
         print(f"Error: Invalid data in the CSV file {file_path}. {e}")
         raise e
 
-def write_stats_to_csv(instances: dict[str, ModelStats], output_file: Union[str, Path]) -> None:
+def write_stats_to_csv(instances: dict, output_file: Union[str, Path]) -> None:
     """
     Writes the statistics from all ModelStats instances to a CSV file.
 
-    :param instances: Dictionary holding instances of ModelStats by name.
-    :type instances: dict[str, ModelStats]
+    :param instances: Dictionary holding instances of SPOStats by name.
+    :type instances: dict[str, SPOStats]
     :param output_file: Path to the output CSV file.
     :type output_file: Union[str, Path]
 

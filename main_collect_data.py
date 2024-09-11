@@ -1,5 +1,9 @@
+import time
+
+from loguru import logger
 from ontouml_models_lib import Catalog, Query, OntologyDevelopmentContext
 from ontouml_models_lib.model import OntologyRepresentationStyle
+
 
 def main() -> None:
     """
@@ -24,10 +28,11 @@ def main() -> None:
     queries = Query.load_queries("queries")
 
     for query in queries:
+        start_time = time.perf_counter()
         query.execute_on_models(filtered, "./outputs/queries_results")
-
-    query = Query("./queries/query_s.sparql")
-    query.execute_on_models(filtered)
+        end_time = time.perf_counter()
+        elapsed_time_ms = (end_time - start_time) * 1000
+        logger.info(f"Query {query.name} took {elapsed_time_ms:.2f} ms to perform.")
 
 
 if __name__ == "__main__":

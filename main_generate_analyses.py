@@ -16,13 +16,15 @@ def save_to_csv(dataframe, filepath, message):
         logger.error(f"Failed to save {filepath}: {e}")
 
 
-def main() -> None:
+def generate_statistics(input_data_file:str,output_folder:str) -> None:
     """
     Main function to generate statistical analysis of the consolidated data.
     """
 
+    logger.info(f"Generating statics for {input_data_file}")
+
     # Read the CSV file into a pandas DataFrame
-    df = pd.read_csv('./outputs/consolidated_all.csv')
+    df = pd.read_csv(input_data_file)
 
     # Validate the input data
     if df.empty:
@@ -57,7 +59,7 @@ def main() -> None:
                                           'Global Relative Frequency (Group-wise)': global_relative_frequency_groupwise.values})
 
     # Save the consolidated frequency analysis data to a single CSV file
-    save_to_csv(frequency_analysis_df, './outputs/analyses/frequency_analysis.csv',
+    save_to_csv(frequency_analysis_df, output_folder+'frequency_analysis.csv',
                 "Frequency Analysis (Total, Group, Relative Frequencies) saved to CSV.")
 
     # 2. Diversity and Distribution Measures
@@ -102,7 +104,7 @@ def main() -> None:
                                           'Simpson Index': simpson_index.values})
 
     # Save the consolidated diversity and distribution measures data to a single CSV file
-    save_to_csv(diversity_measures_df, './outputs/analyses/diversity_measures.csv',
+    save_to_csv(diversity_measures_df, output_folder+'diversity_measures.csv',
                 "Diversity and Distribution Measures (Shannon Entropy, Gini Coefficient, Simpson's Index) saved to CSV.")
 
     # 3. Central Tendency and Dispersion
@@ -132,7 +134,7 @@ def main() -> None:
          'Interquartile Range (IQR)': iqr_counts.values})
 
     # Save the consolidated central tendency and dispersion data to a single CSV file
-    save_to_csv(central_tendency_dispersion_df, './outputs/analyses/central_tendency_dispersion.csv',
+    save_to_csv(central_tendency_dispersion_df, output_folder+'central_tendency_dispersion.csv',
                 "Central Tendency and Dispersion Measures (Mean, Median, Mode, Standard Deviation, Variance, Skewness, Kurtosis, Q1, Q3, IQR) saved to CSV.")
 
     # 4. Similarity Measures
@@ -166,7 +168,7 @@ def main() -> None:
          'Dice Coefficient': list(dice_similarity.values())})
 
     # Save the combined similarity measures data to a single CSV file
-    save_to_csv(similarity_measures_df, './outputs/analyses/similarity_measures.csv',
+    save_to_csv(similarity_measures_df, output_folder+'similarity_measures.csv',
                 "Similarity Measures (Jaccard Similarity and Dice Coefficient) saved to CSV.")
 
     # 5. Coverage and Ubiquity Measures
@@ -189,14 +191,14 @@ def main() -> None:
     coverage_df = pd.DataFrame(coverage_list)
 
     # Save the coverage data to a CSV file
-    save_to_csv(coverage_df, './outputs/analyses/coverage_percentage.csv',
+    save_to_csv(coverage_df, output_folder+'coverage_percentage.csv',
                 "Coverage of Top Percentage of Constructs saved to CSV.")
 
     # 5.2. Ubiquity Index
     ubiquity_index = group_frequency / len(df)  # Fraction of groups in which each construct appears
     ubiquity_index_df = ubiquity_index.reset_index()
     ubiquity_index_df.columns = ['Construct', 'Ubiquity Index']
-    save_to_csv(ubiquity_index_df, './outputs/analyses/ubiquity_index.csv', "Ubiquity Index saved to CSV.")
+    save_to_csv(ubiquity_index_df, output_folder+'ubiquity_index.csv', "Ubiquity Index saved to CSV.")
 
     # 6. Rank-Frequency Distribution with Cumulative Frequency and Percentage
 
@@ -218,7 +220,7 @@ def main() -> None:
     rank_frequency_df['Cumulative Percentage'] = (rank_frequency_df['Cumulative Frequency'] / total_occurrences) * 100
 
     # Save the rank-frequency, cumulative frequency, and cumulative percentage data to a single CSV file
-    save_to_csv(rank_frequency_df, './outputs/analyses/rank_frequency_distribution.csv',
+    save_to_csv(rank_frequency_df, output_folder+'rank_frequency_distribution.csv',
                 "Rank-Frequency, Cumulative Frequency, and Cumulative Percentage data saved to CSV.")
 
     # 7. Correlation and Dependency Measures
@@ -230,7 +232,7 @@ def main() -> None:
     spearman_correlation.index.name = 'Construct'
 
     # Save Spearman Correlation Coefficient to its own CSV file
-    save_to_csv(spearman_correlation, './outputs/analyses/spearman_correlation.csv',
+    save_to_csv(spearman_correlation, output_folder+'spearman_correlation.csv',
                 "Spearman Correlation Coefficient saved to CSV.")
 
     # Mutual Information - Capture non-linear dependencies
@@ -248,8 +250,11 @@ def main() -> None:
     mutual_info.index.name = 'Construct'
 
     # Save Mutual Information matrix to its own CSV file
-    save_to_csv(mutual_info, './outputs/analyses/mutual_information.csv', "Mutual Information saved to CSV.")
+    save_to_csv(mutual_info, output_folder+'mutual_information.csv', "Mutual Information saved to CSV.")
 
 
 if __name__ == "__main__":
-    main()
+    generate_statistics('./outputs/consolidated_spo.csv', "./outputs/analyses/spo_analyses/")
+    generate_statistics('./outputs/consolidated_cs.csv', "./outputs/analyses/cs_analyses/")
+    generate_statistics('./outputs/consolidated_rs.csv', "./outputs/analyses/rs_analyses/")
+    generate_statistics('./outputs/consolidated_abs.csv', "./outputs/analyses/abs_analyses/")
