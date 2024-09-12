@@ -40,39 +40,7 @@ ax2.legend(loc='upper right')
 fig.tight_layout()
 plt.show()
 
-# 2) Dual-Axis Bar Chart for Total Frequency and Total Frequency per Group
-fig, ax1 = plt.subplots(figsize=(10, 6))
-
-# Plot Total Frequency on the primary y-axis
-ax1.bar(df['Construct'], df['Total Frequency'], color='cornflowerblue', width=0.4, label='Total Frequency')
-ax1.set_ylabel('Total Frequency', color='cornflowerblue')
-ax1.tick_params(axis='y', labelcolor='cornflowerblue')
-# Set tick positions and labels to fix the warning
-ax1.set_xticks(range(len(df['Construct'])))
-ax1.set_xticklabels(df['Construct'], rotation=45)
-
-# Color specific x-axis labels
-for label in ax1.get_xticklabels():
-    if label.get_text() == 'none':
-        label.set_color('blue')
-    elif label.get_text() == 'other':
-        label.set_color('red')
-
-# Create a secondary y-axis for Total Frequency per Group
-ax2 = ax1.twinx()
-ax2.bar([i + 0.4 for i in range(len(df))], df['Total Frequency per Group'],
-        color='mediumseagreen', width=0.4, label='Total Frequency per Group')
-ax2.set_ylabel('Total Frequency per Group', color='mediumseagreen')
-ax2.tick_params(axis='y', labelcolor='mediumseagreen')
-
-plt.title('Dual-Axis Bar Chart for Total Frequency and Total Frequency per Group')
-ax1.legend(loc='upper left')
-ax2.legend(loc='upper right')
-fig.tight_layout()
-plt.show()
-
-
-# 3) Side-by-Side Bar Chart with Double Axis for Total Frequency vs. Group Frequency
+# 2) Side-by-Side Bar Chart with Double Axis for Total Frequency vs. Group Frequency
 fig, ax1 = plt.subplots(figsize=(10, 6))
 
 # Plot Total Frequency on the primary y-axis
@@ -100,6 +68,51 @@ plt.title('Side-by-Side Bar Chart with Double Axis for Total Frequency vs. Group
 ax1.legend(loc='upper left')
 ax2.legend(loc='upper right')
 fig.tight_layout()
+plt.show()
+
+
+# 3) Scatter plot for Ubiquity Index vs. Total Frequency per Group
+
+# Constructs in the top-right quadrant (high on both axes) are those that are not only frequently used in the models where they appear but are also used in many different models. These are likely the most "core" or "essential" constructs, which are both common and widely adopted by modelers.
+# Constructs in the bottom-right quadrant (high "Total Frequency per Group" but low "Ubiquity Index") are used heavily when they do appear but only in a small number of models. This might suggest constructs with specialized or niche use cases.
+# Constructs in the top-left quadrant (low "Total Frequency per Group" but high "Ubiquity Index") are used in many different models but not very frequently within each model. This could indicate constructs that are necessary for a broad range of models but are used sparingly.
+# Constructs in the bottom-left quadrant (low on both axes) are used infrequently and in few models, potentially indicating constructs with limited relevance or applicability.
+
+plt.figure(figsize=(10, 6))
+
+# Define the base colors for the plot (12 distinct colors)
+base_palette = sns.color_palette('tab10', n_colors=12)
+
+# Extend the palette to handle all 23 categories by repeating colors
+extended_palette = base_palette + base_palette[:11]  # 12 colors + 11 more to make 23 total
+
+# Define marker types (12 circles 'o' and 11 squares 's')
+markers = ['o'] * 12 + ['s'] * 11
+
+# Plotting the scatter plot with different colors and markers
+for i, construct in enumerate(df['Construct'].unique()):
+    subset = df[df['Construct'] == construct]
+    plt.scatter(subset['Total Frequency per Group'], subset['Ubiquity Index (Group Frequency per Group)'],
+                color=extended_palette[i], marker=markers[i], s=100, edgecolor='w', label=construct)
+
+# Adding labels and title
+plt.xlabel('Total Frequency per Group')
+plt.ylabel('Ubiquity Index')
+plt.title('Scatter Plot of Ubiquity Index vs. Total Frequency per Group')
+
+# Adding a cross to separate the plot into four quadrants
+plt.axhline(y=df['Ubiquity Index (Group Frequency per Group)'].mean(), color='black', linestyle='--', linewidth=1)
+plt.axvline(x=df['Total Frequency per Group'].mean(), color='black', linestyle='--', linewidth=1)
+
+# Customize the legend to color 'none' and 'other'
+legend = plt.legend(title='Constructs', bbox_to_anchor=(1.05, 1), loc='upper left')
+for text in legend.get_texts():
+    if 'none' in text.get_text():
+        text.set_color('blue')
+    elif 'other' in text.get_text():
+        text.set_color('red')
+
+plt.tight_layout()
 plt.show()
 
 # 4) Side-by-Side Donut Charts for Occurrence-wise and Group-wise Relative Frequencies with Colors and Dots Texture
