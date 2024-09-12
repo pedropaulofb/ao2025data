@@ -4,7 +4,7 @@ import numpy as np
 import seaborn as sns
 
 # Read CSV file
-file_path = '../outputs/analyses/cs_analyses/diversity_measures.csv'  # Replace with your actual file path
+file_path = '../outputs/analyses/cs_analyses/diversity_measures.csv'
 df = pd.read_csv(file_path)
 
 # Prepare the data
