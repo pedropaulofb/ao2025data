@@ -2,6 +2,8 @@ import csv
 from pathlib import Path
 from typing import Union
 
+from loguru import logger
+
 from src.SPOStats import SPOStats
 
 
@@ -76,3 +78,25 @@ def write_stats_to_csv(instances: dict, output_file: Union[str, Path]) -> None:
     except IOError as e:
         print(f"Error: Could not write to file {output_file}.")
         raise e
+
+def simple_write_to_csv(in_list:list[str], output_file: str) -> None:
+    """
+    Writes a list of strings to a TXT file.
+
+    :raises IOError: If the file cannot be written.
+    """
+    try:
+        # Open the file in write mode
+        with open(output_file, "w") as file:
+            # Write each line to the file
+            for line in in_list:
+                file.write(line + "\n")
+        logger.success(f"File '{output_file}' has been written successfully.")
+
+    except IOError as e:
+        # Handle I/O errors (e.g., file not found, permission issues)
+        print(f"An error occurred while writing to the file: {e}")
+
+    except Exception as e:
+        # Handle any other exceptions that may occur
+        print(f"An unexpected error occurred: {e}")

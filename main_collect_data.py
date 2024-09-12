@@ -4,6 +4,8 @@ from loguru import logger
 from ontouml_models_lib import Catalog, Query, OntologyDevelopmentContext
 from ontouml_models_lib.model import OntologyRepresentationStyle
 
+from src.generate_stats import simple_write_to_csv
+
 
 def main() -> None:
     """
@@ -23,6 +25,12 @@ def main() -> None:
         model for model in filtered
         if ((OntologyDevelopmentContext.RESEARCH in model.context) or (OntologyDevelopmentContext.INDUSTRY in model.context))
     ]
+
+    # Saving to file all filetered models
+    filtered_models = []
+    for model in filtered:
+        filtered_models.append(model.id)
+    simple_write_to_csv(filtered_models, "./outputs/list_models.txt")
 
     # Load and execute queries on the filtered models
     queries = Query.load_queries("queries")

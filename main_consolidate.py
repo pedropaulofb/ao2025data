@@ -123,3 +123,6 @@ if __name__ == "__main__":
                 "subsetsProperty", "targetEnd", "termination", "triggers", "type", "typeNature", "upperBound"]
 
     filter_csv_by_headers("./outputs/consolidated_spo.csv", "outputs/consolidated_abs.csv", abs_list)
+
+
+# TODO: If the number of groups is not 121, then I need to manually insert the missing ones for correct calculations.

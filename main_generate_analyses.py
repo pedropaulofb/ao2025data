@@ -1,7 +1,8 @@
+from itertools import combinations
+
 import numpy as np
 import pandas as pd
 from loguru import logger
-from itertools import combinations
 from sklearn.metrics import mutual_info_score
 
 
@@ -16,7 +17,7 @@ def save_to_csv(dataframe, filepath, message):
         logger.error(f"Failed to save {filepath}: {e}")
 
 
-def generate_statistics(input_data_file:str,output_folder:str) -> None:
+def generate_statistics(input_data_file: str, output_folder: str) -> None:
     """
     Main function to generate statistical analysis of the consolidated data.
     """
@@ -40,29 +41,67 @@ def generate_statistics(input_data_file:str,output_folder:str) -> None:
 
     # 1. Frequency Analysis
 
+    # Number of groups
+    group_num = len(df)
+
     # Total Frequency of Each Construct
     total_frequency = data.sum(axis=0)
 
-    # Group Frequency of Each Construct
+    # Total Frequency of Each Construct per Group
+    total_frequency_per_group = total_frequency / group_num
+
+    # Group Frequency of Each Construct (count of non-zero occurrences for each column)
     group_frequency = data.astype(bool).sum(axis=0)
+
+    # Ubiquity Index (Group Frequency per Group)
+    ubiquity_index = group_frequency / group_num
 
     # Global Relative Frequency (Occurrence-wise)
     global_relative_frequency = total_frequency / total_frequency.sum()
 
-    # Global Relative Frequency (Group-wise)
-    global_relative_frequency_groupwise = group_frequency / len(df)
+    # Correct Calculation for Global Relative Frequency (Group-wise)
+    # Total number of groups (non-zero occurrences)
+    total_groups = group_frequency.sum()
+
+    # Compute the Global Relative Frequency (Group-wise) correctly
+    global_relative_frequency_groupwise = group_frequency / total_groups
 
     # Combine all frequency-related data into a single DataFrame
     frequency_analysis_df = pd.DataFrame({'Construct': total_frequency.index, 'Total Frequency': total_frequency.values,
+                                          'Total Frequency per Group': total_frequency_per_group,
                                           'Group Frequency': group_frequency.values,
+                                          'Ubiquity Index (Group Frequency per Group)': ubiquity_index,
                                           'Global Relative Frequency (Occurrence-wise)': global_relative_frequency.values,
                                           'Global Relative Frequency (Group-wise)': global_relative_frequency_groupwise.values})
 
     # Save the consolidated frequency analysis data to a single CSV file
-    save_to_csv(frequency_analysis_df, output_folder+'frequency_analysis.csv',
+    save_to_csv(frequency_analysis_df, output_folder + 'frequency_analysis.csv',
                 "Frequency Analysis (Total, Group, Relative Frequencies) saved to CSV.")
 
-    # 2. Diversity and Distribution Measures
+    # 2. Rank-Frequency Distribution with Cumulative Frequency and Percentage
+
+    # Calculate the total frequency of each construct (already computed earlier)
+    total_frequency_sorted = total_frequency.sort_values(ascending=False)
+
+    # Calculate the total number of occurrences
+    total_occurrences = total_frequency_sorted.sum()
+
+    # Create a DataFrame for rank and frequency
+    rank_frequency_df = pd.DataFrame(
+        {'Construct': total_frequency_sorted.index, 'Frequency': total_frequency_sorted.values,
+         'Rank': range(1, len(total_frequency_sorted) + 1)})
+
+    # Calculate the cumulative frequency
+    rank_frequency_df['Cumulative Frequency'] = rank_frequency_df['Frequency'].cumsum()
+
+    # Calculate the cumulative percentage
+    rank_frequency_df['Cumulative Percentage'] = (rank_frequency_df['Cumulative Frequency'] / total_occurrences) * 100
+
+    # Save the rank-frequency, cumulative frequency, and cumulative percentage data to a single CSV file
+    save_to_csv(rank_frequency_df, output_folder + 'rank_frequency_distribution.csv',
+                "Rank-Frequency, Cumulative Frequency, and Cumulative Percentage data saved to CSV.")
+
+    # 3. Diversity and Distribution Measures
 
     # Define a function to calculate Shannon Entropy for each construct
     def calculate_shannon_entropy(series):
@@ -81,7 +120,7 @@ def generate_statistics(input_data_file:str,output_folder:str) -> None:
         if cumulative[-1] == 0:  # Check for division by zero
             return 0  # Return zero if total is zero (uniform distribution)
         gini_index = (2.0 * np.sum((np.arange(1, n + 1) * sorted_series)) - (n + 1) * cumulative[-1]) / (
-                    n * cumulative[-1])
+                n * cumulative[-1])
         return gini_index
 
     # Apply Gini Coefficient function across the dataframe
@@ -104,10 +143,10 @@ def generate_statistics(input_data_file:str,output_folder:str) -> None:
                                           'Simpson Index': simpson_index.values})
 
     # Save the consolidated diversity and distribution measures data to a single CSV file
-    save_to_csv(diversity_measures_df, output_folder+'diversity_measures.csv',
+    save_to_csv(diversity_measures_df, output_folder + 'diversity_measures.csv',
                 "Diversity and Distribution Measures (Shannon Entropy, Gini Coefficient, Simpson's Index) saved to CSV.")
 
-    # 3. Central Tendency and Dispersion
+    # 4. Central Tendency and Dispersion
 
     # Calculating all statistics
     mean_counts = data.mean(axis=0)
@@ -134,10 +173,33 @@ def generate_statistics(input_data_file:str,output_folder:str) -> None:
          'Interquartile Range (IQR)': iqr_counts.values})
 
     # Save the consolidated central tendency and dispersion data to a single CSV file
-    save_to_csv(central_tendency_dispersion_df, output_folder+'central_tendency_dispersion.csv',
+    save_to_csv(central_tendency_dispersion_df, output_folder + 'central_tendency_dispersion.csv',
                 "Central Tendency and Dispersion Measures (Mean, Median, Mode, Standard Deviation, Variance, Skewness, Kurtosis, Q1, Q3, IQR) saved to CSV.")
 
-    # 4. Similarity Measures
+    # 5. Coverage Measure
+
+    # Coverage of Top Percentage of Constructs
+    percentages = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90]  # Define percentages
+    total_constructs = len(total_frequency)  # Total number of constructs
+    total_occurrences = total_frequency.sum()  # Total occurrences of all constructs
+
+    # List to store coverage results
+    coverage_list = []
+
+    for pct in percentages:
+        k = int(total_constructs * pct)  # Calculate number of top constructs for the given percentage
+        top_k_constructs = total_frequency.sort_values(ascending=False).head(k)  # Get top k constructs by frequency
+        coverage_top_k = top_k_constructs.sum() / total_occurrences  # Calculate coverage
+        coverage_list.append({'Percentage': pct * 100, 'Top k Constructs': k, 'Coverage': coverage_top_k})
+
+    # Convert the list to a DataFrame
+    coverage_df = pd.DataFrame(coverage_list)
+
+    # Save the coverage data to a CSV file
+    save_to_csv(coverage_df, output_folder + 'coverage_percentage.csv',
+                "Coverage of Top Percentage of Constructs saved to CSV.")
+
+    # 6. Similarity Measures
 
     # Initialize dictionaries to store the similarity values
     jaccard_similarity = {}
@@ -168,60 +230,8 @@ def generate_statistics(input_data_file:str,output_folder:str) -> None:
          'Dice Coefficient': list(dice_similarity.values())})
 
     # Save the combined similarity measures data to a single CSV file
-    save_to_csv(similarity_measures_df, output_folder+'similarity_measures.csv',
+    save_to_csv(similarity_measures_df, output_folder + 'similarity_measures.csv',
                 "Similarity Measures (Jaccard Similarity and Dice Coefficient) saved to CSV.")
-
-    # 5. Coverage and Ubiquity Measures
-
-    # 5.1. Coverage of Top Percentage of Constructs
-    percentages = [0.10, 0.20, 0.30, 0.40, 0.50]  # Define percentages
-    total_constructs = len(total_frequency)  # Total number of constructs
-    total_occurrences = total_frequency.sum()  # Total occurrences of all constructs
-
-    # List to store coverage results
-    coverage_list = []
-
-    for pct in percentages:
-        k = int(total_constructs * pct)  # Calculate number of top constructs for the given percentage
-        top_k_constructs = total_frequency.sort_values(ascending=False).head(k)  # Get top k constructs by frequency
-        coverage_top_k = top_k_constructs.sum() / total_occurrences  # Calculate coverage
-        coverage_list.append({'Percentage': pct * 100, 'Top k Constructs': k, 'Coverage': coverage_top_k})
-
-    # Convert the list to a DataFrame
-    coverage_df = pd.DataFrame(coverage_list)
-
-    # Save the coverage data to a CSV file
-    save_to_csv(coverage_df, output_folder+'coverage_percentage.csv',
-                "Coverage of Top Percentage of Constructs saved to CSV.")
-
-    # 5.2. Ubiquity Index
-    ubiquity_index = group_frequency / len(df)  # Fraction of groups in which each construct appears
-    ubiquity_index_df = ubiquity_index.reset_index()
-    ubiquity_index_df.columns = ['Construct', 'Ubiquity Index']
-    save_to_csv(ubiquity_index_df, output_folder+'ubiquity_index.csv', "Ubiquity Index saved to CSV.")
-
-    # 6. Rank-Frequency Distribution with Cumulative Frequency and Percentage
-
-    # Calculate the total frequency of each construct (already computed earlier)
-    total_frequency_sorted = total_frequency.sort_values(ascending=False)
-
-    # Calculate the total number of occurrences
-    total_occurrences = total_frequency_sorted.sum()
-
-    # Create a DataFrame for rank and frequency
-    rank_frequency_df = pd.DataFrame(
-        {'Construct': total_frequency_sorted.index, 'Frequency': total_frequency_sorted.values,
-            'Rank': range(1, len(total_frequency_sorted) + 1)})
-
-    # Calculate the cumulative frequency
-    rank_frequency_df['Cumulative Frequency'] = rank_frequency_df['Frequency'].cumsum()
-
-    # Calculate the cumulative percentage
-    rank_frequency_df['Cumulative Percentage'] = (rank_frequency_df['Cumulative Frequency'] / total_occurrences) * 100
-
-    # Save the rank-frequency, cumulative frequency, and cumulative percentage data to a single CSV file
-    save_to_csv(rank_frequency_df, output_folder+'rank_frequency_distribution.csv',
-                "Rank-Frequency, Cumulative Frequency, and Cumulative Percentage data saved to CSV.")
 
     # 7. Correlation and Dependency Measures
 
@@ -232,7 +242,7 @@ def generate_statistics(input_data_file:str,output_folder:str) -> None:
     spearman_correlation.index.name = 'Construct'
 
     # Save Spearman Correlation Coefficient to its own CSV file
-    save_to_csv(spearman_correlation, output_folder+'spearman_correlation.csv',
+    save_to_csv(spearman_correlation, output_folder + 'spearman_correlation.csv',
                 "Spearman Correlation Coefficient saved to CSV.")
 
     # Mutual Information - Capture non-linear dependencies
@@ -250,7 +260,7 @@ def generate_statistics(input_data_file:str,output_folder:str) -> None:
     mutual_info.index.name = 'Construct'
 
     # Save Mutual Information matrix to its own CSV file
-    save_to_csv(mutual_info, output_folder+'mutual_information.csv', "Mutual Information saved to CSV.")
+    save_to_csv(mutual_info, output_folder + 'mutual_information.csv', "Mutual Information saved to CSV.")
 
 
 if __name__ == "__main__":
