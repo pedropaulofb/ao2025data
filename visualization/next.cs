@@ -16,15 +16,6 @@ High Gini Coefficient indicates that a construct's usage is highly unequal acros
 Low Gini Coefficient with high Ubiquity Index represents constructs that are both widely adopted and evenly used across models, marking them as "core" constructs.
 High Gini Coefficient with low Ubiquity Index may represent specialized constructs used intensely in certain models but not generally.
 
-# 3. Scatter Plot: "Skewness vs. Kurtosis"
-X-Axis: Skewness
-Y-Axis: Kurtosis
-Why It’s Useful:
-This plot examines the shape of the distribution of construct usage across models.
-Skewness indicates the asymmetry of the distribution (positive skew suggests more frequent low counts, negative skew suggests more frequent high counts).
-Kurtosis indicates the "tailedness" or outlier presence in the distribution (high kurtosis suggests many outliers).
-Constructs in the low-skew, low-kurtosis quadrant may have a more "normal" or balanced distribution, while those with high skew and kurtosis could represent specialized constructs that show unique or rare usage patterns.
-
 # 4. Scatter Plot: "Simpson's Index vs. Total Frequency"
 X-Axis: Total Frequency
 Y-Axis: Simpson's Index
