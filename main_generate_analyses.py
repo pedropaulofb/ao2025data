@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 from sklearn.metrics import mutual_info_score
+from sklearn.metrics.cluster import entropy
 
 
 def save_to_csv(dataframe, filepath, message):
@@ -259,8 +260,16 @@ def generate_statistics(input_data_file: str, output_folder: str) -> None:
         mutual_info.loc[construct1, construct2] = mi
         mutual_info.loc[construct2, construct1] = mi  # Symmetric matrix
 
+    # Compute Mutual Information for a construct with itself (entropy)
+    for construct in constructs:
+        entropy_value = entropy(df[construct])
+        mutual_info.loc[construct, construct] = entropy_value
+
     # Add 'Construct' as the first column header
     mutual_info.index.name = 'Construct'
+
+    # Convert the index (construct names) into a column
+    mutual_info.reset_index(inplace=True)
 
     # Save Mutual Information matrix to its own CSV file
     save_to_csv(mutual_info, output_folder + 'mutual_information.csv', "Mutual Information saved to CSV.")

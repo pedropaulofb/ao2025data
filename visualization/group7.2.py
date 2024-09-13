@@ -4,16 +4,15 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Read the CSV file into a DataFrame
-file_path = '../outputs/analyses/cs_analyses/spearman_correlation.csv'
+# Load the data from CSV file
+file_path = '../outputs/analyses/cs_analyses/mutual_information.csv'
 df = pd.read_csv(file_path, index_col=0)
 
 # 1. Heatmap
 
-# Plotting the heatmap
+# Create a heatmap using Seaborn
 plt.figure(figsize=(12, 10))
-ax = sns.heatmap(df, annot=True, cmap='coolwarm', center=0, fmt=".2f", linewidths=0.5)
-plt.title('Heatmap of the Correlation Matrix')
+ax = sns.heatmap(df, annot=True, fmt=".2f", cmap='viridis', linewidths=.5)
 
 # Customize tick label colors
 for label in ax.get_xticklabels():
@@ -28,29 +27,33 @@ for label in ax.get_yticklabels():
     elif label.get_text() == 'other':
         label.set_color('red')
 
-plt.xticks(rotation=45, ha='right')  # Adjust the rotation and alignment for x-axis labels
-plt.yticks(rotation=0)  # Adjust the rotation for y-axis labels
+# Customize the plot
+plt.title('Heatmap of Construct Interrelations')
+plt.xlabel('Constructs')
+plt.ylabel('Constructs')
+
+# Show the plot
 plt.show()
 
-
-# 2. Network Graph of Correlations
+# 2. Network Graph
 
 # Convert the DataFrame to a long format
 df_long = df.stack().reset_index()
-df_long.columns = ['Construct 1', 'Construct 2', 'Spearman Correlation']
+df_long.columns = ['Construct 1', 'Construct 2', 'Mutual Information']
 
 # Remove self-correlations (correlation of a construct with itself)
 df_long = df_long[df_long['Construct 1'] != df_long['Construct 2']]
 
-# Select the N most positive correlations
+# Drop duplicate pairs (e.g., both (A, B) and (B, A))
+df_long['Construct Pair'] = df_long.apply(lambda row: tuple(sorted([row['Construct 1'], row['Construct 2']])), axis=1)
+df_long = df_long.drop_duplicates(subset='Construct Pair')
+
+# Select the N most mutual information values
 N = 10
-top_positive = df_long.nlargest(N, 'Spearman Correlation')
+top_mutual = df_long.nlargest(N, 'Mutual Information')
 
-# Select the N most negative correlations
-top_negative = df_long.nsmallest(N, 'Spearman Correlation')
-
-# Select the N correlations closest to zero
-near_zero = df_long.iloc[(df_long['Spearman Correlation'].abs().argsort()[:N])]
+# Select the N least mutual information values
+least_mutual = df_long.nsmallest(N, 'Mutual Information')
 
 # Function to create a network graph with a legend
 def plot_network(data, title, metric_label, palette):
@@ -62,7 +65,7 @@ def plot_network(data, title, metric_label, palette):
         G.add_edge(row['Construct 1'], row['Construct 2'], weight=row[metric_label])
 
     # Draw the graph
-    pos = nx.circular_layout(G)
+    pos = nx.circular_layout(G)  # Use spring layout for better visualization
     weights = [G[u][v]['weight'] for u, v in G.edges()]
 
     # Create a figure and axis for the plot
@@ -81,60 +84,57 @@ def plot_network(data, title, metric_label, palette):
     plt.title(title)
     plt.show()
 
-# Plot network for the N most positive Spearman Correlations
-plot_network(top_positive, f'Network Graph for Top {N} Most Positive Spearman Correlations', 'Spearman Correlation', palette=plt.cm.autumn_r)
+# Plot network for the N most mutual information values
+plot_network(top_mutual, f'Network Graph for Top {N} Most Mutual Information', 'Mutual Information', palette=plt.cm.autumn_r)
 
-# Plot network for the N most negative Spearman Correlations
-plot_network(top_negative, f'Network Graph for Top {N} Most Negative Spearman Correlations', 'Spearman Correlation', palette=plt.cm.winter)
+# Plot network for the N least mutual information values
+plot_network(least_mutual, f'Network Graph for Top {N} Least Mutual Information', 'Mutual Information', palette=plt.cm.winter)
 
-# Plot network for the N correlations closest to zero
-plot_network(near_zero, f'Network Graph for Top {N} Correlations Closest to Zero', 'Spearman Correlation', palette=plt.cm.summer)
+# 3. Rank Chart
 
-
-# 3. Ranked Chart
-
-# Calculate the sum of the absolute correlation values for each construct
-construct_importance = df.abs().sum(axis=1)
+# Calculate the sum of the mutual information values for each construct
+construct_importance_mi = df.sum(axis=1)
 
 # Sort the constructs by their importance in descending order
-construct_importance_sorted = construct_importance.sort_values(ascending=False)
+construct_importance_mi_sorted = construct_importance_mi.sort_values(ascending=False)
 
 # Create a bar chart to visualize construct importance
 plt.figure(figsize=(10, 8))
-ay = sns.barplot(x=construct_importance_sorted.values, y=construct_importance_sorted.index,
-            hue=construct_importance_sorted.index, palette='viridis', dodge=False, legend=False)
+ax = sns.barplot(x=construct_importance_mi_sorted.values, y=construct_importance_mi_sorted.index,
+                 hue=construct_importance_mi_sorted.index, palette='viridis', dodge=False)
 
-for label in ay.get_yticklabels():
+# Highlight specific constructs if needed
+for label in ax.get_yticklabels():
     if label.get_text() == 'none':
         label.set_color('blue')
     elif label.get_text() == 'other':
         label.set_color('red')
 
-plt.title('Construct Importance Ranking Based on Total Absolute Correlations')
-plt.xlabel('Sum of Absolute Correlation Values')
+plt.title('Construct Importance Ranking Based on Total Mutual Information')
+plt.xlabel('Sum of Mutual Information Values')
 plt.ylabel('Construct')
 # Customize grid lines: Remove horizontal, keep vertical
 plt.grid(axis='y', linestyle='')  # Remove horizontal grid lines
 plt.grid(axis='x', linestyle='-', color='gray')  # Keep vertical grid lines
-# Set x-axis ticks to be every 0.5 units
-plt.xticks(np.arange(0, construct_importance_sorted.max() + 0.5, 0.5))
+# Set x-axis ticks dynamically based on data range
+plt.xticks(np.arange(0, construct_importance_mi_sorted.max() + 0.5, 0.5))
 plt.show()
 
 # 4. Box Plot
 
 # Convert the DataFrame to a long format
 df_long = df.stack().reset_index()
-df_long.columns = ['Construct 1', 'Construct 2', 'Spearman Correlation']
+df_long.columns = ['Construct 1', 'Construct 2', 'Mutual Information']
 
-# Remove self-correlations (correlation of a construct with itself)
+# Remove self-correlations (mutual information of a construct with itself)
 df_long = df_long[df_long['Construct 1'] != df_long['Construct 2']]
 
-# Create a box plot to show the distribution of correlations for each construct
+# Create a box plot to show the distribution of mutual information for each construct
 plt.figure(figsize=(12, 8))
-ax = sns.boxplot(x='Construct 1', y='Spearman Correlation', data=df_long, palette='viridis')
-plt.title('Distribution of Correlation Coefficients for Each Construct')
+ax = sns.boxplot(x='Construct 1', y='Mutual Information', data=df_long, palette='viridis')
+plt.title('Distribution of Mutual Information for Each Construct')
 plt.xlabel('Construct')
-plt.ylabel('Spearman Correlation Coefficient')
+plt.ylabel('Mutual Information')
 plt.xticks(rotation=45)
 plt.grid(axis='y')
 
