@@ -42,19 +42,18 @@ df_long.columns = ['Construct 1', 'Construct 2', 'Spearman Correlation']
 # Remove self-correlations (correlation of a construct with itself)
 df_long = df_long[df_long['Construct 1'] != df_long['Construct 2']]
 
-# Calculate absolute values of Spearman correlations for ranking
-df_long['Abs Correlation'] = df_long['Spearman Correlation'].abs()
-
 # Select the N most positive correlations
-N = 20
+N = 10
 top_positive = df_long.nlargest(N, 'Spearman Correlation')
 
-# Select the M most negative correlations
-M = 20
-top_negative = df_long.nsmallest(M, 'Spearman Correlation')
+# Select the N most negative correlations
+top_negative = df_long.nsmallest(N, 'Spearman Correlation')
+
+# Select the N correlations closest to zero
+near_zero = df_long.iloc[(df_long['Spearman Correlation'].abs().argsort()[:N])]
 
 # Function to create a network graph with a legend
-def plot_network(data, title, metric_label,palette):
+def plot_network(data, title, metric_label, palette):
     # Create an empty graph
     G = nx.Graph()
 
@@ -83,12 +82,13 @@ def plot_network(data, title, metric_label,palette):
     plt.show()
 
 # Plot network for the N most positive Spearman Correlations
-plot_network(top_positive, f'Network Graph for Top {N} Most Positive Spearman Correlations', 'Spearman Correlation',
-             palette=plt.cm.autumn_r)
+plot_network(top_positive, f'Network Graph for Top {N} Most Positive Spearman Correlations', 'Spearman Correlation', palette=plt.cm.autumn_r)
 
-# Plot network for the M most negative Spearman Correlations
-plot_network(top_negative, f'Network Graph for Top {M} Most Negative Spearman Correlations', 'Spearman Correlation',
-             palette=plt.cm.winter)
+# Plot network for the N most negative Spearman Correlations
+plot_network(top_negative, f'Network Graph for Top {N} Most Negative Spearman Correlations', 'Spearman Correlation', palette=plt.cm.winter)
+
+# Plot network for the N correlations closest to zero
+plot_network(near_zero, f'Network Graph for Top {N} Correlations Closest to Zero', 'Spearman Correlation', palette=plt.cm.summer)
 
 
 # 3. Ranked Chart
@@ -101,7 +101,8 @@ construct_importance_sorted = construct_importance.sort_values(ascending=False)
 
 # Create a bar chart to visualize construct importance
 plt.figure(figsize=(10, 8))
-ay = sns.barplot(x=construct_importance_sorted.values, y=construct_importance_sorted.index, palette='viridis')
+ay = sns.barplot(x=construct_importance_sorted.values, y=construct_importance_sorted.index,
+            hue=construct_importance_sorted.index, palette='viridis', dodge=False, legend=False)
 
 for label in ay.get_yticklabels():
     if label.get_text() == 'none':
