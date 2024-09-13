@@ -23,7 +23,7 @@ ax1.set_xlabel('Construct')
 ax1.set_xticks(x)
 ax1.set_xticklabels(df['Construct'], rotation=45, ha='right')  # Rotate labels and align to the right
 
-# Rotate x-axis labels correctly and apply color to specific labels
+# Apply color to specific labels
 for label in ax1.get_xticklabels():
     if label.get_text() == 'none':
         label.set_color('blue')
