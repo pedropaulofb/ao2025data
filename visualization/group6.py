@@ -25,7 +25,24 @@ for construct in jaccard_pivot.index:
 
 # Plot heatmap for Jaccard Similarity
 plt.figure(figsize=(12, 8))
-sns.heatmap(jaccard_pivot, annot=True, cmap='viridis', cbar_kws={'label': 'Jaccard Similarity'})
+ax = sns.heatmap(jaccard_pivot, annot=True, cmap='viridis', cbar_kws={'label': 'Jaccard Similarity'})
+
+# Customize the x and y axis labels
+plt.setp(ax.get_xticklabels(), color='black')  # Reset all labels to black first
+
+# Color specific labels
+for label in ax.get_xticklabels():
+    if label.get_text() == 'none':
+        label.set_color('blue')
+    elif label.get_text() == 'other':
+        label.set_color('red')
+
+for label in ax.get_yticklabels():
+    if label.get_text() == 'none':
+        label.set_color('blue')
+    elif label.get_text() == 'other':
+        label.set_color('red')
+
 plt.title('Heatmap of Jaccard Similarity Between Construct Pairs')
 plt.show()
 
@@ -41,7 +58,24 @@ for construct in dice_pivot.index:
 
 # Plot heatmap for Dice Coefficient
 plt.figure(figsize=(12, 8))
-sns.heatmap(dice_pivot, annot=True, cmap='viridis', cbar_kws={'label': 'Dice Coefficient'})
+ax = sns.heatmap(jaccard_pivot, annot=True, cmap='viridis', cbar_kws={'label': 'Jaccard Similarity'})
+
+# Customize the x and y axis labels
+plt.setp(ax.get_xticklabels(), color='black')  # Reset all labels to black first
+
+# Color specific labels
+for label in ax.get_xticklabels():
+    if label.get_text() == 'none':
+        label.set_color('blue')
+    elif label.get_text() == 'other':
+        label.set_color('red')
+
+for label in ax.get_yticklabels():
+    if label.get_text() == 'none':
+        label.set_color('blue')
+    elif label.get_text() == 'other':
+        label.set_color('red')
+
 plt.title('Heatmap of Dice Coefficient Between Construct Pairs')
 plt.show()
 
@@ -124,7 +158,14 @@ full_df = pd.concat([df, mirror_df], ignore_index=True)
 
 # Create box plots grouped by the first construct
 plt.figure(figsize=(12, 8))
-sns.boxplot(data=full_df, x='Construct 1', y='Jaccard Similarity', hue='Construct 1', palette='viridis', legend=False)
+ax = sns.boxplot(data=full_df, x='Construct 1', y='Jaccard Similarity', hue='Construct 1', palette='viridis', legend=False)
+# Customize x-axis label colors
+for label in ax.get_xticklabels():
+    if label.get_text() == 'none':
+        label.set_color('blue')
+    elif label.get_text() == 'other':
+        label.set_color('red')
+
 plt.title('Box Plot of Jaccard Similarity Grouped by Construct')
 plt.xlabel('Construct')
 plt.ylabel('Jaccard Similarity')
@@ -134,7 +175,14 @@ plt.tight_layout()
 plt.show()
 
 plt.figure(figsize=(12, 8))
-sns.boxplot(data=full_df, x='Construct 1', y='Dice Coefficient', hue='Construct 1', palette='viridis', legend=False)
+ax = sns.boxplot(data=full_df, x='Construct 1', y='Dice Coefficient', hue='Construct 1', palette='viridis', legend=False)
+# Customize x-axis label colors
+for label in ax.get_xticklabels():
+    if label.get_text() == 'none':
+        label.set_color('blue')
+    elif label.get_text() == 'other':
+        label.set_color('red')
+
 plt.title('Box Plot of Dice Coefficient Grouped by Construct')
 plt.xlabel('Construct')
 plt.ylabel('Dice Coefficient')
