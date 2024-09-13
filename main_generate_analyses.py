@@ -235,17 +235,20 @@ def generate_statistics(input_data_file: str, output_folder: str) -> None:
 
     # 7. Correlation and Dependency Measures
 
-    # Spearman Correlation Coefficient - Used for other distributions
+    # 7.1. Spearman Correlation Coefficient - Used for other distributions
     spearman_correlation = data.corr(method='spearman')
 
     # Add 'Construct' as the first column header
     spearman_correlation.index.name = 'Construct'
 
+    # Convert the index (construct names) into a column
+    spearman_correlation.reset_index(inplace=True)
+
     # Save Spearman Correlation Coefficient to its own CSV file
     save_to_csv(spearman_correlation, output_folder + 'spearman_correlation.csv',
                 "Spearman Correlation Coefficient saved to CSV.")
 
-    # Mutual Information - Capture non-linear dependencies
+    # 7.2. Mutual Information - Capture non-linear dependencies
 
     # Initialize a DataFrame to store Mutual Information
     mutual_info = pd.DataFrame(index=constructs, columns=constructs, dtype=float)
