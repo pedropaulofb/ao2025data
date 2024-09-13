@@ -60,9 +60,10 @@ df['Log_Variance'] = np.log1p(df['Variance'])
 # Plot: Scatter Plot for Mean vs. Log_Variance with Polynomial Regression Curve and Confidence Interval
 plt.figure(figsize=(8, 6))
 sns.regplot(data=df, x='Mean', y='Log_Variance', scatter_kws={'alpha': 0.7, 'label': 'Data Points'},
-    # Add label for scatter points
-    order=2, ci=95, line_kws={'color': 'red', 'label': 'Polynomial Fit (Degree 2)'}  # Add label for regression line
-)
+            # Add label for scatter points
+            order=2, ci=95, line_kws={'color': 'red', 'label': 'Polynomial Fit (Degree 2)'}
+            # Add label for regression line
+            )
 plt.title('Scatter Plot with Polynomial Regression Curve and Confidence Interval: Mean vs. Log(Variance)')
 plt.xlabel('Mean')
 plt.ylabel('Log(Variance)')
@@ -103,18 +104,18 @@ upper_error = df['SEM']
 # Plot: Bar Chart for Mean Values Across Constructs with Error Bars
 plt.figure(figsize=(15, 8))
 sns.barplot(x='Construct', y='Mean', data=df, hue='Construct',  # Use 'hue' to match 'x' variable
-    palette='viridis', errorbar=None,  # Replace deprecated 'ci' with 'errorbar=None'
-    legend=False  # Avoid adding a legend
-)
+            palette='viridis', errorbar=None,  # Replace deprecated 'ci' with 'errorbar=None'
+            legend=False  # Avoid adding a legend
+            )
 
 # Add custom error bars using asymmetric error bars
 plt.errorbar(x=df['Construct'], y=df['Mean'], yerr=[lower_error, upper_error],
-    # Asymmetric error bars: lower and upper limits
-    fmt='none',  # No markers, just error bars
-    ecolor='gray',  # Error bar color
-    elinewidth=2,  # Error bar line width
-    capsize=5  # Size of the error bar caps
-)
+             # Asymmetric error bars: lower and upper limits
+             fmt='none',  # No markers, just error bars
+             ecolor='gray',  # Error bar color
+             elinewidth=2,  # Error bar line width
+             capsize=5  # Size of the error bar caps
+             )
 
 # Customize x-axis labels
 ax = plt.gca()  # Get the current axis
@@ -140,9 +141,9 @@ fig, ax1 = plt.subplots(figsize=(12, 6))
 
 # Plot the bar chart for Skewness
 sns.barplot(x='Construct', y='Skewness', data=df, ax=ax1, hue='Construct',  # Use 'hue' to match 'x' variable
-    palette='viridis', errorbar=None,  # Replace deprecated 'ci' with 'errorbar=None'
-    legend=False  # Avoid adding a legend
-)
+            palette='viridis', errorbar=None,  # Replace deprecated 'ci' with 'errorbar=None'
+            legend=False  # Avoid adding a legend
+            )
 
 # Customize the first y-axis for Skewness
 ax1.set_ylabel('Skewness', fontsize=12)
@@ -176,4 +177,89 @@ for label in x_labels:
         label.set_color('red')  # Set color to red for 'other'
 
 plt.tight_layout()
+plt.show()
+
+# 8. Density Plot for Skewness and Kurtosis
+plt.figure(figsize=(10, 6))
+sns.kdeplot(df['Skewness'], fill=True, color='blue', label='Skewness')  # Use 'fill=True' instead of 'shade=True'
+sns.kdeplot(df['Kurtosis'], fill=True, color='red', label='Kurtosis')  # Use 'fill=True' instead of 'shade=True'
+plt.title('Density Plot for Skewness and Kurtosis')
+plt.xlabel('Value')
+plt.ylabel('Density')
+plt.legend()
+plt.show()
+
+
+# 9. Radar Charts
+# Select top 5 constructs by mean value
+top_constructs = df.nlargest(5, 'Mean')
+
+# 9.1. Radar chart for Group 1: Central Tendency Analysis
+central_tendency_columns = ['Mean', 'Median', 'IQR']
+df_radar_central_tendency = top_constructs[central_tendency_columns]
+df_radar_central_tendency_normalized = (df_radar_central_tendency - df_radar_central_tendency.min()) / (df_radar_central_tendency.max() - df_radar_central_tendency.min())
+
+# Number of variables for this group
+num_vars_central_tendency = len(central_tendency_columns)
+angles_central_tendency = [n / float(num_vars_central_tendency) * 2 * np.pi for n in range(num_vars_central_tendency)]
+angles_central_tendency += angles_central_tendency[:1]
+
+plt.figure(figsize=(8, 6))
+ax1 = plt.subplot(111, polar=True)
+for index, row in df_radar_central_tendency_normalized.iterrows():
+    values = row.tolist()
+    values += values[:1]
+    construct_label = top_constructs.loc[index, 'Construct']
+    ax1.plot(angles_central_tendency, values, label=construct_label)
+    ax1.fill(angles_central_tendency, values, alpha=0.1)
+
+plt.xticks(angles_central_tendency[:-1], central_tendency_columns)
+plt.title('Radar Chart: Central Tendency Analysis')
+plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
+plt.show()
+
+# 9.2. Radar chart for Group 2: Variability and Spread
+spread_columns = ['SD', 'Variance', 'IQR', 'Q1', 'Q3']
+df_radar_spread = top_constructs[spread_columns]
+df_radar_spread_normalized = (df_radar_spread - df_radar_spread.min()) / (df_radar_spread.max() - df_radar_spread.min())
+
+num_vars_spread = len(spread_columns)
+angles_spread = [n / float(num_vars_spread) * 2 * np.pi for n in range(num_vars_spread)]
+angles_spread += angles_spread[:1]
+
+plt.figure(figsize=(8, 6))
+ax2 = plt.subplot(111, polar=True)
+for index, row in df_radar_spread_normalized.iterrows():
+    values = row.tolist()
+    values += values[:1]
+    construct_label = top_constructs.loc[index, 'Construct']
+    ax2.plot(angles_spread, values, label=construct_label)
+    ax2.fill(angles_spread, values, alpha=0.1)
+
+plt.xticks(angles_spread[:-1], spread_columns)
+plt.title('Radar Chart: Variability and Spread Analysis')
+plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
+plt.show()
+
+# 9.3. Radar chart for Group 3: Comprehensive Spread and Shape Analysis
+comprehensive_columns = ['Mean', 'SD', 'Skewness', 'Kurtosis', 'IQR']
+df_radar_comprehensive = top_constructs[comprehensive_columns]
+df_radar_comprehensive_normalized = (df_radar_comprehensive - df_radar_comprehensive.min()) / (df_radar_comprehensive.max() - df_radar_comprehensive.min())
+
+num_vars_comprehensive = len(comprehensive_columns)
+angles_comprehensive = [n / float(num_vars_comprehensive) * 2 * np.pi for n in range(num_vars_comprehensive)]
+angles_comprehensive += angles_comprehensive[:1]
+
+plt.figure(figsize=(8, 6))
+ax4 = plt.subplot(111, polar=True)
+for index, row in df_radar_comprehensive_normalized.iterrows():
+    values = row.tolist()
+    values += values[:1]
+    construct_label = top_constructs.loc[index, 'Construct']
+    ax4.plot(angles_comprehensive, values, label=construct_label)
+    ax4.fill(angles_comprehensive, values, alpha=0.1)
+
+plt.xticks(angles_comprehensive[:-1], comprehensive_columns)
+plt.title('Radar Chart: Comprehensive Spread and Shape Analysis')
+plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
 plt.show()
