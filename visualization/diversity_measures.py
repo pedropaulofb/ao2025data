@@ -10,7 +10,7 @@ from src.color_legend import color_text
 from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_group3(file_path):
+def execute_visualization_diversity_measures(file_path):
     # Read CSV file
     df = pd.read_csv(file_path)
     save_dir = create_figures_subdir(file_path)
@@ -124,5 +124,3 @@ def execute_visualization_group3(file_path):
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
 
-
-execute_visualization_group3('../outputs/analyses/cs_analyses/diversity_measures.csv')

@@ -10,7 +10,7 @@ from src.color_legend import color_text
 from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_group6(file_path):
+def execute_visualization_similarity_measures(file_path):
     # Read data from the CSV file
     df = pd.read_csv(file_path)
     save_dir = create_figures_subdir(file_path)
@@ -195,5 +195,3 @@ def execute_visualization_group6(file_path):
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
 
-
-execute_visualization_group6('../outputs/analyses/cs_analyses/similarity_measures.csv')

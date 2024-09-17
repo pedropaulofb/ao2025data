@@ -9,7 +9,7 @@ from src.color_legend import color_text
 from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_group2(file_path):
+def execute_visualization_rank_frequency_distribution(file_path):
     # Load the CSV file into a DataFrame
     data = pd.read_csv(file_path)
     save_dir = create_figures_subdir(file_path)
@@ -48,5 +48,3 @@ def execute_visualization_group2(file_path):
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
 
-
-execute_visualization_group2("../outputs/analyses/cs_analyses/rank_frequency_distribution.csv")

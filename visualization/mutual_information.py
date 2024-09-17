@@ -11,7 +11,7 @@ from src.color_legend import color_text
 from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_group72(file_path):
+def execute_visualization_mutual_information(file_path):
     # Load the data from CSV file
     df = pd.read_csv(file_path, index_col=0)
     save_dir = create_figures_subdir(file_path)
@@ -152,5 +152,3 @@ def execute_visualization_group72(file_path):
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
 
-
-execute_visualization_group72('../outputs/analyses/cs_analyses/mutual_information.csv')

@@ -11,7 +11,7 @@ from src.color_legend import color_text
 from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_group4(file_path):
+def execute_visualization_central_tendency_dispersion(file_path):
     # Load the data from the CSV file
 
     df = pd.read_csv(file_path)
@@ -300,6 +300,3 @@ def execute_visualization_group4(file_path):
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
-
-
-execute_visualization_group4('../outputs/analyses/cs_analyses/central_tendency_dispersion.csv')

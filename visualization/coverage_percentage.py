@@ -9,7 +9,7 @@ from matplotlib.ticker import MultipleLocator
 from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_group5(file_path):
+def execute_visualization_coverage_percentage(file_path):
     # Read the data from the CSV file
     data = pd.read_csv(file_path)
     save_dir = create_figures_subdir(file_path)
@@ -44,5 +44,3 @@ def execute_visualization_group5(file_path):
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
 
-
-execute_visualization_group5('../outputs/analyses/cs_analyses/coverage_percentage.csv')
