@@ -46,8 +46,9 @@ def execute_visualization_mutual_information(file_path):
     df_long_network = df_long_network[df_long_network['Construct 1'] != df_long_network['Construct 2']]
 
     # Drop duplicate pairs (e.g., both (A, B) and (B, A))
-    df_long_network['Construct Pair'] = df_long_network.apply(lambda row: tuple(sorted([row['Construct 1'], row['Construct 2']])),
-                                              axis=1)
+    df_long_network['Construct Pair'] = df_long_network.apply(
+        lambda row: tuple(sorted([row['Construct 1'], row['Construct 2']])),
+        axis=1)
     df_long_network = df_long_network.drop_duplicates(subset='Construct Pair')
 
     # Select the N most mutual information values
@@ -136,7 +137,8 @@ def execute_visualization_mutual_information(file_path):
 
     # Create a box plot to show the distribution of mutual information for each construct
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    ax = sns.boxplot(x='Construct 1', y='Mutual Information', data=df_long_boxplot, hue='Construct 1', palette='viridis',
+    ax = sns.boxplot(x='Construct 1', y='Mutual Information', data=df_long_boxplot, hue='Construct 1',
+                     palette='viridis',
                      legend=False)
     plt.title('Box Plot of Mutual Information by Construct', fontweight='bold')
     plt.xlabel('Construct')
@@ -151,4 +153,3 @@ def execute_visualization_mutual_information(file_path):
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
-

@@ -39,8 +39,8 @@ def execute_visualization_diversity_measures(file_path):
 
     # Plot Gini Coefficient and Simpson Index on the second y-axis (right)
     ax2.bar(x, df['Gini Coefficient'], width=bar_width, color='#ff7f0e', label='Gini Coefficient')
-    ax2.bar(x + bar_width, df['Simpson Index'], width=bar_width, color='#2ca02c', label='Simpson Index')
-    ax2.set_ylabel('Gini Coefficient and Simpson Index')
+    # ax2.bar(x + bar_width, df['Simpson Index'], width=bar_width, color='#2ca02c', label='Simpson Index')
+    ax2.set_ylabel('Gini Coefficient')
 
     # Add legends
     ax1.legend(loc='upper left')
@@ -123,4 +123,3 @@ def execute_visualization_diversity_measures(file_path):
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
-

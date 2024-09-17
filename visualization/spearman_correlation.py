@@ -54,7 +54,7 @@ def execute_visualization_spearman_correlation(file_path):
     near_zero = df_long.iloc[(df_long['Spearman Correlation'].abs().argsort()[:N])]
 
     # Function to create a network graph with a legend
-    def plot_network(data, title, metric_label, palette,fig_name):
+    def plot_network(data, title, metric_label, palette, fig_name):
         # Create an empty graph
         G = nx.Graph()
 
@@ -86,15 +86,15 @@ def execute_visualization_spearman_correlation(file_path):
 
     # Plot network for the N most positive Spearman Correlations
     plot_network(top_positive, f'Top {N} Positive Spearman Correlations Network', 'Spearman Correlation',
-                 palette=plt.cm.autumn_r,fig_name='network_top_positive_spearman_correlations.png')
+                 palette=plt.cm.autumn_r, fig_name='network_top_positive_spearman_correlations.png')
 
     # Plot network for the N most negative Spearman Correlations
     plot_network(top_negative, f'Top {N} Negative Spearman Correlations Network', 'Spearman Correlation',
-                 palette=plt.cm.winter,fig_name='network_top_negative_spearman_correlations.png')
+                 palette=plt.cm.winter, fig_name='network_top_negative_spearman_correlations.png')
 
     # Plot network for the N correlations closest to zero
     plot_network(near_zero, f'Top {N} Neutral Spearman Correlations Network', 'Spearman Correlation',
-                 palette=plt.cm.summer,fig_name='network_top_neutral_spearman_correlations.png')
+                 palette=plt.cm.summer, fig_name='network_top_neutral_spearman_correlations.png')
 
     # 3. Ranked Chart
 
@@ -143,4 +143,3 @@ def execute_visualization_spearman_correlation(file_path):
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
-

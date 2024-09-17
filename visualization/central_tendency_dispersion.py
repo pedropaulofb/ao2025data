@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from loguru import logger
-from networkx.algorithms.bipartite import color
 
 from src.color_legend import color_text
 from src.create_figure_subdir import create_figures_subdir

@@ -280,3 +280,5 @@ if __name__ == "__main__":
     generate_statistics('./outputs/consolidated_cs.csv', "./outputs/analyses/cs_analyses/")
     # generate_statistics('./outputs/consolidated_rs.csv', "./outputs/analyses/rs_analyses/")
     # generate_statistics('./outputs/consolidated_abs.csv', "./outputs/analyses/abs_analyses/")
+
+# TODO: Remove Simpson's Index

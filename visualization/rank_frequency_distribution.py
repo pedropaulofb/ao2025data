@@ -47,4 +47,3 @@ def execute_visualization_rank_frequency_distribution(file_path):
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
-
