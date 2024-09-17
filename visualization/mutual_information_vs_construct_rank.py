@@ -8,7 +8,7 @@ from loguru import logger
 from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_inter3(file_path1, file_path2):
+def execute_visualization_mutual_information_vs_construct_rank(file_path1, file_path2):
     # Load the data from the CSV files
     rank_df = pd.read_csv(file_path1)
     mutual_info_df = pd.read_csv(file_path2)
@@ -35,9 +35,9 @@ def execute_visualization_inter3(file_path1, file_path2):
                     legend=False)
 
     # Customize the plot
-    plt.title('Scatter Plot of Rank vs. Mutual Information')
-    plt.xlabel('Rank')
-    plt.ylabel('Average Mutual Information')
+    plt.title('Average Mutual Information vs. Construct Rank', fontweight='bold')
+    plt.xlabel('Construct Rank')
+    plt.ylabel('Mean Mutual Information')
     plt.grid(True)
 
     # Annotate each point with the construct name
@@ -49,11 +49,11 @@ def execute_visualization_inter3(file_path1, file_path2):
                  ha='center')
 
     # Show the plot
-    fig_name = 'inter3_fig1.png'
+    fig_name = 'mutual_information_vs_construct_rank.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
 
 
-execute_visualization_inter3('../outputs/analyses/cs_analyses/rank_frequency_distribution.csv',
+execute_visualization_mutual_information_vs_construct_rank('../outputs/analyses/cs_analyses/rank_frequency_distribution.csv',
                              '../outputs/analyses/cs_analyses/mutual_information.csv')

@@ -1,3 +1,4 @@
+import ast
 import os
 
 import matplotlib.pyplot as plt
@@ -8,7 +9,7 @@ from loguru import logger
 from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_inter6(file_path1, file_path2):
+def execute_visualization_mutual_info_vs_jaccard_similarity(file_path1, file_path2):
     # Load the data from the CSV files
     mutual_info_df = pd.read_csv(file_path1)
     similarity_measures_df = pd.read_csv(file_path2)
@@ -23,7 +24,7 @@ def execute_visualization_inter6(file_path1, file_path2):
 
     # Iterate through the similarity measures dataframe to extract construct pairs and their similarity measures
     for i, row in similarity_measures_df.iterrows():
-        construct_pair = eval(row['Construct Pair'])  # Convert string representation to a tuple
+        construct_pair = ast.literal_eval(row['Construct Pair'])
         construct1, construct2 = construct_pair
 
         # Retrieve mutual information for each pair
@@ -60,9 +61,9 @@ def execute_visualization_inter6(file_path1, file_path2):
                     legend=False)
 
     # Customize the plot
-    plt.title('Scatter Plot of Mutual Information vs. Jaccard Similarity')
-    plt.xlabel('Jaccard Similarity')
-    plt.ylabel('Mutual Information')
+    plt.title('Comparison of Mutual Information and Jaccard Similarity for Construct Pairs', fontweight='bold')
+    plt.xlabel('Jaccard Similarity (Construct Pair)')
+    plt.ylabel('Mutual Information (Construct Pair)')
     plt.grid(True)
 
     # Draw lines to create quadrants using medians
@@ -90,18 +91,18 @@ def execute_visualization_inter6(file_path1, file_path2):
     #                  color=color)  # Use the color variable here
 
     # Add annotations for the median lines
-    plt.text(x=0, y=mutual_info_median, s=f'Median Mutual Information: {mutual_info_median:.2f}', color='grey',
+    plt.text(x=max(pairs_df['Jaccard Similarity'])/2, y=mutual_info_median, s=f'Median Mutual Information: {mutual_info_median:.2f}', color='grey',
              fontsize=10,
              va='bottom', ha='left')
-    plt.text(x=jaccard_median, y=min(pairs_df['Mutual Information']),
+    plt.text(x=jaccard_median, y=max(pairs_df['Mutual Information']/2),
              s=f'Median Jaccard Similarity: {jaccard_median:.2f}',
              color='grey', fontsize=10, va='bottom', ha='right', rotation=90)
 
-    fig_name = 'inter6_fig1.png'
+    fig_name = 'mutual_info_vs_jaccard_similarity.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
 
 
-execute_visualization_inter6('../outputs/analyses/cs_analyses/mutual_information.csv',
+execute_visualization_mutual_info_vs_jaccard_similarity('../outputs/analyses/cs_analyses/mutual_information.csv',
                              '../outputs/analyses/cs_analyses/similarity_measures.csv')

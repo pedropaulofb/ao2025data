@@ -5,10 +5,11 @@ import pandas as pd
 import seaborn as sns
 from loguru import logger
 
+from src.color_legend import color_text
 from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_inter1(file_path1, file_path2):
+def execute_visualization_shannon_entropy_vs_global_frequency(file_path1, file_path2):
     # Load the data from the CSV files
     diversity_measures = pd.read_csv(file_path1)
     frequency_analysis = pd.read_csv(file_path2)
@@ -32,43 +33,41 @@ def execute_visualization_inter1(file_path1, file_path2):
 
     # Customize the plot
     plt.yscale('log')
-    plt.title('Scatter Plot of Shannon Entropy vs. Global Relative Frequency (Occurrence-wise)')
+    plt.title('Shannon Entropy vs. Global Relative Frequency', fontweight='bold')
     plt.xlabel('Shannon Entropy')
-    plt.ylabel('Global Relative Frequency (Occurrence-wise)')
+    plt.ylabel('Log of Global Relative Frequency (Occurrence-wise)')
     plt.grid(True)
 
     # Draw lines to create quadrants
     plt.axhline(y=frequency_threshold, color='grey', linestyle='--', linewidth=1)  # Horizontal line
     plt.axvline(x=entropy_threshold, color='grey', linestyle='--', linewidth=1)  # Vertical line
 
-    # Annotate each point with the construct name and color for 'none' and 'other'
+    # Annotate each point with the construct name
+    texts = []  # Initialize an empty list to store text objects
     for i in range(len(merged_data)):
         construct_name = merged_data['Construct'][i]
 
-        # Set the color based on the construct name
-        if construct_name == 'none':
-            color = 'blue'
-        elif construct_name == 'other':
-            color = 'red'
-        else:
-            color = 'black'  # Default color for other constructs
+        # Create text object with default color (black)
+        text = plt.text(x=merged_data['Shannon Entropy'][i],
+                        y=merged_data['Global Relative Frequency (Occurrence-wise)'][i], s=construct_name, fontsize=8,
+                        ha='right', color='black')
+        texts.append(text)  # Append the text object to the list
 
-        # Annotate the plot with the construct name and its color
-        plt.text(x=merged_data['Shannon Entropy'][i], y=merged_data['Global Relative Frequency (Occurrence-wise)'][i],
-                 s=construct_name, fontsize=8, ha='right', color=color)  # Use the color variable here
+    # Apply color_text function to set specific colors
+    color_text(texts)
 
     # Add annotations for the median lines
-    plt.text(x=0, y=frequency_threshold, s=f'Median Frequency: {frequency_threshold:.2e}', color='grey', fontsize=10,
+    plt.text(x=(max(merged_data['Global Relative Frequency (Occurrence-wise)']))/2, y=frequency_threshold, s=f'Median Frequency: {frequency_threshold:.2e}', color='grey', fontsize=10,
              va='bottom', ha='left')
     plt.text(x=entropy_threshold, y=min(merged_data['Global Relative Frequency (Occurrence-wise)']),
              s=f'Median Entropy: {entropy_threshold:.2f}', color='grey', fontsize=10, va='bottom', ha='right',
              rotation=90)
 
-    fig_name = 'inter1_fig1.png'
+    fig_name = 'shannon_entropy_vs_global_frequency.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
 
 
-execute_visualization_inter1('../outputs/analyses/cs_analyses/diversity_measures.csv',
+execute_visualization_shannon_entropy_vs_global_frequency('../outputs/analyses/cs_analyses/diversity_measures.csv',
                              '../outputs/analyses/cs_analyses/frequency_analysis.csv')
