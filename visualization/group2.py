@@ -5,6 +5,7 @@ import pandas as pd
 import seaborn as sns
 from loguru import logger
 
+from src.color_legend import color_text
 from src.create_figure_subdir import create_figures_subdir
 
 
@@ -20,20 +21,16 @@ def execute_visualization_group2(file_path):
     data['Cumulative Percentage'] = data['Percentage Frequency'].cumsum()
 
     # 1. Pareto Chart for Rank-Frequency and Cumulative Percentage
-    fig, ax1 = plt.subplots(figsize=(12, 8), tight_layout=True)
+    fig, ax1 = plt.subplots(figsize=(16, 9), tight_layout=True)
 
     # Bar plot for Rank-Percentage Frequency with uniform color
     sns.barplot(x='Construct', y='Percentage Frequency', data=data, ax=ax1, color='skyblue')
     ax1.set_xlabel('Construct')
     ax1.set_ylabel('Occurrence-wise Relative Frequency (%)')
-    ax1.set_title('Pareto Chart for Rank-Percentage Frequency and Cumulative Percentage')
+    ax1.set_title('Pareto Chart: Construct Frequency and Cumulative Percentage', fontweight='bold')
 
-    # Rotate x-axis labels correctly and apply color to specific labels
-    for label in ax1.get_xticklabels():
-        if label.get_text() == 'none':
-            label.set_color('blue')
-        elif label.get_text() == 'other':
-            label.set_color('red')
+    # Apply color to specific labels
+    color_text(ax1.get_xticklabels())
 
     # Rotate the labels by 45 degrees
     ax1.tick_params(axis='x', rotation=90)
@@ -41,13 +38,15 @@ def execute_visualization_group2(file_path):
     # Line plot for Cumulative Percentage
     ax2 = ax1.twinx()
     ax2.plot(range(len(data)), data['Cumulative Percentage'], color='red', marker='o')
-    ax2.set_ylabel('Cumulative Percentage (%)')
+    ax2.set_ylabel('Cumulative Frequency (%)')
     ax2.set_yticks(range(0, 101, 10))  # Set cumulative percentage grid at every 10%
 
     plt.grid(True)
-    fig_name = 'group2_fig1.png'
+    fig.tight_layout()  # Ensure everything fits within the figure
+    fig_name = 'pareto_chart_construct_frequency_cumulative_percentage.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
 
 execute_visualization_group2("../outputs/analyses/cs_analyses/rank_frequency_distribution.csv")

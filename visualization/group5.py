@@ -15,13 +15,13 @@ def execute_visualization_group5(file_path):
     save_dir = create_figures_subdir(file_path)
 
     # 1. Plot Line Chart for Coverage vs. Percentage
-    fig = plt.figure(figsize=(12, 8), tight_layout=True)  # Set the figure size
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)  # Set the figure size
     sns.lineplot(data=data, x='Percentage', y='Coverage', marker='o')
 
     # Improved title and labels
-    plt.title('Coverage Achieved by Top Percentages of Constructs', fontsize=14)
-    plt.xlabel('Top Percentage of Constructs Considered (%)', fontsize=12)
-    plt.ylabel('Coverage of Total Occurrences', fontsize=12)
+    plt.title('Coverage vs. Top Percentages of Constructs', fontsize=14, fontweight='bold')
+    plt.xlabel('Percentage of Constructs Considered (%)', fontsize=12)
+    plt.ylabel('Total Coverage of Construct Occurrences', fontsize=12)
 
     # Add annotations for each point to display the corresponding "Top k Constructs" value
     for i in range(len(data)):
@@ -39,9 +39,10 @@ def execute_visualization_group5(file_path):
     plt.grid(True)  # Add a grid for better readability
     plt.gca().xaxis.set_major_locator(MultipleLocator(10))  # Set major ticks at intervals of 10
 
-    fig_name = 'group5_fig1.png'
+    fig_name = 'coverage_vs_construct_percentage.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
 
 execute_visualization_group5('../outputs/analyses/cs_analyses/coverage_percentage.csv')

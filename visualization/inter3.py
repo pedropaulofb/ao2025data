@@ -24,7 +24,7 @@ def execute_visualization_inter3(file_path1, file_path2):
                            on='Construct')
 
     # Plot the scatter plot
-    fig = plt.figure(figsize=(12, 8), tight_layout=True)
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)
     sns.scatterplot(data=merged_data,
                     x='Rank',
                     y='Avg Mutual Information',
@@ -52,6 +52,7 @@ def execute_visualization_inter3(file_path1, file_path2):
     fig_name = 'inter3_fig1.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
 
 execute_visualization_inter3('../outputs/analyses/cs_analyses/rank_frequency_distribution.csv',

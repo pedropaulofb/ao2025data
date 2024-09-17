@@ -24,7 +24,7 @@ def execute_visualization_inter4(file_path1, file_path2):
     frequency_threshold = merged_data['Group Frequency'].median()  # Median for Group Frequency
 
     # Create a scatter plot for Shannon Entropy vs Group Frequency
-    fig = plt.figure(figsize=(12, 8), tight_layout=True)
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)
     sns.scatterplot(data=merged_data,
                     x='Shannon Entropy',
                     y='Group Frequency',
@@ -73,6 +73,7 @@ def execute_visualization_inter4(file_path1, file_path2):
     fig_name = 'inter4_fig1.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
 
 execute_visualization_inter4('../outputs/analyses/cs_analyses/diversity_measures.csv',

@@ -6,6 +6,7 @@ import pandas as pd
 import seaborn as sns
 from loguru import logger
 
+from src.color_legend import color_text
 from src.create_figure_subdir import create_figures_subdir
 
 
@@ -18,7 +19,9 @@ def execute_visualization_group6(file_path):
     df['Construct 1'] = df['Construct Pair'].apply(lambda x: eval(x)[0])
     df['Construct 2'] = df['Construct Pair'].apply(lambda x: eval(x)[1])
 
-    # 1. Heatmap
+    ### 1) Heatmap
+
+    # 1.1) Heatmap for Jaccard Similarity
 
     # Create a pivot table for Jaccard Similarity
     jaccard_pivot = df.pivot_table(index='Construct 1', columns='Construct 2', values='Jaccard Similarity')
@@ -31,29 +34,23 @@ def execute_visualization_group6(file_path):
         jaccard_pivot.loc[construct, construct] = 1
 
     # Plot heatmap for Jaccard Similarity
-    fig = plt.figure(figsize=(12, 8), tight_layout=True)
-    ax = sns.heatmap(jaccard_pivot, annot=True, cmap='viridis', fmt='.3f', cbar_kws={'label': 'Jaccard Similarity'})
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)
+    ax = sns.heatmap(jaccard_pivot, annot=True, cmap='viridis', fmt='.2f', cbar_kws={'label': 'Jaccard Similarity'})
 
     # Customize the x and y axis labels
     plt.setp(ax.get_xticklabels(), color='black')  # Reset all labels to black first
 
     # Color specific labels
-    for label in ax.get_xticklabels():
-        if label.get_text() == 'none':
-            label.set_color('blue')
-        elif label.get_text() == 'other':
-            label.set_color('red')
+    color_text(ax.get_xticklabels())
+    color_text(ax.get_yticklabels())
 
-    for label in ax.get_yticklabels():
-        if label.get_text() == 'none':
-            label.set_color('blue')
-        elif label.get_text() == 'other':
-            label.set_color('red')
-
-    plt.title('Heatmap of Jaccard Similarity Between Construct Pairs')
-    fig_name = 'group6_fig1.png'
+    plt.title('Jaccard Similarity Heatmap for Construct Pairs', fontweight='bold')
+    fig_name = 'heatmap_jaccard_similarity_construct_pairs.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
+
+    # 1.2) Heatmap for Dice Coefficient
 
     # Create a pivot table for Dice Coefficient
     dice_pivot = df.pivot_table(index='Construct 1', columns='Construct 2', values='Dice Coefficient')
@@ -66,31 +63,23 @@ def execute_visualization_group6(file_path):
         dice_pivot.loc[construct, construct] = 1
 
     # Plot heatmap for Dice Coefficient
-    fig = plt.figure(figsize=(12, 8), tight_layout=True)
-    ax = sns.heatmap(jaccard_pivot, annot=True, cmap='viridis', fmt='.3f', cbar_kws={'label': 'Jaccard Similarity'})
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)
+    ax = sns.heatmap(dice_pivot, annot=True, cmap='viridis', fmt='.2f', cbar_kws={'label': 'Dice Coefficient'})
 
     # Customize the x and y axis labels
     plt.setp(ax.get_xticklabels(), color='black')  # Reset all labels to black first
 
     # Color specific labels
-    for label in ax.get_xticklabels():
-        if label.get_text() == 'none':
-            label.set_color('blue')
-        elif label.get_text() == 'other':
-            label.set_color('red')
+    color_text(ax.get_xticklabels())
+    color_text(ax.get_yticklabels())
 
-    for label in ax.get_yticklabels():
-        if label.get_text() == 'none':
-            label.set_color('blue')
-        elif label.get_text() == 'other':
-            label.set_color('red')
-
-    plt.title('Heatmap of Dice Coefficient Between Construct Pairs')
-    fig_name = 'group6_fig2.png'
+    plt.title('Dice Coefficient Heatmap for Construct Pairs', fontweight='bold')
+    fig_name = 'heatmap_dice_coefficient_construct_pairs.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
-    # 2. Network Graph
+    ### 2) Network Graph
 
     # Number of top pairs to visualize
     N = 15
@@ -115,7 +104,7 @@ def execute_visualization_group6(file_path):
         weights = [G[u][v]['weight'] for u, v in G.edges()]
 
         # Create a figure and axis for the plot
-        fig, ax = plt.subplots(figsize=(12, 8), tight_layout=True)
+        fig, ax = plt.subplots(figsize=(16, 9), tight_layout=True)
 
         # Draw nodes and edges
         nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=2000, edge_color=weights,
@@ -127,39 +116,40 @@ def execute_visualization_group6(file_path):
         cbar = plt.colorbar(sm, ax=ax)  # Associate the color bar with the current axis
         cbar.set_label(metric_label)
 
-        plt.title(title)
+        plt.title(title, fontweight='bold')
         fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
         logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+        plt.close(fig)
 
     # Plot network for Jaccard Similarity
-    plot_network(top_jaccard, f'Network Graph for Top {N} Pairs by Jaccard Similarity', 'Jaccard Similarity',
-                 fig_name='group6_fig3.png')
+    plot_network(top_jaccard, f'Top {N} Pairs Network by Jaccard Similarity', 'Jaccard Similarity',
+                 fig_name='network_top_jaccard_similarity_pairs.png')
 
     # Plot network for Dice Coefficient
-    plot_network(top_dice, f'Network Graph for Top {N} Pairs by Dice Coefficient', 'Dice Coefficient',
-                 fig_name='group6_fig4.png')
+    plot_network(top_dice, f'Top {N} Pairs Network by Dice Coefficient', 'Dice Coefficient',
+                 fig_name='network_top_dice_coefficient_pairs.png')
 
     # 3. Scatter plot
-    fig = plt.figure(figsize=(12, 8), tight_layout=True)
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)
     scatter_plot = sns.scatterplot(data=df, x='Jaccard Similarity', y='Dice Coefficient', hue='Construct Pair',
                                    # Different colors for different construct pairs
                                    palette='viridis',  # Color palette for the scatter plot
-                                   markers=True,  # Use different markers for clarity
                                    s=100,  # Size of the markers
                                    legend=False  # Remove the legend for each point
                                    )
 
     # Customize the plot
-    plt.title('Scatter Plot: Jaccard Similarity vs. Dice Coefficient')
+    plt.title('Scatter Plot of Jaccard Similarity vs. Dice Coefficient', fontweight='bold')
     plt.xlabel('Jaccard Similarity')
     plt.ylabel('Dice Coefficient')
     plt.grid(True)
 
     # Show the plot
     plt.tight_layout()
-    fig_name = 'group6_fig5.png'
+    fig_name = 'scatter_jaccard_vs_dice_similarity.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
     # 4. Box Plot
 
@@ -171,45 +161,39 @@ def execute_visualization_group6(file_path):
     full_df = pd.concat([df, mirror_df], ignore_index=True)
 
     # Create box plots grouped by the first construct
-    fig = plt.figure(figsize=(12, 8), tight_layout=True)
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)
     ax = sns.boxplot(data=full_df, x='Construct 1', y='Jaccard Similarity', hue='Construct 1', palette='viridis',
                      legend=False)
     # Customize x-axis label colors
-    for label in ax.get_xticklabels():
-        if label.get_text() == 'none':
-            label.set_color('blue')
-        elif label.get_text() == 'other':
-            label.set_color('red')
+    color_text(ax.get_xticklabels())
 
-    plt.title('Box Plot of Jaccard Similarity Grouped by Construct')
+    plt.title('Box Plot of Jaccard Similarity by Construct', fontweight='bold')
     plt.xlabel('Construct')
     plt.ylabel('Jaccard Similarity')
     plt.xticks(rotation=45)  # Rotate x-axis labels for better visibility
     plt.grid(True)
     plt.tight_layout()
-    fig_name = 'group6_fig6.png'
+    fig_name = 'boxplot_jaccard_similarity_by_construct.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
-    fig = plt.figure(figsize=(12, 8), tight_layout=True)
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)
     ax = sns.boxplot(data=full_df, x='Construct 1', y='Dice Coefficient', hue='Construct 1', palette='viridis',
                      legend=False)
     # Customize x-axis label colors
-    for label in ax.get_xticklabels():
-        if label.get_text() == 'none':
-            label.set_color('blue')
-        elif label.get_text() == 'other':
-            label.set_color('red')
+    color_text(ax.get_xticklabels())
 
-    plt.title('Box Plot of Dice Coefficient Grouped by Construct')
+    plt.title('Box Plot of Dice Coefficient by Construct', fontweight='bold')
     plt.xlabel('Construct')
     plt.ylabel('Dice Coefficient')
     plt.xticks(rotation=45)  # Rotate x-axis labels for better visibility
     plt.grid(True)
     plt.tight_layout()
-    fig_name = 'group6_fig7.png'
+    fig_name = 'boxplot_dice_coefficient_by_construct.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
 
 execute_visualization_group6('../outputs/analyses/cs_analyses/similarity_measures.csv')

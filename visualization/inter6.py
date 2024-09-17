@@ -50,7 +50,7 @@ def execute_visualization_inter6(file_path1, file_path2):
     mutual_info_threshold = mutual_info_median * 1.2  # Adjust this threshold as needed
 
     # Create a scatter plot for Mutual Information vs. Jaccard Similarity
-    fig = plt.figure(figsize=(12, 8), tight_layout=True)
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)
     sns.scatterplot(data=pairs_df,
                     x='Jaccard Similarity',
                     y='Mutual Information',
@@ -100,6 +100,7 @@ def execute_visualization_inter6(file_path1, file_path2):
     fig_name = 'inter6_fig1.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
 
 execute_visualization_inter6('../outputs/analyses/cs_analyses/mutual_information.csv',

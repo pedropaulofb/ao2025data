@@ -24,7 +24,7 @@ def execute_visualization_inter5(file_path1, file_path2):
     simpson_threshold = merged_data['Simpson Index'].median()  # Median for Simpson Index
 
     # Create a scatter plot for Simpson's Index vs. Total Frequency
-    fig = plt.figure(figsize=(12, 8), tight_layout=True)
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)
     sns.scatterplot(data=merged_data,
                     x='Total Frequency',
                     y='Simpson Index',
@@ -73,6 +73,7 @@ def execute_visualization_inter5(file_path1, file_path2):
     fig_name = 'inter5_fig1.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
 
 execute_visualization_inter5('../outputs/analyses/cs_analyses/diversity_measures.csv',

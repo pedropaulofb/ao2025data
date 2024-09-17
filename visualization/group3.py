@@ -6,6 +6,7 @@ import pandas as pd
 import seaborn as sns
 from loguru import logger
 
+from src.color_legend import color_text
 from src.create_figure_subdir import create_figures_subdir
 
 
@@ -19,7 +20,7 @@ def execute_visualization_group3(file_path):
     bar_width = 0.25  # Width of each bar
 
     # Create the figure
-    fig, ax1 = plt.subplots(figsize=(12, 8), tight_layout=True)  # Increased figure width for more space
+    fig, ax1 = plt.subplots(figsize=(16, 9), tight_layout=True)  # Increased figure width for more space
 
     # Plot Shannon Entropy on the first y-axis (left)
     ax1.bar(x - bar_width, df['Shannon Entropy'], width=bar_width, color='#1f77b4', label='Shannon Entropy')
@@ -31,11 +32,7 @@ def execute_visualization_group3(file_path):
     ax1.set_xticklabels(df['Construct'], rotation=45, ha='right')  # Rotate labels and align to the right
 
     # Apply color to specific labels
-    for label in ax1.get_xticklabels():
-        if label.get_text() == 'none':
-            label.set_color('blue')
-        elif label.get_text() == 'other':
-            label.set_color('red')
+    color_text(ax1.get_xticklabels())
 
     # Create a second y-axis (right) that shares the same x-axis
     ax2 = ax1.twinx()
@@ -51,24 +48,26 @@ def execute_visualization_group3(file_path):
 
     # Increase spacing between the labels by setting x-axis limits and tight layout
     plt.xlim(-0.5, len(df['Construct']) - 0.5)  # Adjust limits to give more space around bars
-    plt.title('Combined Bar Chart with Two Y-Axes for Shannon Entropy, Gini Coefficient, and Simpson Index')
+    plt.title('Comparison of Diversity Measures Across Constructs', fontweight='bold')
     plt.tight_layout()
 
-    fig_name = 'group3_fig1.png'
+    fig_name = 'diversity_measures_comparison_across_constructs.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
     # 2. Calculate Correlation Matrix
     corr = df[['Shannon Entropy', 'Gini Coefficient', 'Simpson Index']].corr()
 
     # Plot Heatmap
-    plt.figure(figsize=(12, 8), tight_layout=True)
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)
     sns.heatmap(corr, annot=True, cmap='coolwarm', center=0)
-    plt.title('Correlation Heatmap of Metrics')
+    plt.title('Heatmap of Correlations Among Diversity Measures', fontweight='bold')
 
-    fig_name = 'group3_fig2.png'
+    fig_name = 'correlation_heatmap_diversity_measures.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
     # 3. Box Plot
 
@@ -77,51 +76,53 @@ def execute_visualization_group3(file_path):
                         var_name='Measure', value_name='Value')
 
     # Create the figure with two subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8), tight_layout=True)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 9), tight_layout=True)
 
     # Plot for Shannon Entropy
     sns.boxplot(x='Measure', y='Value', data=df_melted[df_melted['Measure'] == 'Shannon Entropy'], ax=ax1)
-    ax1.set_title('Box Plot for Shannon Entropy')
+    ax1.set_title('Variation of Shannon Entropy Across Constructs', fontweight='bold')
     ax1.set_xlabel('Measure')
     ax1.set_ylabel('Value')
 
     # Plot for Gini Coefficient and Simpson Index
     sns.boxplot(x='Measure', y='Value',
                 data=df_melted[df_melted['Measure'].isin(['Gini Coefficient', 'Simpson Index'])], ax=ax2)
-    ax2.set_title('Box Plot for Gini Coefficient and Simpson Index')
+    ax2.set_title('Variation of Gini Coefficient and Simpson Index Across Constructs', fontweight='bold')
     ax2.set_xlabel('Measure')
     ax2.set_ylabel('Value')
 
     plt.tight_layout()
 
-    fig_name = 'group3_fig3.png'
+    fig_name = 'box_plot_variation_of_diversity_measures.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
     # 4. Density Plot
 
     # Plotting Histograms with Seaborn
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8), tight_layout=True)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 9), tight_layout=True)
 
     # Histogram for Shannon Entropy
     sns.histplot(df['Shannon Entropy'], bins=15, ax=ax1, kde=True, color='blue')
-    ax1.set_title('Histogram of Shannon Entropy')
-    ax1.set_xlabel('Value')
+    ax1.set_title('Density Plot of Shannon Entropy', fontweight='bold')
+    ax1.set_xlabel('Metric Value')
     ax1.set_xlim(0, None)  # Start at 0 and go up to the maximum observed
 
     # Histogram for Gini Coefficient and Simpson Index
     sns.histplot(df['Gini Coefficient'], bins=15, ax=ax2, kde=True, color='orange', label='Gini Coefficient', alpha=0.6)
     sns.histplot(df['Simpson Index'], bins=15, ax=ax2, kde=True, color='green', label='Simpson Index', alpha=0.6)
-    ax2.set_title('Histogram of Gini Coefficient and Simpson Index')
-    ax2.set_xlabel('Value')
+    ax2.set_title('Density Plot of Gini Coefficient and Simpson Index', fontweight='bold')
+    ax2.set_xlabel('Metric Value')
     ax2.set_xlim(0, 1)  # Restrict to [0, 1] range
     ax2.legend()
 
     plt.tight_layout()
 
-    fig_name = 'group3_fig4.png'
+    fig_name = 'density_plot_of_diversity_measures.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    plt.close(fig)
 
 
 execute_visualization_group3('../outputs/analyses/cs_analyses/diversity_measures.csv')
