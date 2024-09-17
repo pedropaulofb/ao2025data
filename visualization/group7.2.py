@@ -1,148 +1,168 @@
+import os
+
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
+from loguru import logger
 
-# Load the data from CSV file
-file_path = '../outputs/analyses/cs_analyses/mutual_information.csv'
-df = pd.read_csv(file_path, index_col=0)
+from src.create_figure_subdir import create_figures_subdir
 
-# 1. Heatmap
 
-# Create a heatmap using Seaborn
-plt.figure(figsize=(12, 10))
-ax = sns.heatmap(df, annot=True, fmt=".2f", cmap='viridis', linewidths=.5)
+def execute_visualization_group72(file_path):
+    # Load the data from CSV file
+    df = pd.read_csv(file_path, index_col=0)
+    save_dir = create_figures_subdir(file_path)
 
-# Customize tick label colors
-for label in ax.get_xticklabels():
-    if label.get_text() == 'none':
-        label.set_color('blue')
-    elif label.get_text() == 'other':
-        label.set_color('red')
+    # 1. Heatmap
 
-for label in ax.get_yticklabels():
-    if label.get_text() == 'none':
-        label.set_color('blue')
-    elif label.get_text() == 'other':
-        label.set_color('red')
+    # Create a heatmap using Seaborn
+    fig = plt.figure(figsize=(12, 8), tight_layout=True)
+    ax = sns.heatmap(df, annot=True, fmt=".2f", cmap='viridis', linewidths=.5)
 
-# Customize the plot
-plt.title('Heatmap of Construct Interrelations')
-plt.xlabel('Constructs')
-plt.ylabel('Constructs')
+    # Customize tick label colors
+    for label in ax.get_xticklabels():
+        if label.get_text() == 'none':
+            label.set_color('blue')
+        elif label.get_text() == 'other':
+            label.set_color('red')
 
-# Show the plot
-plt.show()
+    for label in ax.get_yticklabels():
+        if label.get_text() == 'none':
+            label.set_color('blue')
+        elif label.get_text() == 'other':
+            label.set_color('red')
 
-# 2. Network Graph
+    # Customize the plot
+    plt.title('Heatmap of Construct Interrelations')
+    plt.xlabel('Constructs')
+    plt.ylabel('Constructs')
 
-# Convert the DataFrame to a long format
-df_long = df.stack().reset_index()
-df_long.columns = ['Construct 1', 'Construct 2', 'Mutual Information']
+    fig_name = 'group72_fig1.png'
+    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
 
-# Remove self-correlations (correlation of a construct with itself)
-df_long = df_long[df_long['Construct 1'] != df_long['Construct 2']]
+    # 2. Network Graph
 
-# Drop duplicate pairs (e.g., both (A, B) and (B, A))
-df_long['Construct Pair'] = df_long.apply(lambda row: tuple(sorted([row['Construct 1'], row['Construct 2']])), axis=1)
-df_long = df_long.drop_duplicates(subset='Construct Pair')
+    # Convert the DataFrame to a long format
+    df_long = df.stack().reset_index()
+    df_long.columns = ['Construct 1', 'Construct 2', 'Mutual Information']
 
-# Select the N most mutual information values
-N = 10
-top_mutual = df_long.nlargest(N, 'Mutual Information')
+    # Remove self-correlations (correlation of a construct with itself)
+    df_long = df_long[df_long['Construct 1'] != df_long['Construct 2']]
 
-# Select the N least mutual information values
-least_mutual = df_long.nsmallest(N, 'Mutual Information')
+    # Drop duplicate pairs (e.g., both (A, B) and (B, A))
+    df_long['Construct Pair'] = df_long.apply(lambda row: tuple(sorted([row['Construct 1'], row['Construct 2']])),
+                                              axis=1)
+    df_long = df_long.drop_duplicates(subset='Construct Pair')
 
-# Function to create a network graph with a legend
-def plot_network(data, title, metric_label, palette):
-    # Create an empty graph
-    G = nx.Graph()
+    # Select the N most mutual information values
+    N = 10
+    top_mutual = df_long.nlargest(N, 'Mutual Information')
 
-    # Add edges to the graph
-    for _, row in data.iterrows():
-        G.add_edge(row['Construct 1'], row['Construct 2'], weight=row[metric_label])
+    # Select the N least mutual information values
+    least_mutual = df_long.nsmallest(N, 'Mutual Information')
 
-    # Draw the graph
-    pos = nx.circular_layout(G)  # Use spring layout for better visualization
-    weights = [G[u][v]['weight'] for u, v in G.edges()]
+    # Function to create a network graph with a legend
+    def plot_network(data, title, metric_label, palette, fig_name):
+        # Create an empty graph
+        G = nx.Graph()
 
-    # Create a figure and axis for the plot
-    fig, ax = plt.subplots(figsize=(8, 6))
+        # Add edges to the graph
+        for _, row in data.iterrows():
+            G.add_edge(row['Construct 1'], row['Construct 2'], weight=row[metric_label])
 
-    # Draw nodes and edges
-    nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=2000, edge_color=weights,
-            edge_cmap=palette, width=3, edge_vmin=min(weights), edge_vmax=max(weights), ax=ax)
+        # Draw the graph
+        pos = nx.circular_layout(G)  # Use spring layout for better visualization
+        weights = [G[u][v]['weight'] for u, v in G.edges()]
 
-    # Add a color bar
-    sm = plt.cm.ScalarMappable(cmap=palette, norm=plt.Normalize(vmin=min(weights), vmax=max(weights)))
-    sm.set_array([])
-    cbar = plt.colorbar(sm, ax=ax)  # Associate the color bar with the current axis
-    cbar.set_label(metric_label)
+        # Create a figure and axis for the plot
+        fig, ax = plt.subplots(figsize=(12, 8), tight_layout=True)
 
-    plt.title(title)
-    plt.show()
+        # Draw nodes and edges
+        nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=2000, edge_color=weights,
+                edge_cmap=palette, width=3, edge_vmin=min(weights), edge_vmax=max(weights), ax=ax)
 
-# Plot network for the N most mutual information values
-plot_network(top_mutual, f'Network Graph for Top {N} Most Mutual Information', 'Mutual Information', palette=plt.cm.autumn_r)
+        # Add a color bar
+        sm = plt.cm.ScalarMappable(cmap=palette, norm=plt.Normalize(vmin=min(weights), vmax=(max(weights))))
+        sm.set_array([])
+        cbar = plt.colorbar(sm, ax=ax)  # Associate the color bar with the current axis
+        cbar.set_label(metric_label)
 
-# Plot network for the N least mutual information values
-plot_network(least_mutual, f'Network Graph for Top {N} Least Mutual Information', 'Mutual Information', palette=plt.cm.winter)
+        plt.title(title)
+        fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
+        logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
 
-# 3. Rank Chart
+    # Plot network for the N most mutual information values
+    plot_network(top_mutual, f'Network Graph for Top {N} Most Mutual Information', 'Mutual Information',
+                 palette=plt.cm.autumn_r, fig_name='group72_fig2.png')
 
-# Calculate the sum of the mutual information values for each construct
-construct_importance_mi = df.sum(axis=1)
+    # Plot network for the N least mutual information values
+    plot_network(least_mutual, f'Network Graph for Top {N} Least Mutual Information', 'Mutual Information',
+                 palette=plt.cm.winter, fig_name='group72_fig3.png')
 
-# Sort the constructs by their importance in descending order
-construct_importance_mi_sorted = construct_importance_mi.sort_values(ascending=False)
+    # 3. Rank Chart
 
-# Create a bar chart to visualize construct importance
-plt.figure(figsize=(10, 8))
-ax = sns.barplot(x=construct_importance_mi_sorted.values, y=construct_importance_mi_sorted.index,
-                 hue=construct_importance_mi_sorted.index, palette='viridis', dodge=False)
+    # Calculate the sum of the mutual information values for each construct
+    construct_importance_mi = df.sum(axis=1)
 
-# Highlight specific constructs if needed
-for label in ax.get_yticklabels():
-    if label.get_text() == 'none':
-        label.set_color('blue')
-    elif label.get_text() == 'other':
-        label.set_color('red')
+    # Sort the constructs by their importance in descending order
+    construct_importance_mi_sorted = construct_importance_mi.sort_values(ascending=False)
 
-plt.title('Construct Importance Ranking Based on Total Mutual Information')
-plt.xlabel('Sum of Mutual Information Values')
-plt.ylabel('Construct')
-# Customize grid lines: Remove horizontal, keep vertical
-plt.grid(axis='y', linestyle='')  # Remove horizontal grid lines
-plt.grid(axis='x', linestyle='-', color='gray')  # Keep vertical grid lines
-# Set x-axis ticks dynamically based on data range
-plt.xticks(np.arange(0, construct_importance_mi_sorted.max() + 0.5, 0.5))
-plt.show()
+    # Create a bar chart to visualize construct importance
+    fig = plt.figure(figsize=(12, 8), tight_layout=True)
+    ax = sns.barplot(x=construct_importance_mi_sorted.values, y=construct_importance_mi_sorted.index,
+                     hue=construct_importance_mi_sorted.index, palette='viridis', dodge=False, legend=False)
 
-# 4. Box Plot
+    # Highlight specific constructs if needed
+    for label in ax.get_yticklabels():
+        if label.get_text() == 'none':
+            label.set_color('blue')
+        elif label.get_text() == 'other':
+            label.set_color('red')
 
-# Convert the DataFrame to a long format
-df_long = df.stack().reset_index()
-df_long.columns = ['Construct 1', 'Construct 2', 'Mutual Information']
+    plt.title('Construct Importance Ranking Based on Total Mutual Information')
+    plt.xlabel('Sum of Mutual Information Values')
+    plt.ylabel('Construct')
+    # Customize grid lines: Remove horizontal, keep vertical
+    plt.grid(axis='y', linestyle='')  # Remove horizontal grid lines
+    plt.grid(axis='x', linestyle='-', color='gray')  # Keep vertical grid lines
+    # Set x-axis ticks dynamically based on data range
+    plt.xticks(np.arange(0, construct_importance_mi_sorted.max() + 0.5, 0.5))
+    fig_name = 'group72_fig4.png'
+    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
 
-# Remove self-correlations (mutual information of a construct with itself)
-df_long = df_long[df_long['Construct 1'] != df_long['Construct 2']]
+    # 4. Box Plot
 
-# Create a box plot to show the distribution of mutual information for each construct
-plt.figure(figsize=(12, 8))
-ax = sns.boxplot(x='Construct 1', y='Mutual Information', data=df_long, palette='viridis')
-plt.title('Distribution of Mutual Information for Each Construct')
-plt.xlabel('Construct')
-plt.ylabel('Mutual Information')
-plt.xticks(rotation=45)
-plt.grid(axis='y')
+    # Convert the DataFrame to a long format
+    df_long = df.stack().reset_index()
+    df_long.columns = ['Construct 1', 'Construct 2', 'Mutual Information']
 
-# Customize x-axis label colors
-for label in ax.get_xticklabels():
-    if label.get_text() == 'none':
-        label.set_color('blue')
-    elif label.get_text() == 'other':
-        label.set_color('red')
+    # Remove self-correlations (mutual information of a construct with itself)
+    df_long = df_long[df_long['Construct 1'] != df_long['Construct 2']]
 
-plt.show()
+    # Create a box plot to show the distribution of mutual information for each construct
+    fig = plt.figure(figsize=(12, 8), tight_layout=True)
+    ax = sns.boxplot(x='Construct 1', y='Mutual Information', data=df_long, hue='Construct 1', palette='viridis',
+                     legend=False)
+    plt.title('Distribution of Mutual Information for Each Construct')
+    plt.xlabel('Construct')
+    plt.ylabel('Mutual Information')
+    plt.xticks(rotation=45)
+    plt.grid(axis='y')
+
+    # Customize x-axis label colors
+    for label in ax.get_xticklabels():
+        if label.get_text() == 'none':
+            label.set_color('blue')
+        elif label.get_text() == 'other':
+            label.set_color('red')
+
+    fig_name = 'group72_fig5.png'
+    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+
+
+execute_visualization_group72('../outputs/analyses/cs_analyses/mutual_information.csv')

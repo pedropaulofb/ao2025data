@@ -11,7 +11,10 @@ class CSStats:
         self.name: str = name
 
         # List of attributes stored in the 'stats' dictionary
-        self.stats: list[str] = ["abstract", "category", "collective", "datatype", "enumeration", "event", "historicalRole", "historicalRoleMixin", "kind", "mixin", "mode", "phase", "phaseMixin", "quality", "quantity", "relator", "role", "roleMixin", "situation", "subkind", "type", "none", "other"]
+        self.stats: list[str] = ["abstract", "category", "collective", "datatype", "enumeration", "event",
+                                 "historicalRole", "historicalRoleMixin", "kind", "mixin", "mode", "phase",
+                                 "phaseMixin", "quality", "quantity", "relator", "role", "roleMixin", "situation",
+                                 "subkind", "type", "none", "other"]
 
         # Initialize 'stats' dictionary with default value 0 for all attributes
         self.stats: dict[str, int] = {attr: 0 for attr in self.stats}

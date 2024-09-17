@@ -50,6 +50,7 @@ def read_csv_and_update_instances(file_path: Union[str, Path], instances: dict[s
         print(f"Error: Invalid data in the CSV file {file_path}. {e}")
         raise e
 
+
 def write_stats_to_csv(instances: dict, output_file: Union[str, Path]) -> None:
     """
     Writes the statistics from all ModelStats instances to a CSV file.
@@ -79,7 +80,8 @@ def write_stats_to_csv(instances: dict, output_file: Union[str, Path]) -> None:
         print(f"Error: Could not write to file {output_file}.")
         raise e
 
-def simple_write_to_csv(in_list:list[str], output_file: str) -> None:
+
+def simple_write_to_csv(in_list: list[str], output_file: str) -> None:
     """
     Writes a list of strings to a TXT file.
 

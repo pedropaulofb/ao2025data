@@ -23,7 +23,8 @@ def main() -> None:
     # Custom filtering to remove models with just CLASSROOM as context
     filtered = [
         model for model in filtered
-        if ((OntologyDevelopmentContext.RESEARCH in model.context) or (OntologyDevelopmentContext.INDUSTRY in model.context))
+        if ((OntologyDevelopmentContext.RESEARCH in model.context) or (
+                OntologyDevelopmentContext.INDUSTRY in model.context))
     ]
 
     # Saving to file all filetered models

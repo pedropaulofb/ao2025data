@@ -180,7 +180,7 @@ def generate_statistics(input_data_file: str, output_folder: str) -> None:
     # 5. Coverage Measure
 
     # Coverage of Top Percentage of Constructs
-    percentages = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90]  # Define percentages
+    percentages = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00]  # Define percentages
     total_constructs = len(total_frequency)  # Total number of constructs
     total_occurrences = total_frequency.sum()  # Total occurrences of all constructs
 
