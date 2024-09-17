@@ -32,11 +32,7 @@ def execute_visualization_frequency_analysis(file_path):
     ax1.set_xticklabels(df['Construct'], rotation=90)
 
     # Color specific x-axis labels
-    for label in ax1.get_xticklabels():
-        if label.get_text() == 'none':
-            label.set_color('blue')
-        elif label.get_text() == 'other':
-            label.set_color('red')
+    color_text(ax1.get_xticklabels())
 
     # Create a secondary y-axis for Ubiquity Index
     ax2 = ax1.twinx()
