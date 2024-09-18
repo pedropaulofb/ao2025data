@@ -111,9 +111,19 @@ def execute_visualization_frequency_analysis(file_path):
     plt.ylabel('Ubiquity Index (Diversity Across Models)')
     plt.title('Construct Usage: Ubiquity Index vs. Total Frequency per Group', fontweight='bold')
 
-    # Adding a cross to separate the plot into four quadrants
-    plt.axhline(y=df['Ubiquity Index (Group Frequency per Group)'].mean(), color='black', linestyle='--', linewidth=1)
-    plt.axvline(x=df['Total Frequency per Group'].mean(), color='black', linestyle='--', linewidth=1)
+    # Calculate median values
+    median_y = df['Ubiquity Index (Group Frequency per Group)'].median()
+    median_x = df['Total Frequency per Group'].median()
+
+    # Adding a cross to separate the plot into four quadrants using the median
+    plt.axhline(y=median_y, color='black', linestyle='--', linewidth=1)
+    plt.axvline(x=median_x, color='black', linestyle='--', linewidth=1)
+
+    # Adding text for the median values at the extreme (highest values) parts of the lines
+    plt.text(df['Total Frequency per Group'].max(), median_y, f'median: {median_y:.2f}', color='gray', fontsize=10,
+             ha='right', va='bottom')
+    plt.text(median_x, df['Ubiquity Index (Group Frequency per Group)'].max(), f'median: {median_x:.2f}',
+             color='gray', fontsize=10, ha='right', va='top', rotation=90)
 
     # Customize the legend to color 'none' and 'other'
     bold_font = FontProperties(weight='bold')
