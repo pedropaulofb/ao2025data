@@ -1,4 +1,0 @@
-Frequency and Ubiquity: Constructs that appear frequently (high Total Frequency or Total Frequency per Group) and are widely distributed across groups (high Ubiquity Index).
-Centrality and Core Constructs: Constructs that have high co-occurrence with others (high Jaccard Similarity) and strong dependencies (high Mutual Information). These are core constructs that are central to many models.
-Diversity and Versatility: Constructs that have high Shannon Entropy (indicating they are used in a diverse range of contexts) and low Gini Coefficient (indicating they are evenly distributed across models).
-Dominance and Specificity: Constructs that are dominant in specific contexts or models (high Simpson’s Index) and may serve as specialized or niche constructs.

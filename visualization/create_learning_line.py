@@ -1,11 +1,14 @@
 import os
 
-import pandas as pd
-import networkx as nx
 import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+import pandas as pd
+import seaborn as sns
 from loguru import logger
 from matplotlib.colors import Normalize
-import seaborn as sns
+
+from src.create_figure_subdir import create_figures_subdir
 
 
 # Step 1: Read the matrix from the CSV file
@@ -14,10 +17,12 @@ def read_matrix(file_path):
     return df
 
 
-# Step 2: Find the highest value in the matrix
-def find_highest_value(df):
-    max_value = df.to_numpy().max()
-    return max_value
+# Step 2: Find the highest value based on the absolute value (module) of the items
+def find_highest_absolute_value(df):
+    max_value = df.to_numpy().max()  # This is your current code that finds the max value
+    # To find the highest value based on the absolute value (module):
+    max_value_by_module = np.abs(df.to_numpy()).max()  # Find the maximum of the absolute values
+    return max_value_by_module
 
 
 # Step 3: Find the element with the highest sum of all Ns
@@ -31,11 +36,11 @@ def find_highest_sum_element(df):
 def create_graph(df):
     G = nx.Graph()  # Create a new graph
 
-    # # Step 5A: Start with the element with the highest sum
-    # start_element = find_highest_sum_element(df)
+    # Step 5A: Start with the element with the highest sum
+    start_element = find_highest_sum_element(df)
 
-    # Step 5B: Select a starting element
-    start_element = 'kind'
+    # # Step 5B: Select a starting element
+    # start_element = 'kind'
 
     visited = set()  # To track visited elements
     visited.add(start_element)
@@ -65,15 +70,15 @@ def create_graph(df):
 
 
 # Step 6: Plot the graph with colored edges using seaborn
-def plot_graph(G):
+def create_learning_line(graph, file_path, metric_name):
     # Create a new figure and axis
     fig, ax = plt.subplots(figsize=(16, 9), tight_layout=True)  # Increased figure width for more space
 
-    pos = nx.circular_layout(G)
+    pos = nx.circular_layout(graph)
 
     # Get the edge weights to determine the coloring
-    edge_weights = nx.get_edge_attributes(G, 'weight')
-    edges = G.edges()
+    edge_weights = nx.get_edge_attributes(graph, 'weight')
+    edges = graph.edges()
 
     # Normalize the weights to [0,1] for color mapping
     weights = list(edge_weights.values())
@@ -86,10 +91,11 @@ def plot_graph(G):
     edge_colors = [palette(norm(weight)) for weight in weights]
 
     # Draw the graph with seaborn-styled colored edges
-    nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=2000, font_size=10, font_weight='bold', ax=ax)
+    nx.draw(graph, pos, with_labels=True, node_color='lightblue', node_size=2000, font_size=10, font_weight='bold',
+            ax=ax)
 
     # Draw edges with the corresponding colors
-    nx.draw_networkx_edges(G, pos, edgelist=edges, edge_color=edge_colors, width=2, ax=ax)
+    nx.draw_networkx_edges(graph, pos, edgelist=edges, edge_color=edge_colors, width=2, ax=ax)
 
     # Create a ScalarMappable for the colorbar
     sm = plt.cm.ScalarMappable(cmap=palette, norm=norm)
@@ -98,27 +104,28 @@ def plot_graph(G):
     # Add a colorbar to represent the weight values
     plt.colorbar(sm, ax=ax, label="Edge Weights")
 
+    formatted_metric_name = metric_name.replace('_', ' ').title()
+
     # Add the title to the plot
-    plt.title("Mutual Information Network of Key Elements", fontweight='bold')
+    plt.title(f"{formatted_metric_name} Network of Key Elements", fontweight='bold')
 
     plt.tight_layout()
-    fig_name = 'mutual_information_network.png'
-    fig.savefig(os.path.join(".", fig_name), dpi=300)
+    fig_name = f'mutual_information_network_{metric_name}.png'
+    save_dir = create_figures_subdir(file_path)
+    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved.")
     plt.close(fig)
 
 
-
 # Main function to run the script
-if __name__ == "__main__":
-    file_path = "../outputs/analyses/cs_analyses/mutual_information.csv"
+def execute_learning_line(file_path):
     df = read_matrix(file_path)
-    df.drop(columns=['other','none'], axis=1)
-
+    df.drop(columns=['other', 'none'], axis=1)
+    metric_name = os.path.splitext(os.path.basename(file_path))[0]
 
     # Find and print the highest value in the matrix
-    max_value = find_highest_value(df)
+    max_value = find_highest_absolute_value(df)
 
     # Create the graph and plot it
     graph = create_graph(df)
-    plot_graph(graph)
+    create_learning_line(graph, file_path, metric_name)

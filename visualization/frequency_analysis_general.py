@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from adjustText import adjust_text
 from loguru import logger
 from matplotlib.font_manager import FontProperties
 
@@ -10,7 +11,7 @@ from src.color_legend import color_text
 from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_frequency_analysis(file_path):
+def execute_visualization_frequency_analysis_general(file_path):
     df = pd.read_csv(file_path)
     save_dir = create_figures_subdir(file_path)
 
@@ -82,62 +83,7 @@ def execute_visualization_frequency_analysis(file_path):
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
 
-    ### 3) Scatter plot for Ubiquity Index vs. Total Frequency per Group
-
-    # Constructs in the top-right quadrant (high on both axes) are those that are not only frequently used in the models where they appear but are also used in many different models. These are likely the most "core" or "essential" constructs, which are both common and widely adopted by modelers.
-    # Constructs in the bottom-right quadrant (high "Total Frequency per Group" but low "Ubiquity Index") are used heavily when they do appear but only in a small number of models. This might suggest constructs with specialized or niche use cases.
-    # Constructs in the top-left quadrant (low "Total Frequency per Group" but high "Ubiquity Index") are used in many different models but not very frequently within each model. This could indicate constructs that are necessary for a broad range of models but are used sparingly.
-    # Constructs in the bottom-left quadrant (low on both axes) are used infrequently and in few models, potentially indicating constructs with limited relevance or applicability.
-
-    fig = plt.figure(figsize=(16, 9), tight_layout=True)
-
-    # Define the base colors for the plot (12 distinct colors)
-    base_palette = sns.color_palette('tab10', n_colors=12)
-
-    # Extend the palette to handle all 23 categories by repeating colors
-    extended_palette = base_palette + base_palette[:11]  # 12 colors + 11 more to make 23 total
-
-    # Define marker types (12 circles 'o' and 11 squares 's')
-    markers = ['o'] * 12 + ['s'] * 11
-
-    # Plotting the scatter plot with different colors and markers
-    for i, construct in enumerate(df['Construct'].unique()):
-        subset = df[df['Construct'] == construct]
-        plt.scatter(subset['Total Frequency per Group'], subset['Ubiquity Index (Group Frequency per Group)'],
-                    color=extended_palette[i], marker=markers[i], s=100, edgecolor='w', label=construct)
-
-    # Adding labels and title
-    plt.xlabel('Total Construct Frequency per Group')
-    plt.ylabel('Ubiquity Index (Diversity Across Models)')
-    plt.title('Construct Usage: Ubiquity Index vs. Total Frequency per Group', fontweight='bold')
-
-    # Calculate median values
-    median_y = df['Ubiquity Index (Group Frequency per Group)'].median()
-    median_x = df['Total Frequency per Group'].median()
-
-    # Adding a cross to separate the plot into four quadrants using the median
-    plt.axhline(y=median_y, color='black', linestyle='--', linewidth=1)
-    plt.axvline(x=median_x, color='black', linestyle='--', linewidth=1)
-
-    # Adding text for the median values at the extreme (highest values) parts of the lines
-    plt.text(df['Total Frequency per Group'].max(), median_y, f'median: {median_y:.2f}', color='gray', fontsize=10,
-             ha='right', va='bottom')
-    plt.text(median_x, df['Ubiquity Index (Group Frequency per Group)'].max(), f'median: {median_x:.2f}',
-             color='gray', fontsize=10, ha='right', va='top', rotation=90)
-
-    # Customize the legend to color 'none' and 'other'
-    bold_font = FontProperties(weight='bold')
-    legend = plt.legend(title='Constructs', title_fontproperties=bold_font, bbox_to_anchor=(1.02, 1), loc='upper left')
-
-    color_text(legend.get_texts())
-
-    plt.tight_layout()
-    fig_name = 'construct_usage_ubiquity_index_vs_total_frequency.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
-    plt.close(fig)
-
-    ### 4) Side-by-Side Donut Charts for Occurrence-wise and Group-wise Relative Frequencies with Colors and Dots Texture
+    ### 3) Side-by-Side Donut Charts for Occurrence-wise and Group-wise Relative Frequencies with Colors and Dots Texture
 
     # Calculate the percentages
     percent_occurrence = df['Global Relative Frequency (Occurrence-wise)'] * 100

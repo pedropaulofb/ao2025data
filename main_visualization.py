@@ -1,7 +1,9 @@
 from visualization.central_tendency_dispersion import execute_visualization_central_tendency_dispersion
 from visualization.coverage_percentage import execute_visualization_coverage_percentage
+from visualization.create_learning_line import execute_learning_line
 from visualization.diversity_measures import execute_visualization_diversity_measures
-from visualization.frequency_analysis import execute_visualization_frequency_analysis
+from visualization.frequency_analysis_general import execute_visualization_frequency_analysis_general
+from visualization.frequency_analysis_scatter import execute_visualization_frequency_analysis_scatter
 from visualization.hybrid_analyses import execute_visualization_mutual_info_vs_jaccard_similarity, \
     execute_visualization_simpson_diversity_vs_construct_frequency, \
     execute_visualization_mutual_information_vs_construct_rank, \
@@ -18,18 +20,19 @@ from visualization.spearman_correlation import execute_visualization_spearman_co
 
 def create_visualizations():
     # GROUPED ANALYSES
-
     execute_visualization_central_tendency_dispersion('./outputs/analyses/cs_analyses/central_tendency_dispersion.csv')
     execute_visualization_coverage_percentage('./outputs/analyses/cs_analyses/coverage_percentage.csv')
     execute_visualization_diversity_measures('./outputs/analyses/cs_analyses/diversity_measures.csv')
-    execute_visualization_frequency_analysis("./outputs/analyses/cs_analyses/frequency_analysis.csv")
+    execute_visualization_frequency_analysis_general("./outputs/analyses/cs_analyses/frequency_analysis.csv")
+    execute_visualization_frequency_analysis_scatter("./outputs/analyses/cs_analyses/frequency_analysis.csv")
     execute_visualization_mutual_information('./outputs/analyses/cs_analyses/mutual_information.csv')
     execute_visualization_rank_frequency_distribution("./outputs/analyses/cs_analyses/rank_frequency_distribution.csv")
     execute_visualization_similarity_measures('./outputs/analyses/cs_analyses/similarity_measures.csv')
     execute_visualization_spearman_correlation('./outputs/analyses/cs_analyses/spearman_correlation.csv')
-
-    # HYBRID ANALYSES
-
+    execute_learning_line('./outputs/analyses/cs_analyses/mutual_information.csv')
+    execute_learning_line('./outputs/analyses/cs_analyses/spearman_correlation.csv')
+    #
+    # # HYBRID ANALYSES
     execute_visualization_mutual_info_vs_jaccard_similarity('./outputs/analyses/cs_analyses/mutual_information.csv',
                                                             './outputs/analyses/cs_analyses/similarity_measures.csv')
     execute_visualization_mutual_information_vs_construct_rank(

@@ -1,6 +1,3 @@
-import ast
-
-
 def execute_visualization_mutual_info_vs_jaccard_similarity(file_path1, file_path2):
     # Load the data from the CSV files
     mutual_info_df = pd.read_csv(file_path1)
@@ -306,16 +303,7 @@ def execute_visualization_shannon_entropy_vs_group_frequency_constructs(file_pat
     plt.close(fig)
 
 
-import os
-
-import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
 from adjustText import adjust_text
-from loguru import logger
-
-from src.color_legend import color_text
-from src.create_figure_subdir import create_figures_subdir
 
 
 def execute_visualization_ubiquity_vs_gini_coefficient(file_path1, file_path2):
@@ -380,15 +368,7 @@ def execute_visualization_ubiquity_vs_gini_coefficient(file_path1, file_path2):
     plt.close(fig)
 
 
-import os
-
-import pandas as pd
-from loguru import logger
-from matplotlib import pyplot as plt
-import seaborn as sns
-
 from src.color_legend import color_text
-from src.create_figure_subdir import create_figures_subdir
 
 
 def execute_visualization_gini_coefficient_vs_global_frequency(file_path1, file_path2):
@@ -444,7 +424,6 @@ def execute_visualization_gini_coefficient_vs_global_frequency(file_path1, file_
     plt.text(x=gini_median, y=merged_data['Global Relative Frequency (Occurrence-wise)'].min(),
              s=f'Median Gini Coefficient: {gini_median:.2f}', color='grey', fontsize=10, va='bottom', ha='right',
              rotation=90)
-
 
     fig_name = 'gini_coefficient_vs_global_frequency.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
@@ -505,7 +484,6 @@ def execute_visualization_gini_coefficient_vs_group_frequency_constructs(file_pa
     plt.text(x=gini_median, y=merged_data['Group Frequency'].min(),
              s=f'Median Gini Coefficient: {gini_median:.2f}', color='grey', fontsize=10, va='bottom', ha='right',
              rotation=90)
-
 
     fig_name = 'gini_coefficient_vs_group_frequency_constructs.png'
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
@@ -608,4 +586,3 @@ def execute_visualization_mutual_info_vs_dice_coefficient(file_path1, file_path2
     fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
     plt.close(fig)
-
