@@ -47,8 +47,8 @@ def execute_visualization_mutual_information(file_path):
 
     # Drop duplicate pairs (e.g., both (A, B) and (B, A))
     df_long_network['Construct Pair'] = df_long_network.apply(
-        lambda row: tuple(sorted([row['Construct 1'], row['Construct 2']])),
-        axis=1)
+        lambda row: tuple(sorted([row['Construct 1'], row['Construct 2']])), axis=1
+    )
     df_long_network = df_long_network.drop_duplicates(subset='Construct Pair')
 
     # Select the N most mutual information values
@@ -63,12 +63,16 @@ def execute_visualization_mutual_information(file_path):
         # Create an empty graph
         G = nx.Graph()
 
-        # Add edges to the graph
+        # Add edges to the graph, making sure we only add each pair once
+        added_edges = set()  # A set to track which edges have already been added
         for _, row in data.iterrows():
-            G.add_edge(row['Construct 1'], row['Construct 2'], weight=row[metric_label])
+            edge = tuple(sorted([row['Construct 1'], row['Construct 2']]))
+            if edge not in added_edges:
+                G.add_edge(edge[0], edge[1], weight=row[metric_label])
+                added_edges.add(edge)
 
         # Draw the graph
-        pos = nx.circular_layout(G)  # Use spring layout for better visualization
+        pos = nx.circular_layout(G)  # Use circular layout for visualization
         weights = [G[u][v]['weight'] for u, v in G.edges()]
 
         # Create a figure and axis for the plot
