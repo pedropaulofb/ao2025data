@@ -3,7 +3,7 @@ import os
 from loguru import logger
 
 
-def create_figures_subdir(file_path):
+def create_figure_subdir(file_path):
     """
     Create a 'figures' subdirectory in the directory of the given file path if it doesn't already exist.
 

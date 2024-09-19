@@ -5,16 +5,9 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from icecream import ic
 from loguru import logger
 from matplotlib.colors import Normalize
-
-from src.create_figure_subdir import create_figures_subdir
-
-
-# Step 1: Read the matrix from the CSV file
-def read_matrix(file_path):
-    df = pd.read_csv(file_path, index_col=0)
-    return df
 
 
 # Step 2: Find the highest value based on the absolute value (module) of the items
@@ -36,41 +29,42 @@ def find_highest_sum_element(df):
 def create_graph(df):
     G = nx.Graph()  # Create a new graph
 
-    # Step 5A: Start with the element with the highest sum
     start_element = find_highest_sum_element(df)
-
-    # # Step 5B: Select a starting element
-    # start_element = 'kind'
+    if pd.isna(start_element):
+        logger.error("Starting element is NaN. Cannot create graph.")
+        return None
 
     visited = set()  # To track visited elements
     visited.add(start_element)
 
-    # Recursive function to find the highest related element and create nodes/edges
     def add_edges_from_element(current_element):
-        row_values = df.loc[current_element]  # Get the row for the current element
-        unvisited_neighbors = row_values[~row_values.index.isin(visited)]  # Filter unvisited elements
+        row_values = df.loc[current_element]
+        unvisited_neighbors = row_values[~row_values.index.isin(visited)]
 
-        if unvisited_neighbors.empty:
+        if unvisited_neighbors.empty or unvisited_neighbors.isna().all():
             return
 
-        # Find the highest value among unvisited neighbors
         next_element = unvisited_neighbors.idxmax()
+
+        if pd.isna(next_element):
+            return
+
         visited.add(next_element)
-
-        # Add edge to the graph
         G.add_edge(current_element, next_element, weight=row_values[next_element])
-
-        # Recursively proceed to the next element
         add_edges_from_element(next_element)
 
-    # Start the recursion
     add_edges_from_element(start_element)
+
+    if len(G.nodes) == 0:
+        logger.error("Graph has no nodes or edges.")
+        return None
 
     return G
 
 
+
 # Step 6: Plot the graph with colored edges using seaborn
-def create_learning_line(graph, file_path, metric_name):
+def create_learning_line(graph, file_path, out_dir_path,metric_name):
     # Create a new figure and axis
     fig, ax = plt.subplots(figsize=(16, 9), tight_layout=True)  # Increased figure width for more space
 
@@ -110,22 +104,25 @@ def create_learning_line(graph, file_path, metric_name):
     plt.title(f"{formatted_metric_name} Network of Key Elements", fontweight='bold')
 
     plt.tight_layout()
-    fig_name = f'mutual_information_network_{metric_name}.png'
-    save_dir = create_figures_subdir(file_path)
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved.")
+    fig_name = f'learning_line_{metric_name}.png'
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
 
 # Main function to run the script
-def execute_learning_line(file_path):
-    df = read_matrix(file_path)
-    df.drop(columns=['other', 'none'], axis=1)
-    metric_name = os.path.splitext(os.path.basename(file_path))[0]
+def execute_learning_line(in_dir_path, out_dir_path, file_name):
 
-    # Find and print the highest value in the matrix
-    max_value = find_highest_absolute_value(df)
+    file_path = os.path.join(in_dir_path, file_name)
+    df = pd.read_csv(file_path, index_col=0)
 
-    # Create the graph and plot it
+    # Create the graph
     graph = create_graph(df)
-    create_learning_line(graph, file_path, metric_name)
+
+    # Check if the graph is None or empty
+    if graph is None or len(graph.nodes) == 0:
+        logger.error(f"Graph creation failed or graph is empty for {file_path}. Skipping visualization.")
+        return
+
+    # Create the visualization
+    create_learning_line(graph, file_path, out_dir_path, file_name)

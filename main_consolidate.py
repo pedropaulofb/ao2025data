@@ -26,7 +26,8 @@ def consolidate_spo() -> None:
     logger.success(f"Successfully saved file: {output_file}")
 
 
-def consolidate_stereotypes_data(type:str, list_models: str, stereotypes_data_file_path: str, type_data_file_path: str, out_path: str) -> None:
+def consolidate_stereotypes_data(type: str, list_models: str, stereotypes_data_file_path: str, type_data_file_path: str,
+                                 out_path: str) -> None:
     # Dictionary to store ClassStereotypesData or RelationStereotypesData instances by model_id
     instances = {}
 
@@ -66,7 +67,6 @@ def consolidate_stereotypes_data(type:str, list_models: str, stereotypes_data_fi
     process_none(type_data_file_path, instances)
     write_stats_to_csv(instances, out_path)
     logger.success(f"Successfully saved file: {out_path}")
-
 
 
 # Function to process the second CSV file and calculate 'none' attribute

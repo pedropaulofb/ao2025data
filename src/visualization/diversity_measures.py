@@ -7,13 +7,11 @@ import seaborn as sns
 from loguru import logger
 
 from src.color_legend import color_text
-from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_diversity_measures(file_path):
+def execute_visualization_diversity_measures(in_dir_path, out_dir_path, file_path):
     # Read CSV file
-    df = pd.read_csv(file_path)
-    save_dir = create_figures_subdir(file_path)
+    df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
     # Prepare the data
     x = np.arange(len(df['Construct']))  # The label locations
@@ -52,8 +50,8 @@ def execute_visualization_diversity_measures(file_path):
     plt.tight_layout()
 
     fig_name = 'diversity_measures_comparison_across_constructs.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 2. Calculate Correlation Matrix
@@ -65,8 +63,8 @@ def execute_visualization_diversity_measures(file_path):
     plt.title('Heatmap of Correlations Among Diversity Measures', fontweight='bold')
 
     fig_name = 'correlation_heatmap_diversity_measures.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 3. Box Plot
@@ -94,8 +92,8 @@ def execute_visualization_diversity_measures(file_path):
     plt.tight_layout()
 
     fig_name = 'box_plot_variation_of_diversity_measures.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 4. Density Plot
@@ -120,6 +118,6 @@ def execute_visualization_diversity_measures(file_path):
     plt.tight_layout()
 
     fig_name = 'density_plot_of_diversity_measures.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)

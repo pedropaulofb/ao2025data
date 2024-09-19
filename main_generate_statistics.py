@@ -3,7 +3,6 @@ from itertools import combinations
 
 import numpy as np
 import pandas as pd
-from icecream import ic
 from loguru import logger
 from sklearn.metrics import mutual_info_score
 from sklearn.metrics.cluster import entropy
@@ -20,7 +19,7 @@ def save_to_csv(dataframe, filepath, message):
         logger.error(f"Failed to save {filepath}: {e}")
 
 
-def generate_statistics(input_data_file: str, output_folder: str, clean:bool) -> None:
+def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -> None:
     """
     Main function to generate statistical analysis of the consolidated data.
     """
@@ -34,10 +33,8 @@ def generate_statistics(input_data_file: str, output_folder: str, clean:bool) ->
     else:
         logger.info(f"Directory already exists: {output_folder}")
 
-
     # Read the CSV file into a pandas DataFrame
     df = pd.read_csv(input_data_file)
-
 
     # Validate the input data
     if df.empty:
@@ -45,7 +42,7 @@ def generate_statistics(input_data_file: str, output_folder: str, clean:bool) ->
         return
 
     if clean:
-        df = df.drop(columns=["other","none"])
+        df = df.drop(columns=["other", "none"])
 
     if len(df.columns) < 2:
         logger.error("Input CSV file does not have the expected columns. Exiting the program.")
@@ -298,8 +295,8 @@ if __name__ == "__main__":
     for data_file in data_files:
         analysis = os.path.splitext(data_file)[0]
         generate_statistics(os.path.join(data_dir, data_file),
-                            os.path.join("./outputs/statistics/",analysis+"_f/"),
+                            os.path.join("./outputs/statistics/", analysis + "_f/"),
                             False)
         generate_statistics(os.path.join(data_dir, data_file),
-                            os.path.join("./outputs/statistics/",analysis+"_t/"),
+                            os.path.join("./outputs/statistics/", analysis + "_t/"),
                             True)

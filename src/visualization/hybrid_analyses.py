@@ -1,8 +1,19 @@
-def execute_visualization_mutual_info_vs_jaccard_similarity(file_path1, file_path2):
+import ast
+import os
+
+import pandas as pd
+import seaborn as sns
+from adjustText import adjust_text
+from loguru import logger
+from matplotlib import pyplot as plt
+
+from src.color_legend import color_text
+
+
+def execute_visualization_mutual_info_vs_jaccard_similarity(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
-    mutual_info_df = pd.read_csv(file_path1)
-    similarity_measures_df = pd.read_csv(file_path2)
-    save_dir = create_figures_subdir(file_path1)
+    mutual_info_df = pd.read_csv(os.path.join(input_dir, file1_name))
+    similarity_measures_df = pd.read_csv(os.path.join(input_dir, file2_name))
 
     # Prepare a list for DataFrame creation
     pairs_data = {'Construct Pair': [], 'Jaccard Similarity': [], 'Mutual Information': []}
@@ -23,7 +34,7 @@ def execute_visualization_mutual_info_vs_jaccard_similarity(file_path1, file_pat
     pairs_df = pd.DataFrame(pairs_data)
 
     # Save the results to a CSV file
-    output_file_path = os.path.join(save_dir, 'construct_pairs_jaccard_similarity_info.csv')
+    output_file_path = os.path.join(output_dir, 'construct_pairs_jaccard_similarity_info.csv')
     pairs_df.to_csv(output_file_path, index=False)
     print(f"CSV file saved to {output_file_path}")
 
@@ -79,16 +90,15 @@ def execute_visualization_mutual_info_vs_jaccard_similarity(file_path1, file_pat
              rotation=90)
 
     fig_name = 'mutual_info_vs_jaccard_similarity.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
 
 
-def execute_visualization_simpson_diversity_vs_construct_frequency(file_path1, file_path2):
+def execute_visualization_simpson_diversity_vs_construct_frequency(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
-    diversity_measures = pd.read_csv(file_path1)
-    frequency_analysis = pd.read_csv(file_path2)
-    save_dir = create_figures_subdir(file_path1)
+    diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
+    frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
     # Merge the dataframes on the 'Construct' column
     merged_data = pd.merge(diversity_measures[['Construct', 'Simpson Index']],
@@ -141,16 +151,15 @@ def execute_visualization_simpson_diversity_vs_construct_frequency(file_path1, f
              rotation=90)
 
     fig_name = 'simpson_diversity_vs_construct_frequency.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
 
 
-def execute_visualization_mutual_information_vs_construct_rank(file_path1, file_path2):
+def execute_visualization_mutual_information_vs_construct_rank(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
-    rank_df = pd.read_csv(file_path1)
-    mutual_info_df = pd.read_csv(file_path2)
-    save_dir = create_figures_subdir(file_path1)
+    rank_df = pd.read_csv(os.path.join(input_dir, file1_name))
+    mutual_info_df = pd.read_csv(os.path.join(input_dir, file2_name))
 
     # Calculate the average mutual information for each construct
     mutual_info_avg = mutual_info_df.drop(columns='Construct').mean(axis=1)
@@ -178,16 +187,15 @@ def execute_visualization_mutual_information_vs_construct_rank(file_path1, file_
 
     # Show the plot
     fig_name = 'mutual_information_vs_construct_rank.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
 
 
-def execute_visualization_shannon_entropy_vs_global_frequency(file_path1, file_path2):
+def execute_visualization_shannon_entropy_vs_global_frequency(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
-    diversity_measures = pd.read_csv(file_path1)
-    frequency_analysis = pd.read_csv(file_path2)
-    save_dir = create_figures_subdir(file_path1)
+    diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
+    frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
     # Merge the dataframes on the 'Construct' column
     merged_data = pd.merge(diversity_measures[['Construct', 'Shannon Entropy']],
@@ -238,16 +246,15 @@ def execute_visualization_shannon_entropy_vs_global_frequency(file_path1, file_p
              rotation=90)
 
     fig_name = 'shannon_entropy_vs_global_frequency.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
 
 
-def execute_visualization_shannon_entropy_vs_group_frequency_constructs(file_path1, file_path2):
+def execute_visualization_shannon_entropy_vs_group_frequency_constructs(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
-    diversity_measures = pd.read_csv(file_path1)
-    frequency_analysis = pd.read_csv(file_path2)
-    save_dir = create_figures_subdir(file_path1)
+    diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
+    frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
     # Merge the dataframes on the 'Construct' column
     merged_data = pd.merge(diversity_measures[['Construct', 'Shannon Entropy']],
@@ -298,19 +305,15 @@ def execute_visualization_shannon_entropy_vs_group_frequency_constructs(file_pat
              rotation=90)
 
     fig_name = 'shannon_entropy_vs_group_frequency_constructs.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
 
 
-from adjustText import adjust_text
-
-
-def execute_visualization_ubiquity_vs_gini_coefficient(file_path1, file_path2):
+def execute_visualization_ubiquity_vs_gini_coefficient(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
-    diversity_measures = pd.read_csv(file_path1)
-    frequency_analysis = pd.read_csv(file_path2)
-    save_dir = create_figures_subdir(file_path1)
+    diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
+    frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
     # Merge the dataframes on the 'Construct' column
     merged_data = pd.merge(diversity_measures[['Construct', 'Gini Coefficient']],
@@ -363,19 +366,15 @@ def execute_visualization_ubiquity_vs_gini_coefficient(file_path1, file_path2):
              rotation=90)
 
     fig_name = 'ubiquity_vs_gini_coefficient.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
 
 
-from src.color_legend import color_text
-
-
-def execute_visualization_gini_coefficient_vs_global_frequency(file_path1, file_path2):
+def execute_visualization_gini_coefficient_vs_global_frequency(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
-    diversity_measures = pd.read_csv(file_path1)
-    frequency_analysis = pd.read_csv(file_path2)
-    save_dir = create_figures_subdir(file_path1)
+    diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
+    frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
     # Merge the dataframes on the 'Construct' column
     merged_data = pd.merge(diversity_measures[['Construct', 'Gini Coefficient']],
@@ -426,16 +425,15 @@ def execute_visualization_gini_coefficient_vs_global_frequency(file_path1, file_
              rotation=90)
 
     fig_name = 'gini_coefficient_vs_global_frequency.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
 
 
-def execute_visualization_gini_coefficient_vs_group_frequency_constructs(file_path1, file_path2):
+def execute_visualization_gini_coefficient_vs_group_frequency_constructs(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
-    diversity_measures = pd.read_csv(file_path1)
-    frequency_analysis = pd.read_csv(file_path2)
-    save_dir = create_figures_subdir(file_path1)
+    diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
+    frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
     # Merge the dataframes on the 'Construct' column
     merged_data = pd.merge(diversity_measures[['Construct', 'Gini Coefficient']],
@@ -481,32 +479,19 @@ def execute_visualization_gini_coefficient_vs_group_frequency_constructs(file_pa
     # Add annotations for the median lines
     plt.text(x=merged_data['Gini Coefficient'].min(), y=frequency_threshold,
              s=f'Median Group Frequency: {frequency_threshold:.2f}', color='grey', fontsize=10, va='bottom', ha='left')
-    plt.text(x=gini_median, y=merged_data['Group Frequency'].min(),
-             s=f'Median Gini Coefficient: {gini_median:.2f}', color='grey', fontsize=10, va='bottom', ha='right',
-             rotation=90)
+    plt.text(x=gini_median, y=merged_data['Group Frequency'].min(), s=f'Median Gini Coefficient: {gini_median:.2f}',
+             color='grey', fontsize=10, va='bottom', ha='right', rotation=90)
 
     fig_name = 'gini_coefficient_vs_group_frequency_constructs.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
 
 
-import ast
-import os
-
-import pandas as pd
-from loguru import logger
-from matplotlib import pyplot as plt
-import seaborn as sns
-
-from src.create_figure_subdir import create_figures_subdir
-
-
-def execute_visualization_mutual_info_vs_dice_coefficient(file_path1, file_path2):
+def execute_visualization_mutual_info_vs_dice_coefficient(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
-    mutual_info_df = pd.read_csv(file_path1)
-    similarity_measures_df = pd.read_csv(file_path2)
-    save_dir = create_figures_subdir(file_path1)
+    mutual_info_df = pd.read_csv(os.path.join(input_dir, file1_name))
+    similarity_measures_df = pd.read_csv(os.path.join(input_dir, file2_name))
 
     # Prepare a list for DataFrame creation
     pairs_data = {'Construct Pair': [], 'Dice Coefficient': [], 'Mutual Information': []}
@@ -527,7 +512,7 @@ def execute_visualization_mutual_info_vs_dice_coefficient(file_path1, file_path2
     pairs_df = pd.DataFrame(pairs_data)
 
     # Save the results to a CSV file
-    output_file_path = os.path.join(save_dir, 'construct_pairs_dice_similarity_info.csv')
+    output_file_path = os.path.join(output_dir, 'construct_pairs_dice_similarity_info.csv')
     pairs_df.to_csv(output_file_path, index=False)
     print(f"CSV file saved to {output_file_path}")
 
@@ -578,11 +563,10 @@ def execute_visualization_mutual_info_vs_dice_coefficient(file_path1, file_path2
     plt.text(x=max(pairs_df['Dice Coefficient']) / 2, y=mutual_info_median,
              s=f'Median Mutual Information: {mutual_info_median:.2f}', color='grey', fontsize=10, va='bottom',
              ha='left')
-    plt.text(x=dice_median, y=max(pairs_df['Mutual Information'] / 2),
-             s=f'Median Dice Coefficient: {dice_median:.2f}', color='grey', fontsize=10, va='bottom', ha='right',
-             rotation=90)
+    plt.text(x=dice_median, y=max(pairs_df['Mutual Information'] / 2), s=f'Median Dice Coefficient: {dice_median:.2f}',
+             color='grey', fontsize=10, va='bottom', ha='right', rotation=90)
 
     fig_name = 'mutual_info_vs_dice_coefficient.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)

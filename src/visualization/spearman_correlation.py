@@ -8,13 +8,11 @@ import seaborn as sns
 from loguru import logger
 
 from src.color_legend import color_text
-from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_spearman_correlation(file_path):
+def execute_visualization_spearman_correlation(in_dir_path, out_dir_path, file_path):
     # Read the CSV file into a DataFrame
-    df = pd.read_csv(file_path, index_col=0)
-    save_dir = create_figures_subdir(file_path)
+    df = pd.read_csv(os.path.join(in_dir_path, file_path), index_col=0)
 
     # 1. Heatmap
 
@@ -30,8 +28,8 @@ def execute_visualization_spearman_correlation(file_path):
     plt.xticks(rotation=45, ha='right')  # Adjust the rotation and alignment for x-axis labels
     plt.yticks(rotation=0)  # Adjust the rotation for y-axis labels
     fig_name = 'spearman_correlation_heatmap.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 2. Network Graph of Correlations
@@ -70,8 +68,8 @@ def execute_visualization_spearman_correlation(file_path):
         fig, ax = plt.subplots(figsize=(16, 9), tight_layout=True)
 
         # Draw nodes and edges
-        nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=2000, edge_color=weights,
-                edge_cmap=palette, width=3, edge_vmin=min(weights), edge_vmax=max(weights), ax=ax)
+        nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=2000, edge_color=weights, edge_cmap=palette,
+                width=3, edge_vmin=min(weights), edge_vmax=max(weights), ax=ax)
 
         # Add a color bar
         sm = plt.cm.ScalarMappable(cmap=palette, norm=plt.Normalize(vmin=min(weights), vmax=max(weights)))
@@ -80,8 +78,8 @@ def execute_visualization_spearman_correlation(file_path):
         cbar.set_label(metric_label)
 
         plt.title(title, fontweight='bold')
-        fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-        logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+        fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+        logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
         plt.close(fig)
 
     # Plot network for the N most positive Spearman Correlations
@@ -120,8 +118,8 @@ def execute_visualization_spearman_correlation(file_path):
     # Set x-axis ticks to be every 0.5 units
     plt.xticks(np.arange(0, construct_importance_sorted.max() + 0.5, 0.5))
     fig_name = 'construct_ranking_by_absolute_correlation.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 4. Box Plot
@@ -140,6 +138,6 @@ def execute_visualization_spearman_correlation(file_path):
     color_text(ax.get_xticklabels())
 
     fig_name = 'boxplot_spearman_correlations_by_construct.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)

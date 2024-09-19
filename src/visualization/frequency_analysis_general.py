@@ -3,17 +3,14 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from adjustText import adjust_text
 from loguru import logger
 from matplotlib.font_manager import FontProperties
 
 from src.color_legend import color_text
-from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_frequency_analysis_general(file_path):
-    df = pd.read_csv(file_path)
-    save_dir = create_figures_subdir(file_path)
+def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, file_path):
+    df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
     # Convert the 'Construct' column to a categorical type to ensure proper ordering in the plots
     df['Construct'] = pd.Categorical(df['Construct'], categories=df['Construct'].unique(), ordered=True)
@@ -48,8 +45,8 @@ def execute_visualization_frequency_analysis_general(file_path):
     fig.tight_layout()
 
     fig_name = 'total_frequency_vs_ubiquity_index_by_construct.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     ### 2) Side-by-Side Bar Chart with Double Axis for Total Frequency vs. Group Frequency
@@ -79,8 +76,8 @@ def execute_visualization_frequency_analysis_general(file_path):
     fig.tight_layout()
 
     fig_name = 'total_frequency_vs_group_frequency_across_constructs.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     ### 3) Side-by-Side Donut Charts for Occurrence-wise and Group-wise Relative Frequencies with Colors and Dots Texture
@@ -140,6 +137,6 @@ def execute_visualization_frequency_analysis_general(file_path):
 
     plt.tight_layout()
     fig_name = 'relative_frequency_of_constructs_by_occurrence_and_group_usage.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)

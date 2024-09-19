@@ -6,13 +6,11 @@ import seaborn as sns
 from loguru import logger
 
 from src.color_legend import color_text
-from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_rank_frequency_distribution(file_path):
+def execute_visualization_rank_frequency_distribution(in_dir_path, out_dir_path, file_path):
     # Load the CSV file into a DataFrame
-    data = pd.read_csv(file_path)
-    save_dir = create_figures_subdir(file_path)
+    data = pd.read_csv(os.path.join(in_dir_path, file_path))
 
     # Calculate the percentage frequency for the bar plot
     data['Percentage Frequency'] = (data['Frequency'] / data['Frequency'].sum()) * 100
@@ -44,6 +42,6 @@ def execute_visualization_rank_frequency_distribution(file_path):
     plt.grid(True)
     fig.tight_layout()  # Ensure everything fits within the figure
     fig_name = 'pareto_chart_construct_frequency_cumulative_percentage.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)

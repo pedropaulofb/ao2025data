@@ -6,13 +6,10 @@ import seaborn as sns
 from loguru import logger
 from matplotlib.ticker import MultipleLocator
 
-from src.create_figure_subdir import create_figures_subdir
 
-
-def execute_visualization_coverage_percentage(file_path):
+def execute_visualization_coverage_percentage(in_dir_path, out_dir_path, file_path):
     # Read the data from the CSV file
-    data = pd.read_csv(file_path)
-    save_dir = create_figures_subdir(file_path)
+    data = pd.read_csv(os.path.join(in_dir_path, file_path))
 
     # 1. Plot Line Chart for Coverage vs. Percentage
     fig = plt.figure(figsize=(16, 9), tight_layout=True)  # Set the figure size
@@ -40,6 +37,6 @@ def execute_visualization_coverage_percentage(file_path):
     plt.gca().xaxis.set_major_locator(MultipleLocator(10))  # Set major ticks at intervals of 10
 
     fig_name = 'coverage_vs_construct_percentage.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)

@@ -1,15 +1,15 @@
 import os
 import re
+from itertools import combinations
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-from itertools import combinations
 from adjustText import adjust_text
 from loguru import logger
 
 from src.color_legend import color_text
-from src.create_figure_subdir import create_figures_subdir
+
 
 # Function to format the metric name
 def format_metric_name(metric):
@@ -23,9 +23,8 @@ def format_metric_name(metric):
 
 
 # Function to create all possible scatter plots for the metric combinations
-def execute_visualization_frequency_analysis_scatter(file_path):
-    df = pd.read_csv(file_path)
-    save_dir = create_figures_subdir(file_path)
+def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, file_path):
+    df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
     # Convert the 'Construct' column to a categorical type to ensure proper ordering in the plots
     df['Construct'] = pd.Categorical(df['Construct'], categories=df['Construct'].unique(), ordered=True)
@@ -89,6 +88,6 @@ def execute_visualization_frequency_analysis_scatter(file_path):
 
         plt.tight_layout()
         fig_name = f'frequency_analysis_{formatted_x_metric}_vs_{formatted_y_metric}.png'
-        fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-        logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+        fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+        logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
         plt.close(fig)

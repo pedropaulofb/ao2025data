@@ -3,7 +3,6 @@ import os
 import pickle
 import time
 
-from icecream import ic
 from loguru import logger
 from ontouml_models_lib import Catalog, Query, OntologyDevelopmentContext
 from ontouml_models_lib.model import OntologyRepresentationStyle
@@ -32,7 +31,7 @@ def filter_models(models_to_filter, output_file_name) -> None:
 
     # Custom filtering to remove models without ONTOUML_STYLE in representationStyle
     filtered = [model for model in models_to_filter if
-        OntologyRepresentationStyle.ONTOUML_STYLE in model.representationStyle]
+                OntologyRepresentationStyle.ONTOUML_STYLE in model.representationStyle]
 
     # Custom filtering to remove models with just CLASSROOM as context
     filtered = [model for model in filtered if ((OntologyDevelopmentContext.RESEARCH in model.context) or (
@@ -59,7 +58,6 @@ def filter_models(models_to_filter, output_file_name) -> None:
 
 
 def query_filtered_models(models_to_query, output_dir_path):
-
     if isinstance(models_to_query, str):
         # Deserialize (unpickle) the object
         logger.info(f"Loading models from {models_to_query}.")
@@ -98,5 +96,6 @@ def generate_list_models(models_to_list, output_file_path):
 
 if __name__ == "__main__":
     # loaded_models = load_all_models("non_filtered_models")
-    filtered = filter_models("./outputs/loaded_models/ontouml_no_classroom.object.gz","loaded_models/ontouml_no_classroom_until_2017")
+    filtered = filter_models("./outputs/loaded_models/ontouml_no_classroom.object.gz",
+                             "loaded_models/ontouml_no_classroom_until_2017")
     query_filtered_models(filtered, "outputs/queries_results/ontouml_no_classroom_until_2017")

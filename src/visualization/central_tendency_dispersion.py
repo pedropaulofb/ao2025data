@@ -7,14 +7,12 @@ import seaborn as sns
 from loguru import logger
 
 from src.color_legend import color_text
-from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_central_tendency_dispersion(file_path):
+def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path, file_path):
     # Load the data from the CSV file
 
-    df = pd.read_csv(file_path)
-    save_dir = create_figures_subdir(file_path)
+    df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
     # Rename the columns for shorter labels
     df.rename(columns={'Standard Deviation': 'SD', '25th Percentile (Q1)': 'Q1', '75th Percentile (Q3)': 'Q3',
@@ -34,8 +32,8 @@ def execute_visualization_central_tendency_dispersion(file_path):
     plt.ylabel('Log-Scaled Values')
 
     fig_name = 'box_plot_mean_sd_variance_log_scale.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 2. Box Plot for Q1, Q3, and IQR
@@ -45,8 +43,8 @@ def execute_visualization_central_tendency_dispersion(file_path):
     plt.ylabel('Quartile Values')
 
     fig_name = 'box_plot_quartiles_interquartile_range.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 3. Heatmap of Correlation Between Measures
@@ -67,8 +65,8 @@ def execute_visualization_central_tendency_dispersion(file_path):
     plt.yticks(rotation=45)  # Tilt the y-axis labels by 45 degrees
 
     fig_name = 'heatmap_correlation_descriptive_statistics.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 4. Scatter Plot for Mean vs. Log_Variance with Regression Line
@@ -100,8 +98,8 @@ def execute_visualization_central_tendency_dispersion(file_path):
 
     plt.legend()  # Now, it should find the labeled elements
     fig_name = 'scatter_plot_mean_vs_log_transformed_variance.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 5. Scatter Plot with Regression Line for Skewness vs. Kurtosis
@@ -111,8 +109,8 @@ def execute_visualization_central_tendency_dispersion(file_path):
     plt.xlabel('Skewness')
     plt.ylabel('Kurtosis')
     fig_name = 'scatter_plot_skewness_vs_kurtosis_linear_regression.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 6. Bar Chart for Mean Values Across Constructs
@@ -151,8 +149,8 @@ def execute_visualization_central_tendency_dispersion(file_path):
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
     fig_name = 'bar_chart_mean_values_sd_error_bars.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 5. Plot for Distribution of Skewness and Kurtosis
@@ -196,8 +194,8 @@ def execute_visualization_central_tendency_dispersion(file_path):
 
     plt.tight_layout()
     fig_name = 'bar_line_plot_skewness_kurtosis_constructs.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 8. Density Plot for Skewness and Kurtosis
@@ -209,8 +207,8 @@ def execute_visualization_central_tendency_dispersion(file_path):
     plt.ylabel('Density')
     plt.legend()
     fig_name = 'density_distribution_skewness_kurtosis.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 9. Radar Charts
@@ -242,8 +240,8 @@ def execute_visualization_central_tendency_dispersion(file_path):
     plt.title('Radar Chart of Central Tendency Measures', fontweight='bold')
     plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
     fig_name = 'radar_chart_central_tendency_measures.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 9.2. Radar chart for Group 2: Variability and Spread
@@ -269,8 +267,8 @@ def execute_visualization_central_tendency_dispersion(file_path):
     plt.title('Radar Chart of Variability and Spread Measures', fontweight='bold')
     plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
     fig_name = 'radar_chart_variability_spread_measures.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 9.3. Radar chart for Group 3: Comprehensive Spread and Shape Analysis
@@ -296,6 +294,6 @@ def execute_visualization_central_tendency_dispersion(file_path):
     plt.title('Radar Chart of Comprehensive Spread and Shape Measures', fontweight='bold')
     plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
     fig_name = 'radar_chart_comprehensive_spread_shape_measures.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)

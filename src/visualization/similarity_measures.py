@@ -7,13 +7,11 @@ import seaborn as sns
 from loguru import logger
 
 from src.color_legend import color_text
-from src.create_figure_subdir import create_figures_subdir
 
 
-def execute_visualization_similarity_measures(file_path):
+def execute_visualization_similarity_measures(in_dir_path, out_dir_path, file_path):
     # Read data from the CSV file
-    df = pd.read_csv(file_path)
-    save_dir = create_figures_subdir(file_path)
+    df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
     # Extract constructs from the 'Construct Pair' column
     df['Construct 1'] = df['Construct Pair'].apply(lambda x: eval(x)[0])
@@ -46,8 +44,8 @@ def execute_visualization_similarity_measures(file_path):
 
     plt.title('Jaccard Similarity Heatmap for Construct Pairs', fontweight='bold')
     fig_name = 'heatmap_jaccard_similarity_construct_pairs.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 1.2) Heatmap for Dice Coefficient
@@ -75,8 +73,8 @@ def execute_visualization_similarity_measures(file_path):
 
     plt.title('Dice Coefficient Heatmap for Construct Pairs', fontweight='bold')
     fig_name = 'heatmap_dice_coefficient_construct_pairs.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     ### 2) Network Graph
@@ -117,8 +115,8 @@ def execute_visualization_similarity_measures(file_path):
         cbar.set_label(metric_label)
 
         plt.title(title, fontweight='bold')
-        fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-        logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+        fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+        logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
         plt.close(fig)
 
     # Plot network for Jaccard Similarity
@@ -147,8 +145,8 @@ def execute_visualization_similarity_measures(file_path):
     # Show the plot
     plt.tight_layout()
     fig_name = 'scatter_jaccard_vs_dice_similarity.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     # 4. Box Plot
@@ -174,8 +172,8 @@ def execute_visualization_similarity_measures(file_path):
     plt.grid(True)
     plt.tight_layout()
     fig_name = 'boxplot_jaccard_similarity_by_construct.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
@@ -191,6 +189,6 @@ def execute_visualization_similarity_measures(file_path):
     plt.grid(True)
     plt.tight_layout()
     fig_name = 'boxplot_dice_coefficient_by_construct.png'
-    fig.savefig(os.path.join(save_dir, fig_name), dpi=300)
-    logger.success(f"Figure {fig_name} successfully saved in {save_dir}.")
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
