@@ -6,6 +6,61 @@ from itertools import combinations
 from adjustText import adjust_text
 from loguru import logger
 
+import pandas as pd
+
+def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path):
+    # Calculate median values for moment A
+    median_y_A = df_A[y_metric].median()
+    median_x_A = df_A[x_metric].median()
+
+    # Calculate median values for moment B
+    median_y_B = df_B[y_metric].median()
+    median_x_B = df_B[x_metric].median()
+
+    # Function to determine the quadrant for a given point
+    def get_quadrant(x, y, median_x, median_y):
+        if x >= median_x and y >= median_y:
+            return 'Q1'  # Top right
+        elif x < median_x and y >= median_y:
+            return 'Q2'  # Top left
+        elif x < median_x and y < median_y:
+            return 'Q3'  # Bottom left
+        else:
+            return 'Q4'  # Bottom right
+
+    # Create a list to hold the results
+    results = []
+
+    # Iterate over each construct and determine its quadrant in A and B
+    for construct in df_A['Construct'].unique():
+        subset_A = df_A[df_A['Construct'] == construct]
+        subset_B = df_B[df_B['Construct'] == construct]
+
+        # Get the x and y values for this construct in moment A and B
+        x_A, y_A = subset_A[x_metric].values[0], subset_A[y_metric].values[0]
+        x_B, y_B = subset_B[x_metric].values[0], subset_B[y_metric].values[0]
+
+        # Determine quadrants for both moment A and B
+        quadrant_A = get_quadrant(x_A, y_A, median_x_A, median_y_A)
+        quadrant_B = get_quadrant(x_B, y_B, median_x_B, median_y_B)
+
+        # Append the results as a dictionary
+        results.append({
+            'construct': construct,
+            'quadrant_start': quadrant_A,
+            'quadrant_end': quadrant_B
+        })
+
+    # Convert results to DataFrame
+    results_df = pd.DataFrame(results)
+
+    # Save the results to a CSV file
+    output_file = os.path.join(out_dir_path, f'quadrant_analysis_{x_metric}_vs_{y_metric}.csv')
+    results_df.to_csv(output_file, index=False)
+
+    logger.success(f"Quadrant analysis saved to {output_file}.")
+
+
 
 def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
 
@@ -111,3 +166,5 @@ def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
         fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
         logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
         plt.close(fig)
+
+        calculate_quadrants(df_A, df_B, 'Total Frequency', 'Group Frequency', out_dir_path)
