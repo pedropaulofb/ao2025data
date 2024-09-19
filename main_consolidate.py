@@ -4,6 +4,7 @@ import pandas as pd
 from loguru import logger
 
 from src.ClassStereotypesData import ClassStereotypesData
+from src.RelationStereotypesData import RelationStereotypesData
 from src.SPOStats import SPOStats
 from src.generate_stats import read_csv_and_update_instances, write_stats_to_csv
 
@@ -25,11 +26,23 @@ def consolidate_spo() -> None:
     logger.success(f"Successfully saved file: {output_file}")
 
 
-def consolidate_stereotypes_data(stereotypes_data_file_path: str, type_data_file_path: str, out_path: str) -> None:
+def consolidate_stereotypes_data(type:str, list_models: str, stereotypes_data_file_path: str, type_data_file_path: str, out_path: str) -> None:
     # Dictionary to store ClassStereotypesData or RelationStereotypesData instances by model_id
     instances = {}
 
-    # Function to process the CSV file and create/update instances
+    # Step 1: Read the `list_models` file (assumed to be a text file) and create instances for each model_id
+    with open(list_models, 'r') as txtfile:
+        for line in txtfile:
+            model_id = line.strip()  # Strip any extra whitespace or newline characters
+            if type == 'class':
+                instances[model_id] = ClassStereotypesData(name=model_id)  # Initialize instances
+            elif type == 'relation':
+                instances[model_id] = RelationStereotypesData(name=model_id)  # Initialize instances
+            else:
+                logger.error("Unrecognized type.")
+                exit(1)
+
+    # Step 2: Read the CSV file and populate the already initialized instances
     with open(stereotypes_data_file_path, 'r') as csvfile:
         csvreader = csv.DictReader(csvfile)
 
@@ -38,22 +51,22 @@ def consolidate_stereotypes_data(stereotypes_data_file_path: str, type_data_file
             stereotype = row['stereotype']
             count = int(row['count'])
 
-            # Check if an instance already exists for this model_id
-            if model_id not in instances:
-                # Create a new instance if it doesn't exist
-                instances[model_id] = ClassStereotypesData(name=model_id)
-
-            # Update the appropriate attribute in the existing instance
-            if stereotype in instances[model_id].stats:
-                # If stereotype matches an attribute, update it
-                instances[model_id].stats[stereotype] = count
+            # Ensure the model_id exists in the `instances` dict (it should be pre-populated from list_models)
+            if model_id in instances:
+                if stereotype in instances[model_id].stats:
+                    # Update the existing stat if the stereotype matches an attribute
+                    instances[model_id].stats[stereotype] = count
+                else:
+                    # If stereotype does not match an attribute, sum the value to 'other'
+                    instances[model_id].stats['other'] += count
             else:
-                # If stereotype does not match, sum the value to 'other'
-                instances[model_id].stats['other'] += count
+                logger.warning(f"Model ID {model_id} from CSV not found in the list from {list_models}")
 
+    # Step 3: Process the type_data_file and write results to the output
     process_none(type_data_file_path, instances)
     write_stats_to_csv(instances, out_path)
     logger.success(f"Successfully saved file: {out_path}")
+
 
 
 # Function to process the second CSV file and calculate 'none' attribute
@@ -101,10 +114,13 @@ def filter_csv_by_headers(input_csv_path: str, output_csv_path: str, valid_heade
 
 
 if __name__ == "__main__":
-
-    consolidate_stereotypes_data("./outputs/queries_results/query_cs_consolidated.csv",
-                  "./outputs/queries_results/query_c_consolidated.csv", "./outputs/consolidated_cs.csv")
-    consolidate_stereotypes_data("./outputs/queries_results/query_rs_consolidated.csv",
-                  "./outputs/queries_results/query_r_consolidated.csv", "./outputs/consolidated_rs.csv")
-
-# TODO: If the number of groups is not 121, then I need to manually insert the missing ones for correct calculations.
+    consolidate_stereotypes_data("class",
+                                 "./outputs/loaded_models/ontouml_no_classroom.txt",
+                                 "./outputs/queries_results/ontouml_no_classroom/query_cs_consolidated.csv",
+                                 "./outputs/queries_results/ontouml_no_classroom/query_c_consolidated.csv",
+                                 "outputs/consolidated_data/cs_ontouml_no_classroom.csv")
+    consolidate_stereotypes_data("relation",
+                                 "./outputs/loaded_models/ontouml_no_classroom.txt",
+                                 "./outputs/queries_results/ontouml_no_classroom/query_rs_consolidated.csv",
+                                 "./outputs/queries_results/ontouml_no_classroom/query_r_consolidated.csv",
+                                 "outputs/consolidated_data/rs_ontouml_no_classroom.csv")

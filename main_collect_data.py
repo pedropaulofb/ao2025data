@@ -14,7 +14,7 @@ def load_all_models(output_file_name):
     catalog = Catalog("C:/Users/FavatoBarcelosPP/Dev/ontouml-models")
 
     # Save loaded models to a file
-    output_name = os.path.join("./outputs/", output_file_name + ".object")
+    output_name = os.path.join("./outputs/", output_file_name + ".object.gz")
     with gzip.open(output_name, "wb") as file:
         pickle.dump(catalog.models, file)
     logger.success(f"Loaded models successfully saved in {output_name}.")
@@ -38,12 +38,12 @@ def filter_models(models_to_filter, output_file_name) -> None:
     filtered = [model for model in filtered if ((OntologyDevelopmentContext.RESEARCH in model.context) or (
             OntologyDevelopmentContext.INDUSTRY in model.context))]
 
-    # # Normalizing modified date
-    # for model in filtered:
-    #     model.modified = model.issued if not model.modified else model.modified
-    #
-    # # Custom filtering to remove models modified from 2018 onwards
-    # filtered = [model for model in filtered if (model.issued > 2017) or (model.modified > 2017)]
+    # Normalizing modified date
+    for model in filtered:
+        model.modified = model.issued if not model.modified else model.modified
+
+    # Custom filtering to get models from 2018 onwards
+    filtered = [model for model in filtered if (model.issued <= 2017) and (model.modified <= 2017)]
 
     # Save filtered models to a file
 
@@ -97,14 +97,6 @@ def generate_list_models(models_to_list, output_file_path):
 
 
 if __name__ == "__main__":
-    # loaded_models = load_all_models("all_models")
-    # filter_models("./outputs/all_models.object", "models_ontouml_no-classroom")
-    # query_filtered_models("./outputs/ontouml_no-classroom.object", "outputs/queries_results/ontouml_no-classroom")
-    # query_filtered_models("./outputs/ontouml_no-classroom_after_2018.object",
-    #                       "outputs/queries_results/ontouml_no-classroom_after_2018")
-    # query_filtered_models("./outputs/ontouml_no-classroom_until_2017.object",
-    #                       "outputs/queries_results/ontouml_no-classroom_until_2017")
-
-    # generate_list_models("./outputs/loaded_models/ontouml_no-classroom_until_2017.object",
-    #                      "outputs/loaded_models/ontouml_no-classroom.object_until_2017.txt")
-    pass
+    # loaded_models = load_all_models("non_filtered_models")
+    filtered = filter_models("./outputs/loaded_models/ontouml_no_classroom.object.gz","loaded_models/ontouml_no_classroom_until_2017")
+    query_filtered_models(filtered, "outputs/queries_results/ontouml_no_classroom_until_2017")
