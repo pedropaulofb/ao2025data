@@ -1,7 +1,9 @@
+import os
 from itertools import combinations
 
 import numpy as np
 import pandas as pd
+from icecream import ic
 from loguru import logger
 from sklearn.metrics import mutual_info_score
 from sklearn.metrics.cluster import entropy
@@ -18,20 +20,32 @@ def save_to_csv(dataframe, filepath, message):
         logger.error(f"Failed to save {filepath}: {e}")
 
 
-def generate_statistics(input_data_file: str, output_folder: str) -> None:
+def generate_statistics(input_data_file: str, output_folder: str, clean:bool) -> None:
     """
     Main function to generate statistical analysis of the consolidated data.
     """
 
     logger.info(f"Generating statics for {input_data_file}")
 
+    # Create the directory to save if it does not exist
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+        logger.success(f"Created directory: {output_folder}")
+    else:
+        logger.info(f"Directory already exists: {output_folder}")
+
+
     # Read the CSV file into a pandas DataFrame
     df = pd.read_csv(input_data_file)
+
 
     # Validate the input data
     if df.empty:
         logger.error("Input CSV file is empty. Exiting the program.")
         return
+
+    if clean:
+        df = df.drop(columns=["other","none"])
 
     if len(df.columns) < 2:
         logger.error("Input CSV file does not have the expected columns. Exiting the program.")
@@ -276,9 +290,16 @@ def generate_statistics(input_data_file: str, output_folder: str) -> None:
 
 
 if __name__ == "__main__":
-    # generate_statistics('./outputs/consolidated_spo.csv', "./outputs/analyses/spo_analyses/")
-    generate_statistics('./outputs/consolidated_cs.csv', "./outputs/analyses/cs_analyses/")
-    # generate_statistics('./outputs/consolidated_rs.csv', "./outputs/analyses/rs_analyses/")
-    # generate_statistics('./outputs/consolidated_abs.csv', "./outputs/analyses/abs_analyses/")
+    data_dir = './outputs/consolidated_data'
 
-# TODO: Remove Simpson's Index
+    # Get a list of all files in the directory
+    data_files = [f for f in os.listdir(data_dir) if os.path.isfile(os.path.join(data_dir, f))]
+
+    for data_file in data_files:
+        analysis = os.path.splitext(data_file)[0]
+        generate_statistics(os.path.join(data_dir, data_file),
+                            os.path.join("./outputs/statistics/",analysis+"_f/"),
+                            False)
+        generate_statistics(os.path.join(data_dir, data_file),
+                            os.path.join("./outputs/statistics/",analysis+"_t/"),
+                            True)

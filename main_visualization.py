@@ -20,41 +20,41 @@ from src.visualization.spearman_correlation import execute_visualization_spearma
 
 def create_visualizations():
     # GROUPED ANALYSES
-    execute_visualization_central_tendency_dispersion('./outputs/analyses/cs_analyses/central_tendency_dispersion.csv')
-    execute_visualization_coverage_percentage('./outputs/analyses/cs_analyses/coverage_percentage.csv')
-    execute_visualization_diversity_measures('./outputs/analyses/cs_analyses/diversity_measures.csv')
-    execute_visualization_frequency_analysis_general("./outputs/analyses/cs_analyses/frequency_analysis.csv")
-    execute_visualization_frequency_analysis_scatter("./outputs/analyses/cs_analyses/frequency_analysis.csv")
-    execute_visualization_mutual_information('./outputs/analyses/cs_analyses/mutual_information.csv')
-    execute_visualization_rank_frequency_distribution("./outputs/analyses/cs_analyses/rank_frequency_distribution.csv")
-    execute_visualization_similarity_measures('./outputs/analyses/cs_analyses/similarity_measures.csv')
-    execute_visualization_spearman_correlation('./outputs/analyses/cs_analyses/spearman_correlation.csv')
-    execute_learning_line('./outputs/analyses/cs_analyses/mutual_information.csv')
-    execute_learning_line('./outputs/analyses/cs_analyses/spearman_correlation.csv')
+    execute_visualization_central_tendency_dispersion('outputs/statistics/cs_analyses/central_tendency_dispersion.csv')
+    execute_visualization_coverage_percentage('outputs/statistics/cs_analyses/coverage_percentage.csv')
+    execute_visualization_diversity_measures('outputs/statistics/cs_analyses/diversity_measures.csv')
+    execute_visualization_frequency_analysis_general("outputs/statistics/cs_analyses/frequency_analysis.csv")
+    execute_visualization_frequency_analysis_scatter("outputs/statistics/cs_analyses/frequency_analysis.csv")
+    execute_visualization_mutual_information('outputs/statistics/cs_analyses/mutual_information.csv')
+    execute_visualization_rank_frequency_distribution("outputs/statistics/cs_analyses/rank_frequency_distribution.csv")
+    execute_visualization_similarity_measures('outputs/statistics/cs_analyses/similarity_measures.csv')
+    execute_visualization_spearman_correlation('outputs/statistics/cs_analyses/spearman_correlation.csv')
+    execute_learning_line('outputs/statistics/cs_analyses/mutual_information.csv')
+    execute_learning_line('outputs/statistics/cs_analyses/spearman_correlation.csv')
     #
     # # HYBRID ANALYSES
-    execute_visualization_mutual_info_vs_jaccard_similarity('./outputs/analyses/cs_analyses/mutual_information.csv',
-                                                            './outputs/analyses/cs_analyses/similarity_measures.csv')
+    execute_visualization_mutual_info_vs_jaccard_similarity('outputs/statistics/cs_analyses/mutual_information.csv',
+                                                            'outputs/statistics/cs_analyses/similarity_measures.csv')
     execute_visualization_mutual_information_vs_construct_rank(
-        './outputs/analyses/cs_analyses/rank_frequency_distribution.csv',
-        './outputs/analyses/cs_analyses/mutual_information.csv')
-    execute_visualization_shannon_entropy_vs_global_frequency('./outputs/analyses/cs_analyses/diversity_measures.csv',
-                                                              './outputs/analyses/cs_analyses/frequency_analysis.csv')
+        'outputs/statistics/cs_analyses/rank_frequency_distribution.csv',
+        'outputs/statistics/cs_analyses/mutual_information.csv')
+    execute_visualization_shannon_entropy_vs_global_frequency('outputs/statistics/cs_analyses/diversity_measures.csv',
+                                                              'outputs/statistics/cs_analyses/frequency_analysis.csv')
     execute_visualization_shannon_entropy_vs_group_frequency_constructs(
-        './outputs/analyses/cs_analyses/diversity_measures.csv',
-        './outputs/analyses/cs_analyses/frequency_analysis.csv')
+        'outputs/statistics/cs_analyses/diversity_measures.csv',
+        'outputs/statistics/cs_analyses/frequency_analysis.csv')
     execute_visualization_simpson_diversity_vs_construct_frequency(
-        './outputs/analyses/cs_analyses/diversity_measures.csv',
-        './outputs/analyses/cs_analyses/frequency_analysis.csv')
-    execute_visualization_ubiquity_vs_gini_coefficient('./outputs/analyses/cs_analyses/diversity_measures.csv',
-                                                       './outputs/analyses/cs_analyses/frequency_analysis.csv')
-    execute_visualization_gini_coefficient_vs_global_frequency('./outputs/analyses/cs_analyses/diversity_measures.csv',
-                                                               './outputs/analyses/cs_analyses/frequency_analysis.csv')
+        'outputs/statistics/cs_analyses/diversity_measures.csv',
+        'outputs/statistics/cs_analyses/frequency_analysis.csv')
+    execute_visualization_ubiquity_vs_gini_coefficient('outputs/statistics/cs_analyses/diversity_measures.csv',
+                                                       'outputs/statistics/cs_analyses/frequency_analysis.csv')
+    execute_visualization_gini_coefficient_vs_global_frequency('outputs/statistics/cs_analyses/diversity_measures.csv',
+                                                               'outputs/statistics/cs_analyses/frequency_analysis.csv')
     execute_visualization_gini_coefficient_vs_group_frequency_constructs(
-        './outputs/analyses/cs_analyses/diversity_measures.csv',
-        './outputs/analyses/cs_analyses/frequency_analysis.csv')
-    execute_visualization_mutual_info_vs_dice_coefficient('./outputs/analyses/cs_analyses/mutual_information.csv',
-                                                          './outputs/analyses/cs_analyses/similarity_measures.csv')
+        'outputs/statistics/cs_analyses/diversity_measures.csv',
+        'outputs/statistics/cs_analyses/frequency_analysis.csv')
+    execute_visualization_mutual_info_vs_dice_coefficient('outputs/statistics/cs_analyses/mutual_information.csv',
+                                                          'outputs/statistics/cs_analyses/similarity_measures.csv')
 
 
 if __name__ == "__main__":

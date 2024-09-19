@@ -1,0 +1,20 @@
+Construct,Frequency,Rank,Cumulative Frequency,Cumulative Percentage
+mediation,1326,1,1326,55.434782608695656
+componentOf,318,2,1644,68.72909698996655
+material,298,3,1942,81.18729096989966
+characterization,158,4,2100,87.79264214046822
+memberOf,130,5,2230,93.22742474916387
+derivation,113,6,2343,97.95150501672241
+subCollectionOf,19,7,2362,98.7458193979933
+comparative,15,8,2377,99.37290969899666
+externalDependence,8,9,2385,99.70735785953178
+participation,4,10,2389,99.87458193979933
+subQuantityOf,3,11,2392,100.0
+bringsAbout,0,12,2392,100.0
+instantiation,0,13,2392,100.0
+historicalDependence,0,14,2392,100.0
+creation,0,15,2392,100.0
+manifestation,0,16,2392,100.0
+participational,0,17,2392,100.0
+termination,0,18,2392,100.0
+triggers,0,19,2392,100.0
