@@ -101,27 +101,10 @@ def filter_csv_by_headers(input_csv_path: str, output_csv_path: str, valid_heade
 
 
 if __name__ == "__main__":
-    consolidate_spo()
+
     consolidate_s("./outputs/queries_results/query_cs_consolidated.csv",
                   "./outputs/queries_results/query_c_consolidated.csv", "./outputs/consolidated_cs.csv")
     consolidate_s("./outputs/queries_results/query_rs_consolidated.csv",
                   "./outputs/queries_results/query_r_consolidated.csv", "./outputs/consolidated_rs.csv")
-
-    abs_list = ["abstract", "abstractNature", "aggregationKind", "attribute", "begin", "bringsAbout", "cardinality",
-                "Cardinality", "cardinalityValue", "categorizer", "category", "characterization", "Class", "collective",
-                "collectiveNature", "comparative", "componentOf", "composite", "creation", "datatype", "derivation",
-                "description", "end", "enumeration", "event", "eventNature", "externalDependence",
-                "extrinsicModeNature", "functionalComplexNature", "general", "generalization", "Generalization",
-                "GeneralizationSet", "historicalDependence", "historicalRole", "historicalRoleMixin", "instantiation",
-                "intrinsicModeNature", "isAbstract", "isComplete", "isDerived", "isDisjoint", "isExtensional",
-                "isOrdered", "isPowertype", "isReadOnly", "kind", "literal", "Literal", "lowerBound", "manifestation",
-                "material", "mediation", "memberOf", "mixin", "mode", "model", "name", "none", "Note", "order",
-                "participation", "participational", "phase", "phaseMixin", "property", "Property", "propertyType",
-                "quality", "qualityNature", "quantity", "quantityNature", "redefinesProperty", "Relation",
-                "relationEnd", "relator", "relatorNature", "restrictedTo", "role", "roleMixin", "shared", "situation",
-                "situationNature", "sourceEnd", "specific", "stereotype", "subCollectionOf", "subkind", "subQuantityOf",
-                "subsetsProperty", "targetEnd", "termination", "triggers", "type", "typeNature", "upperBound"]
-
-    filter_csv_by_headers("./outputs/consolidated_spo.csv", "outputs/consolidated_abs.csv", abs_list)
 
 # TODO: If the number of groups is not 121, then I need to manually insert the missing ones for correct calculations.
