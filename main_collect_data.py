@@ -1,3 +1,4 @@
+import gzip
 import os
 import pickle
 import time
@@ -14,7 +15,7 @@ def load_all_models(output_file_name):
 
     # Save loaded models to a file
     output_name = os.path.join("./outputs/", output_file_name + ".object")
-    with open(output_name, "wb") as file:
+    with gzip.open(output_name, "wb") as file:
         pickle.dump(catalog.models, file)
     logger.success(f"Loaded models successfully saved in {output_name}.")
 
@@ -25,7 +26,7 @@ def filter_models(models_to_filter, output_file_name) -> None:
     if isinstance(models_to_filter, str):
         # Deserialize (unpickle) the object
         logger.info(f"Loading models from {models_to_filter}.")
-        with open(models_to_filter, "rb") as file:
+        with gzip.open(models_to_filter, "rb") as file:
             models_to_filter = pickle.load(file)
         logger.success(f"Successfully loaded {len(models_to_filter)} models.")
 
@@ -45,8 +46,9 @@ def filter_models(models_to_filter, output_file_name) -> None:
     # filtered = [model for model in filtered if (model.issued > 2017) or (model.modified > 2017)]
 
     # Save filtered models to a file
-    output_name = os.path.join("./outputs/", output_file_name + ".object")
-    with open(output_name, "wb") as file:
+
+    output_name = os.path.join("./outputs/", output_file_name + ".object.gz")
+    with gzip.open(output_name, "wb") as file:
         pickle.dump(filtered, file)
     logger.success(f"{len(filtered)} filtered models successfully saved in {output_name}.")
 
@@ -61,7 +63,7 @@ def query_filtered_models(models_to_query, output_dir_path):
     if isinstance(models_to_query, str):
         # Deserialize (unpickle) the object
         logger.info(f"Loading models from {models_to_query}.")
-        with open(models_to_query, "rb") as file:
+        with gzip.open(models_to_query, "rb") as file:
             models_to_query = pickle.load(file)
         logger.success(f"Successfully loaded {len(models_to_query)} models.")
 
@@ -75,22 +77,23 @@ def query_filtered_models(models_to_query, output_dir_path):
         elapsed_time_ms = (end_time - start_time) * 1000
         logger.info(f"Query {query.name} took {elapsed_time_ms:.2f} ms to perform.")
 
-def generate_list_models(models_to_list,output_file_path):
 
+def generate_list_models(models_to_list, output_file_path):
     if isinstance(models_to_list, str):
         # Deserialize (unpickle) the object
         logger.info(f"Loading models from {models_to_list}.")
-        with open(models_to_list, "rb") as file:
-            loaded_models = pickle.load(file)
-        logger.success(f"Successfully loaded {len(loaded_models)} models.")
+        with gzip.open(models_to_list, "rb") as file:
+            models_to_list = pickle.load(file)
+        logger.success(f"Successfully loaded {len(models_to_list)} models.")
 
-    list_models_id = [models.id for models in loaded_models]
+    # Get the list of model IDs
+    list_models_id = [model.id for model in models_to_list]
 
     # Save the list of strings to a text file
     with open(output_file_path, "w") as file:
         for item in list_models_id:
             file.write(item + "\n")
-    logger.success(f"Successfully written {len(list_models_id)} models' ids in {output_file_path}.")
+    logger.success(f"Successfully written {len(list_models_id)} models' ids to {output_file_path}.")
 
 
 if __name__ == "__main__":
