@@ -3,7 +3,7 @@ import csv
 import pandas as pd
 from loguru import logger
 
-from src.CSStats import CSStats
+from src.ClassStereotypesData import ClassStereotypesData
 from src.SPOStats import SPOStats
 from src.generate_stats import read_csv_and_update_instances, write_stats_to_csv
 
@@ -25,12 +25,12 @@ def consolidate_spo() -> None:
     logger.success(f"Successfully saved file: {output_file}")
 
 
-def consolidate_s(specific_file_path: str, general_file_path: str, out_path: str) -> None:
-    # Dictionary to store CSStats instances by model_id
+def consolidate_stereotypes_data(stereotypes_data_file_path: str, type_data_file_path: str, out_path: str) -> None:
+    # Dictionary to store ClassStereotypesData or RelationStereotypesData instances by model_id
     instances = {}
 
     # Function to process the CSV file and create/update instances
-    with open(specific_file_path, 'r') as csvfile:
+    with open(stereotypes_data_file_path, 'r') as csvfile:
         csvreader = csv.DictReader(csvfile)
 
         for row in csvreader:
@@ -41,7 +41,7 @@ def consolidate_s(specific_file_path: str, general_file_path: str, out_path: str
             # Check if an instance already exists for this model_id
             if model_id not in instances:
                 # Create a new instance if it doesn't exist
-                instances[model_id] = CSStats(name=model_id)
+                instances[model_id] = ClassStereotypesData(name=model_id)
 
             # Update the appropriate attribute in the existing instance
             if stereotype in instances[model_id].stats:
@@ -51,7 +51,7 @@ def consolidate_s(specific_file_path: str, general_file_path: str, out_path: str
                 # If stereotype does not match, sum the value to 'other'
                 instances[model_id].stats['other'] += count
 
-    process_none(general_file_path, instances)
+    process_none(type_data_file_path, instances)
     write_stats_to_csv(instances, out_path)
     logger.success(f"Successfully saved file: {out_path}")
 
@@ -102,9 +102,9 @@ def filter_csv_by_headers(input_csv_path: str, output_csv_path: str, valid_heade
 
 if __name__ == "__main__":
 
-    consolidate_s("./outputs/queries_results/query_cs_consolidated.csv",
+    consolidate_stereotypes_data("./outputs/queries_results/query_cs_consolidated.csv",
                   "./outputs/queries_results/query_c_consolidated.csv", "./outputs/consolidated_cs.csv")
-    consolidate_s("./outputs/queries_results/query_rs_consolidated.csv",
+    consolidate_stereotypes_data("./outputs/queries_results/query_rs_consolidated.csv",
                   "./outputs/queries_results/query_r_consolidated.csv", "./outputs/consolidated_rs.csv")
 
 # TODO: If the number of groups is not 121, then I need to manually insert the missing ones for correct calculations.

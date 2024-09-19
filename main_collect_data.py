@@ -50,6 +50,9 @@ def filter_models(models_to_filter, output_file_name) -> None:
         pickle.dump(filtered, file)
     logger.success(f"{len(filtered)} filtered models successfully saved in {output_name}.")
 
+    output_list = os.path.join("./outputs/", output_file_name + ".txt")
+    generate_list_models(filtered, output_list)
+
     return filtered
 
 
@@ -72,13 +75,33 @@ def query_filtered_models(models_to_query, output_dir_path):
         elapsed_time_ms = (end_time - start_time) * 1000
         logger.info(f"Query {query.name} took {elapsed_time_ms:.2f} ms to perform.")
 
+def generate_list_models(models_to_list,output_file_path):
+
+    if isinstance(models_to_list, str):
+        # Deserialize (unpickle) the object
+        logger.info(f"Loading models from {models_to_list}.")
+        with open(models_to_list, "rb") as file:
+            loaded_models = pickle.load(file)
+        logger.success(f"Successfully loaded {len(loaded_models)} models.")
+
+    list_models_id = [models.id for models in loaded_models]
+
+    # Save the list of strings to a text file
+    with open(output_file_path, "w") as file:
+        for item in list_models_id:
+            file.write(item + "\n")
+    logger.success(f"Successfully written {len(list_models_id)} models' ids in {output_file_path}.")
+
 
 if __name__ == "__main__":
     # loaded_models = load_all_models("all_models")
     # filter_models("./outputs/all_models.object", "models_ontouml_no-classroom")
-    query_filtered_models("./outputs/ontouml_no-classroom.object", "outputs/queries_results/ontouml_no-classroom")
-    query_filtered_models("./outputs/ontouml_no-classroom_after_2018.object",
-                          "outputs/queries_results/ontouml_no-classroom_after_2018")
-    query_filtered_models("./outputs/ontouml_no-classroom_until_2017.object",
-                          "outputs/queries_results/ontouml_no-classroom_until_2017")
+    # query_filtered_models("./outputs/ontouml_no-classroom.object", "outputs/queries_results/ontouml_no-classroom")
+    # query_filtered_models("./outputs/ontouml_no-classroom_after_2018.object",
+    #                       "outputs/queries_results/ontouml_no-classroom_after_2018")
+    # query_filtered_models("./outputs/ontouml_no-classroom_until_2017.object",
+    #                       "outputs/queries_results/ontouml_no-classroom_until_2017")
 
+    # generate_list_models("./outputs/loaded_models/ontouml_no-classroom_until_2017.object",
+    #                      "outputs/loaded_models/ontouml_no-classroom.object_until_2017.txt")
+    pass

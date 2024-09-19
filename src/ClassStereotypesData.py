@@ -1,4 +1,4 @@
-class CSStats:
+class ClassStereotypesData:
     def __init__(self, name: str, **kwargs: int) -> None:
         """
         Initialize a SPOStats instance with a name and optional attributes.
