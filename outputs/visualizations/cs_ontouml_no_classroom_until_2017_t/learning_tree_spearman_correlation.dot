@@ -1,0 +1,38 @@
+strict digraph  {
+label="Learning Tree";
+labelloc=t;
+labeljust=c;
+kind;
+subkind;
+role;
+category;
+mode;
+roleMixin;
+type;
+mixin;
+relator;
+phase;
+quantity;
+enumeration;
+quality;
+situation;
+event;
+datatype;
+collective;
+kind -> subkind;
+kind -> role;
+subkind -> category;
+category -> mode;
+category -> roleMixin;
+category -> type;
+category -> mixin;
+category -> relator;
+roleMixin -> phase;
+mixin -> quantity;
+quantity -> enumeration;
+enumeration -> quality;
+quality -> situation;
+situation -> event;
+situation -> datatype;
+event -> collective;
+}

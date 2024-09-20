@@ -3,6 +3,7 @@ import os
 from loguru import logger
 
 from src.visualization.learning_line import execute_learning_line
+from src.visualization.learning_tree import execute_learning_tree
 
 
 def create_visualizations(input_dir: str):
@@ -27,10 +28,35 @@ def create_visualizations(input_dir: str):
     # execute_visualization_rank_frequency_distribution_group(input_dir, output_dir, "rank_groupwise_frequency_distribution.csv")
     # execute_visualization_similarity_measures(input_dir, output_dir, 'similarity_measures.csv')
     # execute_visualization_spearman_correlation(input_dir, output_dir, 'spearman_correlation.csv')
-    execute_learning_line(input_dir, output_dir, 'mutual_information.csv')
-    execute_learning_line(input_dir, output_dir, 'spearman_correlation.csv')
+    # execute_learning_line(input_dir, output_dir, 'mutual_information.csv')
+    # execute_learning_line(input_dir, output_dir, 'spearman_correlation.csv')
+    execute_learning_tree(input_dir, output_dir, 'mutual_information.csv')
+    execute_learning_tree(input_dir, output_dir, 'spearman_correlation.csv')
 
-    # HYBRID ANALYSES  # execute_visualization_mutual_info_vs_jaccard_similarity(input_dir, output_dir, 'mutual_information.csv',  #                                                         'similarity_measures.csv')  # execute_visualization_mutual_information_vs_construct_rank(input_dir, output_dir, 'rank_frequency_distribution.csv',  #                                                            'mutual_information.csv')  # execute_visualization_shannon_entropy_vs_global_frequency(input_dir, output_dir, 'diversity_measures.csv',  #                                                           'frequency_analysis.csv')  # execute_visualization_shannon_entropy_vs_group_frequency_constructs(input_dir, output_dir, 'diversity_measures.csv',  #                                                                     'frequency_analysis.csv')  # execute_visualization_simpson_diversity_vs_construct_frequency(input_dir, output_dir, 'diversity_measures.csv',  #                                                                'frequency_analysis.csv')  # execute_visualization_ubiquity_vs_gini_coefficient(input_dir, output_dir, 'diversity_measures.csv',  #                                                    'frequency_analysis.csv')  # execute_visualization_gini_coefficient_vs_global_frequency(input_dir, output_dir, 'diversity_measures.csv',  #                                                            'frequency_analysis.csv')  # execute_visualization_gini_coefficient_vs_group_frequency_constructs(input_dir, output_dir,  #                                                                      'diversity_measures.csv',  #                                                                      'frequency_analysis.csv')  # execute_visualization_mutual_info_vs_dice_coefficient(input_dir, output_dir, 'mutual_information.csv',  #                                                       'similarity_measures.csv')  # execute_visualization_coverage_percentage_all(input_dir, output_dir, 'coverage_percentage_occurrence.csv',  #                                                       'coverage_percentage_group.csv')  # execute_visualization_pareto_combined(input_dir, output_dir, 'rank_frequency_distribution.csv','rank_groupwise_frequency_distribution.csv')
+    # HYBRID ANALYSES  
+    # 
+    # execute_visualization_mutual_info_vs_jaccard_similarity(input_dir, output_dir, 'mutual_information.csv',
+    #                                                         'similarity_measures.csv')
+    # execute_visualization_mutual_information_vs_construct_rank(input_dir, output_dir, 'rank_frequency_distribution.csv',
+    #                                                            'mutual_information.csv')
+    # execute_visualization_shannon_entropy_vs_global_frequency(input_dir, output_dir, 'diversity_measures.csv',
+    #                                                           'frequency_analysis.csv')
+    # execute_visualization_shannon_entropy_vs_group_frequency_constructs(input_dir, output_dir, 'diversity_measures.csv',
+    #                                                                     'frequency_analysis.csv')
+    # execute_visualization_simpson_diversity_vs_construct_frequency(input_dir, output_dir, 'diversity_measures.csv',
+    #                                                                'frequency_analysis.csv')
+    # execute_visualization_ubiquity_vs_gini_coefficient(input_dir, output_dir, 'diversity_measures.csv',
+    #                                                    'frequency_analysis.csv')
+    # execute_visualization_gini_coefficient_vs_global_frequency(input_dir, output_dir, 'diversity_measures.csv',
+    #                                                            'frequency_analysis.csv')
+    # execute_visualization_gini_coefficient_vs_group_frequency_constructs(input_dir, output_dir,
+    #                                                                      'diversity_measures.csv',
+    #                                                                      'frequency_analysis.csv')
+    # execute_visualization_mutual_info_vs_dice_coefficient(input_dir, output_dir, 'mutual_information.csv',
+    #                                                       'similarity_measures.csv')
+    # execute_visualization_coverage_percentage_all(input_dir, output_dir, 'coverage_percentage_occurrence.csv',
+    #                                                       'coverage_percentage_group.csv')
+    # execute_visualization_pareto_combined(input_dir, output_dir, 'rank_frequency_distribution.csv','rank_groupwise_frequency_distribution.csv')
 
 
 def get_subdirectories(directory):
