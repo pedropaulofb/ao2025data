@@ -7,7 +7,7 @@ from loguru import logger
 from matplotlib.ticker import MultipleLocator
 
 
-def execute_visualization_coverage_percentage(in_dir_path, out_dir_path, file_path):
+def execute_visualization_coverage_percentage_occurrence(in_dir_path, out_dir_path, file_path):
     # Read the data from the CSV file
     data = pd.read_csv(os.path.join(in_dir_path, file_path))
 

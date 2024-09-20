@@ -8,7 +8,7 @@ from loguru import logger
 from src.color_legend import color_text
 
 
-def execute_visualization_rank_frequency_distribution(in_dir_path, out_dir_path, file_path):
+def execute_visualization_rank_frequency_distribution_occurrence(in_dir_path, out_dir_path, file_path):
     # Load the CSV file into a DataFrame
     data = pd.read_csv(os.path.join(in_dir_path, file_path))
 

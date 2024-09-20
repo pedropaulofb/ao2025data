@@ -92,6 +92,8 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
 
     # 2. Rank-Frequency Distribution with Cumulative Frequency and Percentage
 
+    # 2.1 Occurrence-wise
+
     # Calculate the total frequency of each construct (already computed earlier)
     total_frequency_sorted = total_frequency.sort_values(ascending=False)
 
@@ -112,6 +114,31 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
     # Save the rank-frequency, cumulative frequency, and cumulative percentage data to a single CSV file
     save_to_csv(rank_frequency_df, output_folder + 'rank_frequency_distribution.csv',
                 "Rank-Frequency, Cumulative Frequency, and Cumulative Percentage data saved to CSV.")
+
+    # 2.2 Group-wise
+
+    # Sort the group-wise frequency in descending order
+    group_frequency_sorted = group_frequency.sort_values(ascending=False)
+
+    # Calculate the total number of groups with non-zero occurrences
+    total_group_occurrences = group_frequency_sorted.sum()
+
+    # Create a DataFrame for rank and group-wise frequency
+    rank_groupwise_frequency_df = pd.DataFrame(
+        {'Construct': group_frequency_sorted.index, 'Group-wise Frequency': group_frequency_sorted.values,
+         'Group-wise Rank': range(1, len(group_frequency_sorted) + 1)})
+
+    # Calculate the cumulative group-wise frequency
+    rank_groupwise_frequency_df['Cumulative Group-wise Frequency'] = rank_groupwise_frequency_df[
+        'Group-wise Frequency'].cumsum()
+
+    # Calculate the cumulative percentage (group-wise)
+    rank_groupwise_frequency_df['Group-wise Cumulative Percentage'] = (rank_groupwise_frequency_df[
+                                                                           'Cumulative Group-wise Frequency'] / total_group_occurrences) * 100
+
+    # Save the rank-frequency, cumulative frequency, and cumulative percentage data (group-wise) to a single CSV file
+    save_to_csv(rank_groupwise_frequency_df, output_folder + 'rank_groupwise_frequency_distribution.csv',
+                "Rank-Frequency (Group-wise), Cumulative Frequency, and Cumulative Percentage (Group-wise) data saved to CSV.")
 
     # 3. Diversity and Distribution Measures
 
@@ -190,6 +217,8 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
 
     # 5. Coverage Measure
 
+    # 5.1 Occurrence-wise
+
     # Coverage of Top Percentage of Constructs
     percentages = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00]  # Define percentages
     total_constructs = len(total_frequency)  # Total number of constructs
@@ -208,8 +237,33 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
     coverage_df = pd.DataFrame(coverage_list)
 
     # Save the coverage data to a CSV file
-    save_to_csv(coverage_df, output_folder + 'coverage_percentage.csv',
+    save_to_csv(coverage_df, output_folder + 'coverage_percentage_occurrence.csv',
                 "Coverage of Top Percentage of Constructs saved to CSV.")
+
+    # 5.2 Group-wise
+
+    # Coverage of Top Percentage of Constructs (Group-wise)
+    percentages = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00]  # Define percentages
+    total_constructs_groupwise = len(group_frequency)  # Total number of constructs (group-wise)
+    total_groupwise_occurrences = group_frequency.sum()  # Total non-zero occurrences across groups
+
+    # List to store group-wise coverage results
+    groupwise_coverage_list = []
+
+    for pct in percentages:
+        k = int(total_constructs_groupwise * pct)  # Calculate number of top constructs for the given percentage
+        top_k_constructs_groupwise = group_frequency.sort_values(ascending=False).head(
+            k)  # Get top k constructs by group-wise frequency
+        coverage_top_k_groupwise = top_k_constructs_groupwise.sum() / total_groupwise_occurrences  # Calculate group-wise coverage
+        groupwise_coverage_list.append(
+            {'Percentage': pct * 100, 'Top k Constructs': k, 'Coverage': coverage_top_k_groupwise})
+
+    # Convert the list to a DataFrame
+    groupwise_coverage_df = pd.DataFrame(groupwise_coverage_list)
+
+    # Save the group-wise coverage data to a CSV file
+    save_to_csv(groupwise_coverage_df, output_folder + 'coverage_percentage_group.csv',
+                "Group-wise Coverage of Top Percentage of Constructs saved to CSV.")
 
     # 6. Similarity Measures
 

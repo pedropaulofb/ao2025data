@@ -6,6 +6,7 @@ import seaborn as sns
 from adjustText import adjust_text
 from loguru import logger
 from matplotlib import pyplot as plt
+from matplotlib.ticker import MultipleLocator
 
 from src.color_legend import color_text
 
@@ -569,4 +570,115 @@ def execute_visualization_mutual_info_vs_dice_coefficient(input_dir, output_dir,
     fig_name = 'mutual_info_vs_dice_coefficient.png'
     fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
+    plt.close(fig)
+
+
+def execute_visualization_coverage_percentage_all(in_dir_path, out_dir_path, file_path_occurrence, file_path_group):
+    # Read the data from the CSV files
+    data_occurrence = pd.read_csv(os.path.join(in_dir_path, file_path_occurrence))
+    data_groupwise = pd.read_csv(os.path.join(in_dir_path, file_path_group))
+
+    # 1. Plot Line Chart for Coverage vs. Percentage (Occurrence-wise and Group-wise)
+    fig = plt.figure(figsize=(16, 9), tight_layout=True)  # Set the figure size
+
+    # Plot occurrence-wise data
+    sns.lineplot(data=data_occurrence, x='Percentage', y='Coverage', marker='o', label='Occurrence-wise Coverage',
+                 color='blue')
+
+    # Plot group-wise data
+    sns.lineplot(data=data_groupwise, x='Percentage', y='Coverage', marker='o', label='Group-wise Coverage',
+                 color='green')
+
+    # Improved title and labels
+    plt.title('Coverage vs. Top Percentages of Constructs (Occurrence-wise and Group-wise)', fontsize=14,
+              fontweight='bold')
+    plt.xlabel('Percentage of Constructs Considered (%)', fontsize=12)
+    plt.ylabel('Coverage of Construct Occurrences', fontsize=12)
+
+    # Add annotations for each point (occurrence-wise)
+    for i in range(len(data_occurrence)):
+        plt.text(data_occurrence['Percentage'][i] + 1,  # Slightly adjust the x position (move to the right)
+                 data_occurrence['Coverage'][i] + 0.015,  # Slightly adjust the y position (move upwards)
+            f"k={data_occurrence['Top k Constructs'][i]}", fontsize=10, color='blue', ha='right'  # Horizontal alignment
+        )
+
+    # Add annotations for each point (group-wise)
+    for i in range(len(data_groupwise)):
+        plt.text(data_groupwise['Percentage'][i] + 1,  # Slightly adjust the x position (move to the right)
+                 data_groupwise['Coverage'][i] + 0.015,  # Slightly adjust the y position (move upwards)
+            f"k={data_groupwise['Top k Constructs'][i]}", fontsize=10, color='green', ha='right'  # Horizontal alignment
+        )
+
+    # Additional formatting
+    plt.xticks(fontsize=10)
+    plt.yticks(fontsize=10)
+    plt.grid(True)  # Add a grid for better readability
+    plt.gca().xaxis.set_major_locator(MultipleLocator(10))  # Set major ticks at intervals of 10
+
+    # Add a legend to distinguish between occurrence-wise and group-wise
+    plt.legend(loc='upper left')
+
+    # Save the combined coverage plot
+    fig_name = 'coverage_vs_construct_percentage_all.png'
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
+    plt.close(fig)
+
+
+def execute_visualization_pareto_combined(in_dir_path, out_dir_path, file_path_occurrence,
+                                                          file_path_group):
+    # Load the CSV files into DataFrames
+    data_occurrence = pd.read_csv(os.path.join(in_dir_path, file_path_occurrence))
+    data_groupwise = pd.read_csv(os.path.join(in_dir_path, file_path_group))
+
+    # Calculate the percentage frequency for both occurrence-wise and group-wise data
+    data_occurrence['Percentage Frequency'] = (data_occurrence['Frequency'] / data_occurrence['Frequency'].sum()) * 100
+    data_groupwise['Percentage Group-wise Frequency'] = (data_groupwise['Group-wise Frequency'] / data_groupwise[
+        'Group-wise Frequency'].sum()) * 100
+
+    # Calculate the cumulative percentage for both occurrence-wise and group-wise data
+    data_occurrence['Cumulative Percentage'] = data_occurrence['Percentage Frequency'].cumsum()
+    data_groupwise['Group-wise Cumulative Percentage'] = data_groupwise['Percentage Group-wise Frequency'].cumsum()
+
+    # Create the plot
+    fig, ax1 = plt.subplots(figsize=(16, 9), tight_layout=True)
+
+    # Bar plot for occurrence-wise frequency
+    bar_width = 0.4
+    ax1.bar(data_occurrence['Construct'], data_occurrence['Percentage Frequency'], width=bar_width,
+            label='Occurrence-wise Frequency', align='center', color='skyblue')
+
+    # Bar plot for group-wise frequency (shifted to the right)
+    ax1.bar(data_groupwise['Construct'], data_groupwise['Percentage Group-wise Frequency'], width=bar_width,
+            label='Group-wise Frequency', align='edge', color='lightgreen')
+
+    # Set labels and title
+    ax1.set_xlabel('Construct', fontsize=12)
+    ax1.set_ylabel('Relative Frequency (%)', fontsize=12)
+    ax1.set_title('Pareto Chart: Occurrence-wise and Group-wise Construct Frequencies', fontweight='bold', fontsize=14)
+
+    # Rotate the labels by 90 degrees for better readability
+    ax1.tick_params(axis='x', rotation=90)
+
+    # Line plot for occurrence-wise cumulative percentage
+    ax2 = ax1.twinx()  # Create a second y-axis
+    ax2.plot(range(len(data_occurrence)), data_occurrence['Cumulative Percentage'], color='blue', marker='o',
+             label='Occurrence-wise Cumulative', linestyle='-', linewidth=2)
+
+    # Line plot for group-wise cumulative percentage
+    ax2.plot(range(len(data_groupwise)), data_groupwise['Group-wise Cumulative Percentage'], color='green', marker='o',
+             label='Group-wise Cumulative', linestyle='-', linewidth=2)
+
+    # Set the y-axis label and ticks for the cumulative percentage
+    ax2.set_ylabel('Cumulative Percentage (%)', fontsize=12)
+    ax2.set_yticks(range(0, 101, 10))
+
+    # Add legends
+    ax1.legend(loc='upper left')
+    ax2.legend(loc='upper right')
+
+    # Save the plot
+    fig_name = 'pareto_combined_occurrence_groupwise_rank_frequency.png'
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)

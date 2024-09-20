@@ -1,0 +1,22 @@
+Construct,Group-wise Frequency,Group-wise Rank,Cumulative Group-wise Frequency,Group-wise Cumulative Percentage
+none,24,1,24,19.672131147540984
+material,16,2,40,32.78688524590164
+mediation,15,3,55,45.08196721311475
+other,14,4,69,56.557377049180324
+componentOf,13,5,82,67.21311475409836
+characterization,11,6,93,76.22950819672131
+memberOf,10,7,103,84.42622950819673
+derivation,9,8,112,91.80327868852459
+subCollectionOf,4,9,116,95.08196721311475
+subQuantityOf,2,10,118,96.72131147540983
+externalDependence,2,11,120,98.36065573770492
+comparative,1,12,121,99.18032786885246
+participation,1,13,122,100.0
+creation,0,14,122,100.0
+bringsAbout,0,15,122,100.0
+historicalDependence,0,16,122,100.0
+instantiation,0,17,122,100.0
+manifestation,0,18,122,100.0
+participational,0,19,122,100.0
+triggers,0,20,122,100.0
+termination,0,21,122,100.0
