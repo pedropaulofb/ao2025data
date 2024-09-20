@@ -5,7 +5,6 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from icecream import ic
 from loguru import logger
 from matplotlib.colors import Normalize
 
@@ -25,7 +24,7 @@ def find_highest_sum_element(df):
     return highest_sum_element
 
 
-# Step 4: Recursively find highest values and create graph edges
+# Step 4: Recursively find highest absolute values and create graph edges
 def create_graph(df):
     G = nx.Graph()  # Create a new graph
 
@@ -38,21 +37,32 @@ def create_graph(df):
     visited.add(start_element)
 
     def add_edges_from_element(current_element):
+        # Get the current row values
         row_values = df.loc[current_element]
+
+        # Get the unvisited neighbors
         unvisited_neighbors = row_values[~row_values.index.isin(visited)]
 
+        # If there are no unvisited neighbors, stop recursion
         if unvisited_neighbors.empty or unvisited_neighbors.isna().all():
             return
 
-        next_element = unvisited_neighbors.idxmax()
+        # Find the next element based on the highest absolute value, but keep the actual value for edge weights
+        next_element = unvisited_neighbors.abs().idxmax()
 
         if pd.isna(next_element):
             return
 
+        # Add the next element to visited
         visited.add(next_element)
+
+        # Add the edge to the graph, using the original (non-absolute) value as the weight
         G.add_edge(current_element, next_element, weight=row_values[next_element])
+
+        # Recursively add edges for the next element
         add_edges_from_element(next_element)
 
+    # Start the recursive edge addition from the start element
     add_edges_from_element(start_element)
 
     if len(G.nodes) == 0:
@@ -103,8 +113,10 @@ def create_learning_line(graph, file_path, out_dir_path,metric_name):
     # Add the title to the plot
     plt.title(f"{formatted_metric_name} Network of Key Elements", fontweight='bold')
 
+    save_file_name, _ = os.path.splitext(metric_name)
+
     plt.tight_layout()
-    fig_name = f'learning_line_{metric_name}.png'
+    fig_name = f'learning_line_{save_file_name}.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
