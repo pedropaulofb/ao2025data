@@ -1,3 +1,4 @@
+import csv
 import gzip
 import os
 import pickle
@@ -94,8 +95,40 @@ def generate_list_models(models_to_list, output_file_path):
     logger.success(f"Successfully written {len(list_models_id)} models' ids to {output_file_path}.")
 
 
+def generate_list_models_years(models_to_list, output_file_path):
+    if isinstance(models_to_list, str):
+        # Deserialize (unpickle) the object
+        logger.info(f"Loading models from {models_to_list}.")
+        with gzip.open(models_to_list, "rb") as file:
+            models_to_list = pickle.load(file)
+        logger.success(f"Successfully loaded {len(models_to_list)} models.")
+
+    # Normalizing modified date
+    for model in models_to_list:
+        model.modified = model.issued if not model.modified else model.modified
+
+    # Get the list of model IDs
+    list_models = [(model.id, model.modified) for model in models_to_list]
+
+    header = ['model', 'year']
+
+    # Open the CSV file in write mode
+    with open(output_file_path, 'w', newline='') as file:
+        writer = csv.writer(file)
+
+        # Write the header
+        writer.writerow(header)
+
+        # Write the data (each tuple as a row)
+        writer.writerows(list_models)
+
+    logger.success(f"Models and years data saved to {output_file_path} successfully.")
+
+
 if __name__ == "__main__":
     # loaded_models = load_all_models("non_filtered_models")
-    filtered = filter_models("./outputs/loaded_models/ontouml_no_classroom.object.gz",
-                             "loaded_models/ontouml_no_classroom_until_2017")
-    query_filtered_models(filtered, "outputs/queries_results/ontouml_no_classroom_until_2017")
+    # filtered = filter_models("./outputs/loaded_models/ontouml_no_classroom.object.gz",
+    #                          "loaded_models/ontouml_no_classroom_until_2017")
+    # query_filtered_models(filtered, "outputs/queries_results/ontouml_no_classroom_until_2017")
+    generate_list_models_years("./outputs/loaded_models/ontouml_no_classroom.object.gz",
+                               "./outputs/ontouml_no_classroom_years.csv")
