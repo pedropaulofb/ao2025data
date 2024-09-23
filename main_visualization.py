@@ -4,6 +4,7 @@ from loguru import logger
 
 from src.visualization.learning_line import execute_learning_line
 from src.visualization.learning_tree import execute_learning_tree
+from src.visualization.temporal_visualizations import plot_constructs_over_time, plot_constructs_in_quartiles
 
 
 def create_visualizations(input_dir: str):
@@ -30,8 +31,8 @@ def create_visualizations(input_dir: str):
     # execute_visualization_spearman_correlation(input_dir, output_dir, 'spearman_correlation.csv')
     # execute_learning_line(input_dir, output_dir, 'mutual_information.csv')
     # execute_learning_line(input_dir, output_dir, 'spearman_correlation.csv')
-    execute_learning_tree(input_dir, output_dir, 'mutual_information.csv')
-    execute_learning_tree(input_dir, output_dir, 'spearman_correlation.csv')
+    # execute_learning_tree(input_dir, output_dir, 'mutual_information.csv')
+    # execute_learning_tree(input_dir, output_dir, 'spearman_correlation.csv')
 
     # HYBRID ANALYSES  
     # 
@@ -64,19 +65,50 @@ def get_subdirectories(directory):
     subdirs = [d for d in os.listdir(directory) if os.path.isdir(os.path.join(directory, d))]
     return subdirs
 
-
 if __name__ == "__main__":
-    # Statistics directory path
-    statistics_dir = os.path.normpath('./outputs/statistics')  # Normalize the directory path
-    # Get the list of first-level subdirectories
-    subdirectories = get_subdirectories(statistics_dir)
+    # # Statistics directory path
+    # statistics_dir = os.path.normpath('./outputs/statistics')  # Normalize the directory path
+    # # Get the list of first-level subdirectories
+    # subdirectories = get_subdirectories(statistics_dir)
 
-    analysis_paths = []
-    for analysis_path in subdirectories:
-        analysis_paths.append(os.path.normpath(os.path.join(statistics_dir, analysis_path)))
+    # analysis_paths = []
+    # for analysis_path in subdirectories:
+    #     analysis_paths.append(os.path.normpath(os.path.join(statistics_dir, analysis_path)))
 
-    for analysis_path in analysis_paths:
-        logger.info(f"Generating visualizations to {analysis_path}.")
-        create_visualizations(analysis_path)
+    # for analysis_path in analysis_paths:
+    #     logger.info(f"Generating visualizations to {analysis_path}.")
+    #     create_visualizations(analysis_path)
 
-    # TIME COMPARISON CLASS  # path_file_A = './outputs/statistics/cs_ontouml_no_classroom_until_2017_f/frequency_analysis.csv'  # path_file_B = './outputs/statistics/cs_ontouml_no_classroom_after_2018_f/frequency_analysis.csv'  # out_dir_path = './outputs/visualizations/movement/cs_ontouml_no_classroom_f'  # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)  #  # path_file_A = './outputs/statistics/cs_ontouml_no_classroom_until_2017_t/frequency_analysis.csv'  # path_file_B = './outputs/statistics/cs_ontouml_no_classroom_after_2018_t/frequency_analysis.csv'  # out_dir_path = './outputs/visualizations/movement/cs_ontouml_no_classroom_t'  # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)  #  # # TIME COMPARISON RELATION  # path_file_A = './outputs/statistics/rs_ontouml_no_classroom_until_2017_f/frequency_analysis.csv'  # path_file_B = './outputs/statistics/rs_ontouml_no_classroom_after_2018_f/frequency_analysis.csv'  # out_dir_path = './outputs/visualizations/movement/rs_ontouml_no_classroom_f'  # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)  #  # path_file_A = './outputs/statistics/rs_ontouml_no_classroom_until_2017_t/frequency_analysis.csv'  # path_file_B = './outputs/statistics/rs_ontouml_no_classroom_after_2018_t/frequency_analysis.csv'  # out_dir_path = './outputs/visualizations/movement/rs_ontouml_no_classroom_t'  # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
+    # TIME COMPARISON CLASS
+    # path_file_A = './outputs/statistics/cs_ontouml_no_classroom_until_2017_f/frequency_analysis.csv'
+    # path_file_B = './outputs/statistics/cs_ontouml_no_classroom_after_2018_f/frequency_analysis.csv'
+    # out_dir_path = './outputs/visualizations/movement/cs_ontouml_no_classroom_f'
+    # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
+    # path_file_A = './outputs/statistics/cs_ontouml_no_classroom_until_2017_t/frequency_analysis.csv'
+    # path_file_B = './outputs/statistics/cs_ontouml_no_classroom_after_2018_t/frequency_analysis.csv'
+    # out_dir_path = './outputs/visualizations/movement/cs_ontouml_no_classroom_t'
+    # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
+    ### TIME COMPARISON RELATION  # path_file_A = './outputs/statistics/rs_ontouml_no_classroom_until_2017_f/frequency_analysis.csv'
+    # path_file_B = './outputs/statistics/rs_ontouml_no_classroom_after_2018_f/frequency_analysis.csv'
+    # out_dir_path = './outputs/visualizations/movement/rs_ontouml_no_classroom_f'
+    # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
+    # path_file_A = './outputs/statistics/rs_ontouml_no_classroom_until_2017_t/frequency_analysis.csv'
+    # path_file_B = './outputs/statistics/rs_ontouml_no_classroom_after_2018_t/frequency_analysis.csv'
+    # out_dir_path = './outputs/visualizations/movement/rs_ontouml_no_classroom_t'
+    # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
+
+    analysis_paths = ["./outputs/statistics/cs_ontouml_no_classroom_f",
+                      "./outputs/statistics/cs_ontouml_no_classroom_t",
+                      "./outputs/statistics/rs_ontouml_no_classroom_f",
+                      "./outputs/statistics/rs_ontouml_no_classroom_t"]
+
+    selected_constructs = ["all","top","bottom"]
+    windows = [1,3,5]
+    file_names = ["temporal_overall_stats.csv", "temporal_yearly_stats.csv"]
+
+    for analysis in analysis_paths:
+        for window in windows:
+            for file in file_names:
+                plot_constructs_in_quartiles(analysis, analysis.replace("statistics","visualizations"), file, window)
+                for selected in selected_constructs:
+                    plot_constructs_over_time(analysis, analysis.replace("statistics","visualizations"), file, selected, window)

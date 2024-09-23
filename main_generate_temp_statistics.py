@@ -35,6 +35,7 @@ def generate_yearly_statistics(constructs_file, years_file, output_file, clean):
     yearly_relative_frequencies = yearly_data.div(yearly_data.sum(axis=1), axis=0)
 
     # Save to CSV with 5 decimal places
+    output_file = os.path.normpath(output_file)
     yearly_relative_frequencies.to_csv(output_file, float_format='%.7f')
     logger.success(f"Yearly Relative Frequency saved to {output_file}.")
 
@@ -77,6 +78,7 @@ def generate_overall_statistics(constructs_file, years_file, output_file, clean:
     overall_relative_frequencies = overall_relative_frequencies[cols]
 
     # Save to CSV with 5 decimal places
+    output_file = os.path.normpath(output_file)
     overall_relative_frequencies.to_csv(output_file, float_format='%.7f', index=False)
     logger.success(f"Overall Relative Frequency saved to {output_file}.")
 
@@ -91,14 +93,14 @@ if __name__ == "__main__":
 
         # Generate the first file: Yearly percentage occurrences
         generate_yearly_statistics(input_file_construct, input_file_years,
-                                   os.path.join("./outputs/statistics", analysis + "_t", "yearly_statistics.csv"), True)
+                                   os.path.join("./outputs/statistics", analysis + "_t", "temporal_yearly_stats.csv"), True)
         generate_yearly_statistics(input_file_construct, input_file_years,
-                                   os.path.join("./outputs/statistics", analysis + "_f", "yearly_statistics.csv"),
+                                   os.path.join("./outputs/statistics", analysis + "_f", "temporal_yearly_stats.csv"),
                                    False)
         # Generate the second file: Overall percentage occurrences
         generate_overall_statistics(input_file_construct, input_file_years,
-                                    os.path.join("./outputs/statistics", analysis + "_t", "overall_statistics.csv"),
+                                    os.path.join("./outputs/statistics", analysis + "_t", "temporal_overall_stats.csv"),
                                     True)
         generate_overall_statistics(input_file_construct, input_file_years,
-                                    os.path.join("./outputs/statistics", analysis + "_f", "overall_statistics.csv"),
+                                    os.path.join("./outputs/statistics", analysis + "_f", "temporal_overall_stats.csv"),
                                     False)
