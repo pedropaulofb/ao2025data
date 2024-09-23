@@ -28,6 +28,9 @@ def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, 
 
     df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
+    # Filter out rows (constructs) with zero occurrences in 'Total Frequency' (or other relevant metrics)
+    df = df[df['Total Frequency'] > 0]
+
     # Convert the 'Construct' column to a categorical type to ensure proper ordering in the plots
     df['Construct'] = pd.Categorical(df['Construct'], categories=df['Construct'].unique(), ordered=True)
 
