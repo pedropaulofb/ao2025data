@@ -124,7 +124,7 @@ def plot_constructs_in_quartiles(in_dir_path, out_dir_path, file_name, window_si
         df_melted = df_reset.melt(id_vars='year', var_name='Construct', value_name='Value')
 
         # Plot each quartile
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(16, 9))
         sns.lineplot(data=df_melted, x='year', y='Value', hue='Construct', palette="tab10", linewidth=2.5, ax=ax)
 
         # Customize plot title based on quartile and smoothing
