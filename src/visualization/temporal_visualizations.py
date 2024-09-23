@@ -226,3 +226,77 @@ def plot_heatmap(in_dir_path, out_dir_path, file_name):
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
+
+# Function to load data and plot the bump chart for each construct
+def plot_constructs_over_time_bump(in_dir_path, out_dir_path, file_name, selected_constructs='all', window_size=1):
+    # Load the CSV file
+    csv_file = os.path.join(in_dir_path, file_name)
+    df = pd.read_csv(csv_file, index_col='year')
+
+    # Normalize the data to percentages (convert raw values to percentages per year)
+    df = df.div(df.sum(axis=1), axis=0) * 100
+
+    # Calculate the top and bottom 50% based on the maximum value of each construct
+    construct_max = df.max().sort_values(ascending=False)
+    num_constructs = len(construct_max)
+
+    # Filter constructs based on 'selected_constructs' argument
+    if selected_constructs == 'top':
+        # Select top 50% constructs
+        top_constructs = construct_max.index[:num_constructs // 2]
+        df = df[top_constructs]
+    elif selected_constructs == 'bottom':
+        # Select bottom 50% constructs
+        bottom_constructs = construct_max.index[num_constructs // 2:]
+        df = df[bottom_constructs]
+    # If 'all' is passed or no valid option, all constructs are used (default behavior)
+
+    # Apply rolling mean if window_size > 1
+    if window_size > 1:
+        df = df.rolling(window=window_size, min_periods=1).mean()
+
+    # Rank the constructs for each year (1 = highest value, N = lowest value)
+    df_ranks = df.rank(axis=1, method='dense', ascending=False)
+
+    # Set plot style
+    sns.set(style="whitegrid")
+
+    # Plot bump chart
+    fig, ax = plt.subplots(figsize=(16, 9))
+
+    # Plot each construct's rank over time
+    for construct in df_ranks.columns:
+        ax.plot(df_ranks.index, df_ranks[construct], label=construct, linewidth=2)
+
+    # Invert y-axis so that Rank 1 is at the top
+    ax.invert_yaxis()
+
+    # Customize plot title based on filtering and smoothing
+    if window_size > 1:
+        if selected_constructs == 'top':
+            title = f'Top 50% Construct Rankings Over Time (Smoothed, Window: {window_size})'
+        elif selected_constructs == 'bottom':
+            title = f'Bottom 50% Construct Rankings Over Time (Smoothed, Window: {window_size})'
+        else:
+            title = f'Construct Rankings Over Time (Smoothed, Window: {window_size})'
+    else:
+        if selected_constructs == 'top':
+            title = 'Top 50% Construct Rankings Over Time'
+        elif selected_constructs == 'bottom':
+            title = 'Bottom 50% Construct Rankings Over Time'
+        else:
+            title = 'Construct Rankings Over Time'
+
+    ax.set_title(title)
+    ax.set_xlabel('Year')
+    ax.set_ylabel('Rank')
+    ax.legend(title='Constructs', bbox_to_anchor=(1.05, 1), loc='upper left')
+
+    # Adjust layout
+    plt.tight_layout()
+
+    # Save the figure instead of showing it
+    fig_name = f"{file_name.replace('.csv', '')}_bump_chart_{selected_constructs}_window{window_size}.png"
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
+    plt.close(fig)
