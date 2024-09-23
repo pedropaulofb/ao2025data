@@ -6,6 +6,7 @@ from src.visualization.frequency_analysis_general import execute_visualization_f
 from src.visualization.frequency_analysis_scatter import execute_visualization_frequency_analysis_scatter
 from src.visualization.learning_line import execute_learning_line
 from src.visualization.learning_tree import execute_learning_tree
+from src.visualization.movement_analysis import execute_visualization_movement
 from src.visualization.temporal_visualizations import plot_constructs_over_time, plot_constructs_in_quartiles, \
     plot_stacked_bar, plot_heatmap, plot_constructs_over_time_bump
 
@@ -100,11 +101,22 @@ if __name__ == "__main__":
     # out_dir_path = './outputs/visualizations/movement/rs_ontouml_no_classroom_t'
     # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
 
-    input_dir = './outputs/statistics/aggregated'
-    output_dir = input_dir.replace("statistics","visualizations")
-    # Get a list of all files in the directory
-    files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
+    # input_dir = './outputs/statistics/aggregated'
+    # output_dir = input_dir.replace("statistics","visualizations")
+    # # Get a list of all files in the directory
+    # files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
+    #
+    # for file in files:
+    #     execute_visualization_frequency_analysis_general(input_dir, output_dir, file,True)
+    #     execute_visualization_frequency_analysis_scatter(input_dir, output_dir, file, True)
 
-    for file in files:
-        execute_visualization_frequency_analysis_general(input_dir, output_dir, file,True)
-        execute_visualization_frequency_analysis_scatter(input_dir, output_dir, file, True)
+    # AGGREGATED MOVEMENT
+    path_file_A = './outputs/statistics/aggregated/cs_ontouml_no_classroom_until_2017_f_aggr.csv'
+    path_file_B = './outputs/statistics/aggregated/cs_ontouml_no_classroom_after_2018_f_aggr.csv'
+    out_dir_path = './outputs/visualizations/aggregated/movement/cs_ontouml_no_classroom_f'
+    execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
+
+    path_file_A = './outputs/statistics/aggregated/cs_ontouml_no_classroom_until_2017_t_aggr.csv'
+    path_file_B = './outputs/statistics/aggregated/cs_ontouml_no_classroom_after_2018_t_aggr.csv'
+    out_dir_path = './outputs/visualizations/aggregated/movement/cs_ontouml_no_classroom_t'
+    execute_visualization_movement(path_file_A, path_file_B, out_dir_path)

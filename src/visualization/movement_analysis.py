@@ -185,6 +185,7 @@ def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path):
 
 
 def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
+
     # Create the directory to save if it does not exist
     if not os.path.exists(out_dir_path):
         os.makedirs(out_dir_path)
@@ -195,6 +196,11 @@ def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
     # Load data from moment A and moment B using the provided file paths
     df_A = pd.read_csv(path_file_A)
     df_B = pd.read_csv(path_file_B)
+
+    if "_t_" in path_file_A:
+        # Drop rows where the 'Construct' column has values 'none', 'other', or 'undef'
+        df_A = df_A[~df_A['Construct'].isin(['none', 'other', 'undef'])]
+        df_B = df_B[~df_B['Construct'].isin(['none', 'other', 'undef'])]
 
     # Check if both dataframes have the same constructs and columns
     assert all(df_A['Construct'] == df_B['Construct']), "The constructs in both moments must match."
