@@ -23,7 +23,9 @@ def format_metric_name(metric):
 
 
 # Function to create all possible scatter plots for the metric combinations
-def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, file_path):
+def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, file_path,aggr:bool=False):
+    base_name = os.path.splitext(file_path)[0] + "_" if aggr else ""
+
     df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
     # Convert the 'Construct' column to a categorical type to ensure proper ordering in the plots
@@ -44,6 +46,14 @@ def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, 
         # Plotting the scatter plot with circles and adding labels to each point
         for i, construct in enumerate(df['Construct'].unique()):
             subset = df[df['Construct'] == construct]
+
+            # Filter out rows with non-finite values in either x_metric or y_metric
+            subset = subset[pd.notnull(subset[x_metric]) & pd.notnull(subset[y_metric])]
+
+            # Skip if no valid data to plot for this construct
+            if subset.empty:
+                continue
+
             # Plot the point (circle marker)
             plt.scatter(subset[x_metric], subset[y_metric],
                         color=extended_palette[i], marker='o', s=100, edgecolor='w', label=construct)
@@ -87,7 +97,7 @@ def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, 
         formatted_y_metric = format_metric_name(y_metric)
 
         plt.tight_layout()
-        fig_name = f'frequency_analysis_{formatted_x_metric}_vs_{formatted_y_metric}.png'
+        fig_name = f'{base_name}frequency_analysis_{formatted_x_metric}_vs_{formatted_y_metric}.png'
         fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
         logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
         plt.close(fig)

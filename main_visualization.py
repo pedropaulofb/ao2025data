@@ -2,6 +2,8 @@ import os
 
 from loguru import logger
 
+from src.visualization.frequency_analysis_general import execute_visualization_frequency_analysis_general
+from src.visualization.frequency_analysis_scatter import execute_visualization_frequency_analysis_scatter
 from src.visualization.learning_line import execute_learning_line
 from src.visualization.learning_tree import execute_learning_tree
 from src.visualization.temporal_visualizations import plot_constructs_over_time, plot_constructs_in_quartiles, \
@@ -98,17 +100,11 @@ if __name__ == "__main__":
     # out_dir_path = './outputs/visualizations/movement/rs_ontouml_no_classroom_t'
     # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
 
-    analysis_paths = ["./outputs/statistics/cs_ontouml_no_classroom_f",
-                      "./outputs/statistics/cs_ontouml_no_classroom_t",
-                      "./outputs/statistics/rs_ontouml_no_classroom_f",
-                      "./outputs/statistics/rs_ontouml_no_classroom_t"]
+    input_dir = './outputs/statistics/aggregated'
+    output_dir = input_dir.replace("statistics","visualizations")
+    # Get a list of all files in the directory
+    files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
 
-    selected_constructs = ["all","top","bottom"]
-    windows = [1,3,5]
-    file_names = ["temporal_overall_stats.csv", "temporal_yearly_stats.csv"]
-
-    for analysis in analysis_paths:
-        for window in windows:
-            for file in file_names:
-                for selected in selected_constructs:
-                    plot_constructs_over_time_bump(analysis, analysis.replace("statistics","visualizations"), file, selected, window)
+    for file in files:
+        execute_visualization_frequency_analysis_general(input_dir, output_dir, file,True)
+        execute_visualization_frequency_analysis_scatter(input_dir, output_dir, file, True)

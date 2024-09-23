@@ -3,13 +3,17 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from icecream import ic
 from loguru import logger
 from matplotlib.font_manager import FontProperties
 
 from src.color_legend import color_text
 
 
-def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, file_path):
+def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, file_path,aggr:bool=False):
+
+    base_name = os.path.splitext(file_path)[0] + "_" if aggr else ""
+
     df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
     # Convert the 'Construct' column to a categorical type to ensure proper ordering in the plots
@@ -44,7 +48,7 @@ def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, 
     ax2.legend(loc='upper right')
     fig.tight_layout()
 
-    fig_name = 'total_frequency_vs_ubiquity_index_by_construct.png'
+    fig_name = f'{base_name}total_frequency_vs_ubiquity_index_by_construct.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
@@ -75,7 +79,7 @@ def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, 
     ax2.legend(loc='upper right')
     fig.tight_layout()
 
-    fig_name = 'total_frequency_vs_group_frequency_across_constructs.png'
+    fig_name = f'{base_name}total_frequency_vs_group_frequency_across_constructs.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
@@ -136,7 +140,7 @@ def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, 
     ax2.set_title('Relative Frequency of Constructs by Group Usage', fontweight='bold')
 
     plt.tight_layout()
-    fig_name = 'relative_frequency_of_constructs_by_occurrence_and_group_usage.png'
+    fig_name = f'{base_name}relative_frequency_of_constructs_by_occurrence_and_group_usage.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
