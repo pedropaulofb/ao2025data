@@ -1,5 +1,5 @@
 import os
-
+import matplotlib.patches as mpatches
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -146,3 +146,83 @@ def plot_constructs_in_quartiles(in_dir_path, out_dir_path, file_name, window_si
         fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
         logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
         plt.close(fig)
+
+# Function to plot stacked bar chart
+def plot_stacked_bar(in_dir_path, out_dir_path, file_name):
+    # Load the CSV file
+    csv_file = os.path.join(in_dir_path, file_name)
+    df = pd.read_csv(csv_file, index_col='year')
+
+    # Normalize the data to percentages (convert raw values to percentages per year)
+    df = df.div(df.sum(axis=1), axis=0) * 100
+
+    # Set up color palettes: 12 solid colors and 12 colors with texture ('.')
+    solid_colors = sns.color_palette("tab20", 12)  # Use a seaborn palette for 12 solid colors
+    textured_colors = sns.color_palette("tab20", 12)  # Another set of colors for textured
+
+    # Create a list of patches for the legend
+    legend_patches = []
+
+    # Create a figure and axis
+    fig, ax = plt.subplots(figsize=(16, 9))
+
+    # Initialize a list to keep track of the bottom for the stacked bar plot
+    bottom = [0] * len(df)
+
+    # Loop through each construct and plot the bar chart
+    for idx, construct in enumerate(df.columns):
+        if idx < 12:
+            # Plot the first 12 constructs with solid colors
+            ax.bar(df.index, df[construct], bottom=bottom, color=solid_colors[idx], label=construct)
+            legend_patches.append(mpatches.Patch(color=solid_colors[idx], label=construct))
+        else:
+            # Plot the next constructs with dots texture ('.') and the second color palette
+            texture = '.'
+            ax.bar(df.index, df[construct], bottom=bottom, color=textured_colors[idx - 12], hatch=texture, label=construct)
+            legend_patches.append(mpatches.Patch(color=textured_colors[idx - 12], hatch=texture, label=construct))
+
+        # Update the bottom for the next construct
+        bottom = [i + j for i, j in zip(bottom, df[construct])]
+
+    # Set labels and title
+    ax.set_xlabel('Year')
+    ax.set_ylabel('Proportion (%)')
+    ax.set_title('Construct Proportions Over Time (Stacked Bar)')
+
+    # Ensure only integer years (no fractions) are shown on the x-axis
+    ax.set_xticks(df.index)  # Set the x-axis ticks to the index (years)
+    ax.set_xticklabels(df.index.astype(int), rotation=45, ha="right")  # Rotate the year labels for better readability
+
+    # Add legend to the plot
+    ax.legend(handles=legend_patches, bbox_to_anchor=(1.05, 1), loc='upper left')
+
+    # Adjust the layout
+    plt.tight_layout()
+
+    # Save the figure
+    fig_name = f"{file_name.replace('.csv', '')}_stacked_bar.png"
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
+    plt.close(fig)
+
+
+def plot_heatmap(in_dir_path, out_dir_path, file_name):
+    # Load CSV file
+    csv_file = os.path.join(in_dir_path, file_name)
+    df = pd.read_csv(csv_file, index_col='year')
+    df = df.div(df.sum(axis=1), axis=0) * 100  # Normalize to percentages
+
+    # Plot heatmap
+    fig, ax = plt.subplots(figsize=(16, 9))
+    sns.heatmap(df.T, cmap='coolwarm', ax=ax, annot=True, fmt=".1f", cbar_kws={'label': 'Proportion (%)'})
+
+    ax.set_xlabel('Year')
+    ax.set_ylabel('Construct')
+    ax.set_title('Construct Proportions Over Time (Heatmap)')
+    plt.tight_layout()
+
+    # Save figure
+    fig_name = f"{file_name.replace('.csv', '')}_heatmap.png"
+    fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
+    plt.close(fig)

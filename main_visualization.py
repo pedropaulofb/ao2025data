@@ -4,7 +4,8 @@ from loguru import logger
 
 from src.visualization.learning_line import execute_learning_line
 from src.visualization.learning_tree import execute_learning_tree
-from src.visualization.temporal_visualizations import plot_constructs_over_time, plot_constructs_in_quartiles
+from src.visualization.temporal_visualizations import plot_constructs_over_time, plot_constructs_in_quartiles, \
+    plot_stacked_bar, plot_heatmap
 
 
 def create_visualizations(input_dir: str):
@@ -106,9 +107,13 @@ if __name__ == "__main__":
     windows = [1,3,5]
     file_names = ["temporal_overall_stats.csv", "temporal_yearly_stats.csv"]
 
+    # for analysis in analysis_paths:
+    #     for window in windows:
+    #         for file in file_names:
+    #             plot_constructs_in_quartiles(analysis, analysis.replace("statistics","visualizations"), file, window)
+    #             for selected in selected_constructs:
+    #                 plot_constructs_over_time(analysis, analysis.replace("statistics","visualizations"), file, selected, window)
+
     for analysis in analysis_paths:
-        for window in windows:
-            for file in file_names:
-                plot_constructs_in_quartiles(analysis, analysis.replace("statistics","visualizations"), file, window)
-                for selected in selected_constructs:
-                    plot_constructs_over_time(analysis, analysis.replace("statistics","visualizations"), file, selected, window)
+        for file_name in file_names:
+            plot_heatmap(analysis,analysis.replace("statistics","visualizations"),file_name)
