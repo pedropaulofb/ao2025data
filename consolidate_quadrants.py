@@ -20,7 +20,14 @@ for evaluation in evaluations:
         df2 = pd.read_csv(file2)
 
         # Merge the two dataframes on the 'construct' column
-        merged_df = pd.merge(df1[['construct', 'quadrant']], df2[['construct', 'quadrant_start', 'quadrant_end']], on='construct')
+        merged_df = pd.merge(df1[['construct', 'quadrant']], df2[['construct', 'quadrant_start', 'quadrant_end']],
+                             on='construct')
+
+        # Rename 'quadrant' to 'quadrant_all'
+        merged_df.rename(columns={'quadrant': 'quadrant_all'}, inplace=True)
+
+        # Reorder the columns
+        merged_df = merged_df[['construct', 'quadrant_start', 'quadrant_end', 'quadrant_all']]
 
         # Save the merged dataframe to a new CSV file
         output_file = base_file2 + evaluation + "_ontouml_no_classroom_" + clean + '/merged_quadrant_analysis.csv'
