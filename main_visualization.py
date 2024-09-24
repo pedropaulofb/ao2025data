@@ -142,8 +142,8 @@ if __name__ == "__main__":
                 for select in select_types:
                     for window in window_sizes:
                         logger.info(f"Starting plot for {in_dir_path} using file={file_name}, select={select} and window={window}.")
-                        plot_constructs_over_time(in_dir_path, out_dir_path, file_name, select, window)
-                        plot_constructs_in_quartiles(in_dir_path, out_dir_path, file_name, window)
+                        # plot_constructs_over_time(in_dir_path, out_dir_path, file_name, select, window)
+                        # plot_constructs_in_quartiles(in_dir_path, out_dir_path, file_name, window)
                         plot_stacked_bar(in_dir_path, out_dir_path, file_name)
-                        plot_heatmap(in_dir_path, out_dir_path, file_name)
-                        plot_constructs_over_time_bump(in_dir_path, out_dir_path, file_name, select,window)
+                        # plot_heatmap(in_dir_path, out_dir_path, file_name)
+                        # plot_constructs_over_time_bump(in_dir_path, out_dir_path, file_name, select,window)
