@@ -3,6 +3,7 @@ import matplotlib.patches as mpatches
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from icecream import ic
 from loguru import logger
 
 
@@ -11,9 +12,6 @@ def plot_constructs_over_time(in_dir_path, out_dir_path, file_name, selected_con
     # Load the CSV file
     csv_file = os.path.join(in_dir_path, file_name)
     df = pd.read_csv(csv_file, index_col='year')
-
-    # Normalize the data to percentages (convert raw values to percentages per year)
-    df = df.div(df.sum(axis=1), axis=0) * 100
 
     # Calculate the top and bottom 50% based on the maximum value of each construct
     construct_max = df.max().sort_values(ascending=False)
@@ -47,21 +45,29 @@ def plot_constructs_over_time(in_dir_path, out_dir_path, file_name, selected_con
     fig, ax = plt.subplots(figsize=(16, 9))
     sns.lineplot(data=df_melted, x='year', y='Value', hue='Construct', palette="tab10", linewidth=2.5, ax=ax)
 
-    # Customize plot title based on filtering and smoothing
+    # Determine if the file is "yearly" or "overall" based on the file name
+    if "yearly" in file_name:
+        normalization_type = "Yearly Normalized"
+    elif "overall" in file_name:
+        normalization_type = "Overall Normalized"
+    else:
+        normalization_type = "Unknown Normalization"
+
+    # Customize plot title based on filtering, smoothing, and normalization type
     if window_size > 1:
         if selected_constructs == 'top':
-            title = f'Top 50% Construct Proportions Over Time (Smoothed, Window: {window_size})'
+            title = f'Top 50% Construct Proportions Over Time ({normalization_type}, Smoothed, Window: {window_size})'
         elif selected_constructs == 'bottom':
-            title = f'Bottom 50% Construct Proportions Over Time (Smoothed, Window: {window_size})'
+            title = f'Bottom 50% Construct Proportions Over Time ({normalization_type}, Smoothed, Window: {window_size})'
         else:
-            title = f'Construct Proportions Over Time (Smoothed, Window: {window_size})'
+            title = f'Construct Proportions Over Time ({normalization_type}, Smoothed, Window: {window_size})'
     else:
         if selected_constructs == 'top':
-            title = 'Top 50% Construct Proportions Over Time'
+            title = f'Top 50% Construct Proportions Over Time ({normalization_type})'
         elif selected_constructs == 'bottom':
-            title = 'Bottom 50% Construct Proportions Over Time'
+            title = f'Bottom 50% Construct Proportions Over Time ({normalization_type})'
         else:
-            title = 'Construct Proportions Over Time'
+            title = f'Construct Proportions Over Time ({normalization_type})'
 
     ax.set_title(title)
     ax.set_xlabel('Year')
@@ -84,9 +90,6 @@ def plot_constructs_in_quartiles(in_dir_path, out_dir_path, file_name, window_si
     # Load the CSV file
     csv_file = os.path.join(in_dir_path, file_name)
     df = pd.read_csv(csv_file, index_col='year')
-
-    # Normalize the data to percentages (convert raw values to percentages per year)
-    df = df.div(df.sum(axis=1), axis=0) * 100
 
     # Calculate the max value of each construct to determine the quartiles
     construct_max = df.max().sort_values(ascending=False)
@@ -127,11 +130,19 @@ def plot_constructs_in_quartiles(in_dir_path, out_dir_path, file_name, window_si
         fig, ax = plt.subplots(figsize=(16, 9))
         sns.lineplot(data=df_melted, x='year', y='Value', hue='Construct', palette="tab10", linewidth=2.5, ax=ax)
 
-        # Customize plot title based on quartile and smoothing
-        if window_size > 1:
-            plot_title = f'{title} Construct Proportions Over Time (Smoothed, Window: {window_size})'
+        # Determine if the file is "yearly" or "overall" based on the file name
+        if "yearly" in file_name:
+            normalization_type = "Yearly Normalized"
+        elif "overall" in file_name:
+            normalization_type = "Overall Normalized"
         else:
-            plot_title = f'{title} Construct Proportions Over Time'
+            normalization_type = "Unknown Normalization"
+
+        # Customize plot title based on quartile, smoothing, and normalization type
+        if window_size > 1:
+            plot_title = f'{title} Construct Proportions Over Time ({normalization_type}, Smoothed, Window: {window_size})'
+        else:
+            plot_title = f'{title} Construct Proportions Over Time ({normalization_type})'
 
         ax.set_title(plot_title)
         ax.set_xlabel('Year')
@@ -152,9 +163,6 @@ def plot_stacked_bar(in_dir_path, out_dir_path, file_name):
     # Load the CSV file
     csv_file = os.path.join(in_dir_path, file_name)
     df = pd.read_csv(csv_file, index_col='year')
-
-    # Normalize the data to percentages (convert raw values to percentages per year)
-    df = df.div(df.sum(axis=1), axis=0) * 100
 
     # Set up color palettes: 12 solid colors and 12 colors with texture ('.')
     solid_colors = sns.color_palette("tab20", 12)  # Use a seaborn palette for 12 solid colors
@@ -184,10 +192,18 @@ def plot_stacked_bar(in_dir_path, out_dir_path, file_name):
         # Update the bottom for the next construct
         bottom = [i + j for i, j in zip(bottom, df[construct])]
 
+    # Determine if the file is "yearly" or "overall" based on the file name
+    if "yearly" in file_name:
+        normalization_type = "Yearly Normalized"
+    elif "overall" in file_name:
+        normalization_type = "Overall Normalized"
+    else:
+        normalization_type = "Unknown Normalization"
+
     # Set labels and title
     ax.set_xlabel('Year')
     ax.set_ylabel('Proportion (%)')
-    ax.set_title('Construct Proportions Over Time (Stacked Bar)')
+    ax.set_title(f'Construct Proportions Over Time (Stacked Bar, {normalization_type})')
 
     # Ensure only integer years (no fractions) are shown on the x-axis
     ax.set_xticks(df.index)  # Set the x-axis ticks to the index (years)
@@ -210,7 +226,6 @@ def plot_heatmap(in_dir_path, out_dir_path, file_name):
     # Load CSV file
     csv_file = os.path.join(in_dir_path, file_name)
     df = pd.read_csv(csv_file, index_col='year')
-    df = df.div(df.sum(axis=1), axis=0) * 100  # Normalize to percentages
 
     # Plot heatmap
     fig, ax = plt.subplots(figsize=(16, 9))
@@ -218,7 +233,17 @@ def plot_heatmap(in_dir_path, out_dir_path, file_name):
 
     ax.set_xlabel('Year')
     ax.set_ylabel('Construct')
-    ax.set_title('Construct Proportions Over Time (Heatmap)')
+    # Determine if the file is "yearly" or "overall" based on the file name
+    if "yearly" in file_name:
+        normalization_type = "Yearly Normalized"
+    elif "overall" in file_name:
+        normalization_type = "Overall Normalized"
+    else:
+        normalization_type = "Unknown Normalization"
+
+    # Set plot title with normalization type
+    ax.set_title(f'Construct Proportions Over Time (Heatmap, {normalization_type})')
+
     plt.tight_layout()
 
     # Save figure
@@ -232,9 +257,6 @@ def plot_constructs_over_time_bump(in_dir_path, out_dir_path, file_name, selecte
     # Load the CSV file
     csv_file = os.path.join(in_dir_path, file_name)
     df = pd.read_csv(csv_file, index_col='year')
-
-    # Normalize the data to percentages (convert raw values to percentages per year)
-    df = df.div(df.sum(axis=1), axis=0) * 100
 
     # Calculate the top and bottom 50% based on the maximum value of each construct
     construct_max = df.max().sort_values(ascending=False)
@@ -271,21 +293,29 @@ def plot_constructs_over_time_bump(in_dir_path, out_dir_path, file_name, selecte
     # Invert y-axis so that Rank 1 is at the top
     ax.invert_yaxis()
 
-    # Customize plot title based on filtering and smoothing
+    # Determine if the file is "yearly" or "overall" based on the file name
+    if "yearly" in file_name:
+        normalization_type = "Yearly Normalized"
+    elif "overall" in file_name:
+        normalization_type = "Overall Normalized"
+    else:
+        normalization_type = "Unknown Normalization"
+
+    # Customize plot title based on filtering, smoothing, and normalization type
     if window_size > 1:
         if selected_constructs == 'top':
-            title = f'Top 50% Construct Rankings Over Time (Smoothed, Window: {window_size})'
+            title = f'Top 50% Construct Rankings Over Time ({normalization_type}, Smoothed, Window: {window_size})'
         elif selected_constructs == 'bottom':
-            title = f'Bottom 50% Construct Rankings Over Time (Smoothed, Window: {window_size})'
+            title = f'Bottom 50% Construct Rankings Over Time ({normalization_type}, Smoothed, Window: {window_size})'
         else:
-            title = f'Construct Rankings Over Time (Smoothed, Window: {window_size})'
+            title = f'Construct Rankings Over Time ({normalization_type}, Smoothed, Window: {window_size})'
     else:
         if selected_constructs == 'top':
-            title = 'Top 50% Construct Rankings Over Time'
+            title = f'Top 50% Construct Rankings Over Time ({normalization_type})'
         elif selected_constructs == 'bottom':
-            title = 'Bottom 50% Construct Rankings Over Time'
+            title = f'Bottom 50% Construct Rankings Over Time ({normalization_type})'
         else:
-            title = 'Construct Rankings Over Time'
+            title = f'Construct Rankings Over Time ({normalization_type})'
 
     ax.set_title(title)
     ax.set_xlabel('Year')

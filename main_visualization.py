@@ -122,13 +122,28 @@ if __name__ == "__main__":
     # out_dir_path = './outputs/visualizations/aggregated/movement/cs_ontouml_no_classroom_t'
     # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
 
-    file_path = "frequency_analysis.csv"
 
-    types = ["cs","rs"]
-    filters = ["t","f"]
+    base_in_dir_path = "outputs/statistics/"
+    base_out_dir_path = "outputs/visualizations/"
 
-    for type in types:
-        for filter in filters:
-            in_dir_path = "outputs/statistics/"+type+"_ontouml_no_classroom_"+filter
-            out_dir_path = "outputs/visualizations/"+type+"_ontouml_no_classroom_"+filter
-            execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, file_path,aggr=False)
+    file_names = ["temporal_overall_stats.csv","temporal_yearly_stats.csv"]
+    analysis_types = ["cs","rs"]
+    filter_types = ["t","f"]
+
+    select_types = ["all","top","bottom"]
+    window_sizes = [1,3,5]
+
+
+    for file_name in file_names:
+        for analysis in analysis_types:
+            for filter in filter_types:
+                in_dir_path = base_in_dir_path + analysis + "_ontouml_no_classroom_" + filter
+                out_dir_path = base_out_dir_path + analysis + "_ontouml_no_classroom_" + filter
+                for select in select_types:
+                    for window in window_sizes:
+                        logger.info(f"Starting plot for {in_dir_path} using file={file_name}, select={select} and window={window}.")
+                        plot_constructs_over_time(in_dir_path, out_dir_path, file_name, select, window)
+                        plot_constructs_in_quartiles(in_dir_path, out_dir_path, file_name, window)
+                        plot_stacked_bar(in_dir_path, out_dir_path, file_name)
+                        plot_heatmap(in_dir_path, out_dir_path, file_name)
+                        plot_constructs_over_time_bump(in_dir_path, out_dir_path, file_name, select,window)
