@@ -1,5 +1,6 @@
 import os
 
+from icecream import ic
 from loguru import logger
 
 from src.visualization.frequency_analysis_general import execute_visualization_frequency_analysis_general
@@ -111,12 +112,23 @@ if __name__ == "__main__":
     #     execute_visualization_frequency_analysis_scatter(input_dir, output_dir, file, True)
 
     # AGGREGATED MOVEMENT
-    path_file_A = './outputs/statistics/aggregated/cs_ontouml_no_classroom_until_2017_f_aggr.csv'
-    path_file_B = './outputs/statistics/aggregated/cs_ontouml_no_classroom_after_2018_f_aggr.csv'
-    out_dir_path = './outputs/visualizations/aggregated/movement/cs_ontouml_no_classroom_f'
-    execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
+    # path_file_A = './outputs/statistics/aggregated/cs_ontouml_no_classroom_until_2017_f_aggr.csv'
+    # path_file_B = './outputs/statistics/aggregated/cs_ontouml_no_classroom_after_2018_f_aggr.csv'
+    # out_dir_path = './outputs/visualizations/aggregated/movement/cs_ontouml_no_classroom_f'
+    # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
+    #
+    # path_file_A = './outputs/statistics/aggregated/cs_ontouml_no_classroom_until_2017_t_aggr.csv'
+    # path_file_B = './outputs/statistics/aggregated/cs_ontouml_no_classroom_after_2018_t_aggr.csv'
+    # out_dir_path = './outputs/visualizations/aggregated/movement/cs_ontouml_no_classroom_t'
+    # execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
 
-    path_file_A = './outputs/statistics/aggregated/cs_ontouml_no_classroom_until_2017_t_aggr.csv'
-    path_file_B = './outputs/statistics/aggregated/cs_ontouml_no_classroom_after_2018_t_aggr.csv'
-    out_dir_path = './outputs/visualizations/aggregated/movement/cs_ontouml_no_classroom_t'
-    execute_visualization_movement(path_file_A, path_file_B, out_dir_path)
+    file_path = "frequency_analysis.csv"
+
+    types = ["cs","rs"]
+    filters = ["t","f"]
+
+    for type in types:
+        for filter in filters:
+            in_dir_path = "outputs/statistics/"+type+"_ontouml_no_classroom_"+filter
+            out_dir_path = "outputs/visualizations/"+type+"_ontouml_no_classroom_"+filter
+            execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, file_path,aggr=False)

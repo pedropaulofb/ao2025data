@@ -10,6 +10,49 @@ from loguru import logger
 
 from src.color_legend import color_text
 
+def calculate_quadrants_and_save(df, x_metric, y_metric, out_dir_path):
+    # Calculate median values for x and y metrics
+    median_y = df[y_metric].median()
+    median_x = df[x_metric].median()
+
+    # Function to determine the quadrant for a given point
+    def get_quadrant(x, y, median_x, median_y):
+        if x >= median_x and y >= median_y:
+            return 'Q1'  # Top right
+        elif x < median_x and y >= median_y:
+            return 'Q2'  # Top left
+        elif x < median_x and y < median_y:
+            return 'Q3'  # Bottom left
+        else:
+            return 'Q4'  # Bottom right
+
+    # Create a list to hold the results
+    results = []
+
+    # Iterate over each construct and determine its quadrant
+    for construct in df['Construct'].unique():
+        subset = df[df['Construct'] == construct]
+
+        # Get the x and y values for this construct
+        x, y = subset[x_metric].values[0], subset[y_metric].values[0]
+
+        # Determine the quadrant
+        quadrant = get_quadrant(x, y, median_x, median_y)
+
+        # Append the results as a dictionary
+        results.append({'construct': construct, 'x_value': x, 'y_value': y, 'quadrant': quadrant})
+
+    # Convert results to DataFrame
+    results_df = pd.DataFrame(results)
+
+    # Save the results to a CSV file
+    output_file = os.path.join(out_dir_path, f'quadrant_analysis_{x_metric}_vs_{y_metric}.csv')
+    results_df.to_csv(output_file, index=False)
+
+    logger.success(f"Quadrant analysis saved to {output_file}.")
+
+    return results_df  # Return the result for further use
+
 
 # Function to format the metric name
 def format_metric_name(metric):
@@ -23,7 +66,7 @@ def format_metric_name(metric):
 
 
 # Function to create all possible scatter plots for the metric combinations
-def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, file_path,aggr:bool=False):
+def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, file_path, aggr:bool=False):
     base_name = os.path.splitext(file_path)[0] + "_" if aggr else ""
 
     df = pd.read_csv(os.path.join(in_dir_path, file_path))
@@ -95,6 +138,9 @@ def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, 
 
         # Remove the legend (as labels are now added directly to the points)
         plt.legend().remove()
+
+        # Call the quadrant calculation and save the results
+        calculate_quadrants_and_save(df, x_metric, y_metric, out_dir_path)
 
         formatted_x_metric = format_metric_name(x_metric)
         formatted_y_metric = format_metric_name(y_metric)
