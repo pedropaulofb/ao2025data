@@ -133,7 +133,6 @@ if __name__ == "__main__":
     select_types = ["all","top","bottom"]
     window_sizes = [1,3,5]
 
-
     for file_name in file_names:
         for analysis in analysis_types:
             for filter in filter_types:
