@@ -72,9 +72,8 @@ def create_graph(df):
     return G
 
 
-
 # Step 6: Plot the graph with colored edges using seaborn
-def create_learning_line(graph, file_path, out_dir_path,metric_name):
+def create_learning_line(graph, file_path, out_dir_path, metric_name):
     # Create a new figure and axis
     fig, ax = plt.subplots(figsize=(16, 9), tight_layout=True)  # Increased figure width for more space
 
@@ -124,7 +123,6 @@ def create_learning_line(graph, file_path, out_dir_path,metric_name):
 
 # Main function to run the script
 def execute_learning_line(in_dir_path, out_dir_path, file_name):
-
     file_path = os.path.join(in_dir_path, file_name)
     df = pd.read_csv(file_path, index_col=0)
 

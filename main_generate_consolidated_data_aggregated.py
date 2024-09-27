@@ -1,10 +1,9 @@
-import pandas as pd
 import os
 
-from icecream import ic
+import pandas as pd
 from loguru import logger
 
-# Define the groups of constructs
+# Define the groups of stereotypes
 aggregation_groups = {
     "sortal": ["kind", "phase", "collective", "mode", "quantity", "relator", "subkind", "role", "historicalRole",
                "type", "quality"],
@@ -20,9 +19,11 @@ aggregation_groups = {
 aggregation_groups["rigid_sortal"] = list(set(aggregation_groups["rigid"]) & set(aggregation_groups["sortal"]))
 aggregation_groups["rigid_non_sortal"] = list(set(aggregation_groups["rigid"]) & set(aggregation_groups["non_sortal"]))
 aggregation_groups["non_rigid_sortal"] = list(set(aggregation_groups["non_rigid"]) & set(aggregation_groups["sortal"]))
-aggregation_groups["non_rigid_non_sortal"] = list(set(aggregation_groups["non_rigid"]) & set(aggregation_groups["non_sortal"]))
+aggregation_groups["non_rigid_non_sortal"] = list(
+    set(aggregation_groups["non_rigid"]) & set(aggregation_groups["non_sortal"]))
 
 aggregation_groups["undef"] = list(set().union(*[aggregation_groups["none"], aggregation_groups["other"]]))
+
 
 # Function to calculate occurrences for each group
 def calculate_group_occurrences(df, groups):
@@ -35,6 +36,7 @@ def calculate_group_occurrences(df, groups):
         result_df[group_name] = df[elements].sum(axis=1)
 
     return result_df
+
 
 if __name__ == "__main__":
     # Load the input CSV file

@@ -8,7 +8,8 @@ import seaborn as sns
 from adjustText import adjust_text
 from loguru import logger
 
-from src.color_legend import color_text
+from src.utils import color_text
+
 
 def calculate_quadrants_and_save(df, x_metric, y_metric, out_dir_path):
     # Calculate median values for x and y metrics
@@ -29,18 +30,18 @@ def calculate_quadrants_and_save(df, x_metric, y_metric, out_dir_path):
     # Create a list to hold the results
     results = []
 
-    # Iterate over each construct and determine its quadrant
-    for construct in df['Construct'].unique():
-        subset = df[df['Construct'] == construct]
+    # Iterate over each stereotype and determine its quadrant
+    for stereotype in df['Stereotype'].unique():
+        subset = df[df['Stereotype'] == stereotype]
 
-        # Get the x and y values for this construct
+        # Get the x and y values for this stereotype
         x, y = subset[x_metric].values[0], subset[y_metric].values[0]
 
         # Determine the quadrant
         quadrant = get_quadrant(x, y, median_x, median_y)
 
         # Append the results as a dictionary
-        results.append({'construct': construct, 'x_value': x, 'y_value': y, 'quadrant': quadrant})
+        results.append({'stereotype': stereotype, 'x_value': x, 'y_value': y, 'quadrant': quadrant})
 
     # Convert results to DataFrame
     results_df = pd.DataFrame(results)
@@ -66,18 +67,18 @@ def format_metric_name(metric):
 
 
 # Function to create all possible scatter plots for the metric combinations
-def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, file_path, aggr:bool=False):
+def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, file_path, aggr: bool = False):
     base_name = os.path.splitext(file_path)[0] + "_" if aggr else ""
 
     df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
-    # Filter out rows (constructs) with zero occurrences in 'Total Frequency' (or other relevant metrics)
+    # Filter out rows (stereotypes) with zero occurrences in 'Total Frequency' (or other relevant metrics)
     df = df[df['Total Frequency'] > 0]
 
-    # Convert the 'Construct' column to a categorical type to ensure proper ordering in the plots
-    df['Construct'] = pd.Categorical(df['Construct'], categories=df['Construct'].unique(), ordered=True)
+    # Convert the 'Stereotype' column to a categorical type to ensure proper ordering in the plots
+    df['Stereotype'] = pd.Categorical(df['Stereotype'], categories=df['Stereotype'].unique(), ordered=True)
 
-    # Get all numeric columns (excluding 'Construct')
+    # Get all numeric columns (excluding 'Stereotype')
     numeric_columns = df.select_dtypes(include='number').columns
 
     # Generate all unique combinations of two metrics
@@ -90,24 +91,24 @@ def execute_visualization_frequency_analysis_scatter(in_dir_path, out_dir_path, 
 
         texts = []
         # Plotting the scatter plot with circles and adding labels to each point
-        for i, construct in enumerate(df['Construct'].unique()):
-            subset = df[df['Construct'] == construct]
+        for i, stereotype in enumerate(df['Stereotype'].unique()):
+            subset = df[df['Stereotype'] == stereotype]
 
             # Filter out rows with non-finite values in either x_metric or y_metric
             subset = subset[pd.notnull(subset[x_metric]) & pd.notnull(subset[y_metric])]
 
-            # Skip if no valid data to plot for this construct
+            # Skip if no valid data to plot for this stereotype
             if subset.empty:
                 continue
 
             # Plot the point (circle marker)
             plt.scatter(subset[x_metric], subset[y_metric],
-                        color=extended_palette[i], marker='o', s=100, edgecolor='w', label=construct)
+                        color=extended_palette[i], marker='o', s=100, edgecolor='w', label=stereotype)
 
             # Add label next to each point
             for j in range(len(subset)):
                 text = plt.text(subset[x_metric].values[j],
-                                subset[y_metric].values[j], construct, fontsize=8,
+                                subset[y_metric].values[j], stereotype, fontsize=8,
                                 color='black', ha='left', va='top')
                 texts.append(text)
 

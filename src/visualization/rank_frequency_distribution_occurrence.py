@@ -5,7 +5,7 @@ import pandas as pd
 import seaborn as sns
 from loguru import logger
 
-from src.color_legend import color_text
+from src.utils import color_text
 
 
 def execute_visualization_rank_frequency_distribution_occurrence(in_dir_path, out_dir_path, file_path):
@@ -22,10 +22,10 @@ def execute_visualization_rank_frequency_distribution_occurrence(in_dir_path, ou
     fig, ax1 = plt.subplots(figsize=(16, 9), tight_layout=True)
 
     # Bar plot for Rank-Percentage Frequency with uniform color
-    sns.barplot(x='Construct', y='Percentage Frequency', data=data, ax=ax1, color='skyblue')
-    ax1.set_xlabel('Construct')
+    sns.barplot(x='Stereotype', y='Percentage Frequency', data=data, ax=ax1, color='skyblue')
+    ax1.set_xlabel('Stereotype')
     ax1.set_ylabel('Occurrence-wise Relative Frequency (%)')
-    ax1.set_title('Pareto Chart: Construct Frequency and Cumulative Percentage', fontweight='bold')
+    ax1.set_title('Pareto Chart: Stereotype Frequency and Cumulative Percentage', fontweight='bold')
 
     # Apply color to specific labels
     color_text(ax1.get_xticklabels())
@@ -41,7 +41,7 @@ def execute_visualization_rank_frequency_distribution_occurrence(in_dir_path, ou
 
     plt.grid(True)
     fig.tight_layout()  # Ensure everything fits within the figure
-    fig_name = 'pareto_chart_construct_frequency_cumulative_percentage.png'
+    fig_name = 'pareto_chart_stereotype_frequency_cumulative_percentage.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)

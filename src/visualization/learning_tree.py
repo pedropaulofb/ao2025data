@@ -57,9 +57,8 @@ def build_branches(df, current, selected, tree, tolerance):
 
 
 def generate_dot(tree, output_file_path, file_name):
-
     output_file = os.path.join(output_file_path, f"learning_tree_{file_name}")
-    output_file = output_file.replace(".csv",".dot")
+    output_file = output_file.replace(".csv", ".dot")
 
     # Set the title of the graph using graph attributes
     pydot_graph = nx.drawing.nx_pydot.to_pydot(tree)
@@ -90,7 +89,6 @@ def select_root_node(df):
 
 
 def execute_learning_tree(in_dir_path, out_dir_path, file_name):
-
     file_path = os.path.join(in_dir_path, file_name)
     df = pd.read_csv(file_path, index_col=0)
 

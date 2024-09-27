@@ -6,7 +6,7 @@ import pandas as pd
 import seaborn as sns
 from loguru import logger
 
-from src.color_legend import color_text
+from src.utils import color_text
 
 
 def execute_visualization_diversity_measures(in_dir_path, out_dir_path, file_path):
@@ -14,7 +14,7 @@ def execute_visualization_diversity_measures(in_dir_path, out_dir_path, file_pat
     df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
     # Prepare the data
-    x = np.arange(len(df['Construct']))  # The label locations
+    x = np.arange(len(df['Stereotype']))  # The label locations
     bar_width = 0.25  # Width of each bar
 
     # Create the figure
@@ -23,11 +23,11 @@ def execute_visualization_diversity_measures(in_dir_path, out_dir_path, file_pat
     # Plot Shannon Entropy on the first y-axis (left)
     ax1.bar(x - bar_width, df['Shannon Entropy'], width=bar_width, color='#1f77b4', label='Shannon Entropy')
     ax1.set_ylabel('Shannon Entropy')
-    ax1.set_xlabel('Construct')
+    ax1.set_xlabel('Stereotype')
 
     # Adjust x-axis labels
     ax1.set_xticks(x)
-    ax1.set_xticklabels(df['Construct'], rotation=45, ha='right')  # Rotate labels and align to the right
+    ax1.set_xticklabels(df['Stereotype'], rotation=45, ha='right')  # Rotate labels and align to the right
 
     # Apply color to specific labels
     color_text(ax1.get_xticklabels())
@@ -45,11 +45,11 @@ def execute_visualization_diversity_measures(in_dir_path, out_dir_path, file_pat
     ax2.legend(loc='upper right')
 
     # Increase spacing between the labels by setting x-axis limits and tight layout
-    plt.xlim(-0.5, len(df['Construct']) - 0.5)  # Adjust limits to give more space around bars
-    plt.title('Comparison of Diversity Measures Across Constructs', fontweight='bold')
+    plt.xlim(-0.5, len(df['Stereotype']) - 0.5)  # Adjust limits to give more space around bars
+    plt.title('Comparison of Diversity Measures Across Stereotypes', fontweight='bold')
     plt.tight_layout()
 
-    fig_name = 'diversity_measures_comparison_across_constructs.png'
+    fig_name = 'diversity_measures_comparison_across_stereotypes.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
@@ -70,7 +70,7 @@ def execute_visualization_diversity_measures(in_dir_path, out_dir_path, file_pat
     # 3. Box Plot
 
     # Melt the data to a long format
-    df_melted = df.melt(id_vars='Construct', value_vars=['Shannon Entropy', 'Gini Coefficient', 'Simpson Index'],
+    df_melted = df.melt(id_vars='Stereotype', value_vars=['Shannon Entropy', 'Gini Coefficient', 'Simpson Index'],
                         var_name='Measure', value_name='Value')
 
     # Create the figure with two subplots
@@ -78,14 +78,14 @@ def execute_visualization_diversity_measures(in_dir_path, out_dir_path, file_pat
 
     # Plot for Shannon Entropy
     sns.boxplot(x='Measure', y='Value', data=df_melted[df_melted['Measure'] == 'Shannon Entropy'], ax=ax1)
-    ax1.set_title('Variation of Shannon Entropy Across Constructs', fontweight='bold')
+    ax1.set_title('Variation of Shannon Entropy Across Stereotypes', fontweight='bold')
     ax1.set_xlabel('Measure')
     ax1.set_ylabel('Value')
 
     # Plot for Gini Coefficient and Simpson Index
     sns.boxplot(x='Measure', y='Value',
                 data=df_melted[df_melted['Measure'].isin(['Gini Coefficient', 'Simpson Index'])], ax=ax2)
-    ax2.set_title('Variation of Gini Coefficient and Simpson Index Across Constructs', fontweight='bold')
+    ax2.set_title('Variation of Gini Coefficient and Simpson Index Across Stereotypes', fontweight='bold')
     ax2.set_xlabel('Measure')
     ax2.set_ylabel('Value')
 

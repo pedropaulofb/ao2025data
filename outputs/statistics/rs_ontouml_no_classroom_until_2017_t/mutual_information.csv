@@ -1,4 +1,4 @@
-Construct,bringsAbout,characterization,comparative,componentOf,creation,derivation,externalDependence,historicalDependence,instantiation,manifestation,material,mediation,memberOf,participation,participational,subCollectionOf,subQuantityOf,termination,triggers
+Stereotype,bringsAbout,characterization,comparative,componentOf,creation,derivation,externalDependence,historicalDependence,instantiation,manifestation,material,mediation,memberOf,participation,participational,subCollectionOf,subQuantityOf,termination,triggers
 bringsAbout,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 characterization,0.0,1.4118191793225023,0.08414863033853784,0.7967027439988875,0.0,0.5720213442333266,0.29875805818934015,0.0,0.0,0.0,0.7322685755893965,1.1739468402322275,0.5966000843449658,0.14999492361041505,0.0,0.328083150400285,0.2987580581893401,0.0,0.0
 comparative,0.0,0.08414863033853784,0.1499949236104153,0.10219166977869497,0.0,0.013087859233951518,0.0025092203842648764,0.0,0.0,0.0,0.10219166977869501,0.10219166977869494,0.14999492361041517,0.001231789031490474,0.0,0.005215485908542344,0.0025092203842648764,0.0,0.0

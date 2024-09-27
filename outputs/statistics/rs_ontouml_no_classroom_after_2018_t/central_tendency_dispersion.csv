@@ -1,4 +1,4 @@
-Construct,Mean,Median,Mode,Standard Deviation,Variance,Skewness,Kurtosis,25th Percentile (Q1),75th Percentile (Q3),Interquartile Range (IQR)
+Stereotype,Mean,Median,Mode,Standard Deviation,Variance,Skewness,Kurtosis,25th Percentile (Q1),75th Percentile (Q3),Interquartile Range (IQR)
 bringsAbout,0.32608695652173914,0.0,0,0.9151796275033819,0.8375537505972289,2.8174107986172157,6.964571274194631,0.0,0.0,0.0
 characterization,4.3478260869565215,2.0,0,6.158055177880228,37.92164357381749,1.8960911093251227,3.298988990138118,0.0,6.0,6.0
 comparative,0.2391304347826087,0.0,0,1.2870407766740672,1.6564739608217864,6.115200538606586,37.87125542290859,0.0,0.0,0.0

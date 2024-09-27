@@ -1,8 +1,7 @@
 import pandas as pd
-from icecream import ic
 
-evaluations = ["cs","rs"]
-cleans = ["t","f"]
+evaluations = ["cs", "rs"]
+cleans = ["t", "f"]
 
 base_file1 = 'outputs/visualizations/'
 base_file2 = "outputs/visualizations/movement/"
@@ -19,15 +18,15 @@ for evaluation in evaluations:
         df1 = pd.read_csv(file1)
         df2 = pd.read_csv(file2)
 
-        # Merge the two dataframes on the 'construct' column
-        merged_df = pd.merge(df1[['construct', 'quadrant']], df2[['construct', 'quadrant_start', 'quadrant_end']],
-                             on='construct')
+        # Merge the two dataframes on the 'stereotype' column
+        merged_df = pd.merge(df1[['stereotype', 'quadrant']], df2[['stereotype', 'quadrant_start', 'quadrant_end']],
+                             on='stereotype')
 
         # Rename 'quadrant' to 'quadrant_all'
         merged_df.rename(columns={'quadrant': 'quadrant_all'}, inplace=True)
 
         # Reorder the columns
-        merged_df = merged_df[['construct', 'quadrant_start', 'quadrant_end', 'quadrant_all']]
+        merged_df = merged_df[['stereotype', 'quadrant_start', 'quadrant_end', 'quadrant_all']]
 
         # Save the merged dataframe to a new CSV file
         output_file = base_file2 + evaluation + "_ontouml_no_classroom_" + clean + '/merged_quadrant_analysis.csv'

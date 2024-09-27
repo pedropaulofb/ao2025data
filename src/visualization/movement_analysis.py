@@ -12,7 +12,7 @@ from loguru import logger
 
 def plot_custom_quadrant_flow_chart(results_df, out_dir_path):
     # Data setup from your DataFrame
-    constructs = results_df['construct']  # Construct labels (first column)
+    stereotypes = results_df['stereotype']  # Stereotype labels (first column)
     quadrant_start = results_df['quadrant_start']  # Start quadrants (A)
     quadrant_end = results_df['quadrant_end']  # End quadrants (B)
 
@@ -23,44 +23,44 @@ def plot_custom_quadrant_flow_chart(results_df, out_dir_path):
     start_positions = []
     end_positions = []
 
-    # Function to space constructs based on their number
-    def evenly_space_constructs(constructs_in_quadrant, q_num):
-        n = len(constructs_in_quadrant)
+    # Function to space stereotypes based on their number
+    def evenly_space_stereotypes(stereotypes_in_quadrant, q_num):
+        n = len(stereotypes_in_quadrant)
         if n == 1:
-            return [q_num]  # If only one construct, place it in the middle of the quadrant
+            return [q_num]  # If only one stereotype, place it in the middle of the quadrant
         else:
             lower_limit = q_num - 0.5
             upper_limit = q_num + 0.5
-            # Calculate the margin (offset) between each construct and the quadrant limits
+            # Calculate the margin (offset) between each stereotype and the quadrant limits
             margin = (upper_limit - lower_limit) / (n + 1)
-            return [lower_limit + margin * (i + 1) for i in range(n)]  # Space constructs evenly with margins
+            return [lower_limit + margin * (i + 1) for i in range(n)]  # Space stereotypes evenly with margins
 
-    # Group constructs by their start and end quadrants for spacing purposes
-    constructs_by_start = results_df.groupby('quadrant_start')['construct'].apply(list).to_dict()
-    constructs_by_end = results_df.groupby('quadrant_end')['construct'].apply(list).to_dict()
+    # Group stereotypes by their start and end quadrants for spacing purposes
+    stereotypes_by_start = results_df.groupby('quadrant_start')['stereotype'].apply(list).to_dict()
+    stereotypes_by_end = results_df.groupby('quadrant_end')['stereotype'].apply(list).to_dict()
 
     # Apply even spacing within each quadrant for start and end positions
     start_spacing = {}
     end_spacing = {}
 
     for q in quadrant_map:
-        if q in constructs_by_start:
-            start_spacing[q] = evenly_space_constructs(constructs_by_start[q], quadrant_map[q])
-        if q in constructs_by_end:
-            end_spacing[q] = evenly_space_constructs(constructs_by_end[q], quadrant_map[q])
+        if q in stereotypes_by_start:
+            start_spacing[q] = evenly_space_stereotypes(stereotypes_by_start[q], quadrant_map[q])
+        if q in stereotypes_by_end:
+            end_spacing[q] = evenly_space_stereotypes(stereotypes_by_end[q], quadrant_map[q])
 
-    # Create counters to track positioning for each construct within its quadrant
+    # Create counters to track positioning for each stereotype within its quadrant
     start_counters = {q: 0 for q in quadrant_map}
     end_counters = {q: 0 for q in quadrant_map}
 
     # Darker, stronger colors for the lines and labels
-    cmap = cm.get_cmap('tab10', len(constructs))  # Use 'tab10' colormap for stronger, darker colors
+    cmap = cm.get_cmap('tab10', len(stereotypes))  # Use 'tab10' colormap for stronger, darker colors
 
     # Color scheme for quadrants with stronger colors (ensuring matching in the legend)
     quadrant_colors = ['#abd194', '#d194a6', '#8894ba', '#c2ab93']  # Q1-Q4 colors (in reversed order)
 
-    # Calculate positions for each construct
-    for i, construct in enumerate(constructs):
+    # Calculate positions for each stereotype
+    for i, stereotype in enumerate(stereotypes):
         start_q = quadrant_start.iloc[i]
         end_q = quadrant_end.iloc[i]
 
@@ -89,13 +89,13 @@ def plot_custom_quadrant_flow_chart(results_df, out_dir_path):
     for i, (q_label, q_num) in enumerate(quadrant_map.items()):
         ax.fill_betweenx([q_num - 0.5, q_num + 0.5], 0, 1, color=quadrant_colors[i], alpha=0.3)
 
-    # Plot lines between lanes (quadrants) for each construct
-    for i, construct in enumerate(constructs):
-        line_color = cmap(i)  # Get unique, stronger color for the current construct
+    # Plot lines between lanes (quadrants) for each stereotype
+    for i, stereotype in enumerate(stereotypes):
+        line_color = cmap(i)  # Get unique, stronger color for the current stereotype
         ax.plot(x, [start_positions[i], end_positions[i]], marker='o', color=line_color)
 
-        # Add the labels for the constructs on the left side (Moment A) in the same color as the line
-        ax.text(-0.05, start_positions[i], construct, verticalalignment='center', horizontalalignment='right',
+        # Add the labels for the stereotypes on the left side (Moment A) in the same color as the line
+        ax.text(-0.05, start_positions[i], stereotype, verticalalignment='center', horizontalalignment='right',
                 color=line_color)
 
     # Remove quadrant labels from the y-axis (not needed anymore)
@@ -110,7 +110,7 @@ def plot_custom_quadrant_flow_chart(results_df, out_dir_path):
     ax.tick_params(axis='x', which='both', length=0)  # This will remove the small tick lines on the x-axis
 
     # Add a title to the plot
-    ax.set_title("Construct Movement Between Quadrants Over Time", fontsize=16, pad=0, fontweight='bold')
+    ax.set_title("Stereotype Movement Between Quadrants Over Time", fontsize=16, pad=0, fontweight='bold')
 
     # Remove unnecessary spines and gridlines
     ax.spines['top'].set_visible(False)
@@ -155,12 +155,12 @@ def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path):
     # Create a list to hold the results
     results = []
 
-    # Iterate over each construct and determine its quadrant in A and B
-    for construct in df_A['Construct'].unique():
-        subset_A = df_A[df_A['Construct'] == construct]
-        subset_B = df_B[df_B['Construct'] == construct]
+    # Iterate over each stereotype and determine its quadrant in A and B
+    for stereotype in df_A['Stereotype'].unique():
+        subset_A = df_A[df_A['Stereotype'] == stereotype]
+        subset_B = df_B[df_B['Stereotype'] == stereotype]
 
-        # Get the x and y values for this construct in moment A and B
+        # Get the x and y values for this stereotype in moment A and B
         x_A, y_A = subset_A[x_metric].values[0], subset_A[y_metric].values[0]
         x_B, y_B = subset_B[x_metric].values[0], subset_B[y_metric].values[0]
 
@@ -169,7 +169,7 @@ def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path):
         quadrant_B = get_quadrant(x_B, y_B, median_x_B, median_y_B)
 
         # Append the results as a dictionary
-        results.append({'construct': construct, 'quadrant_start': quadrant_A, 'quadrant_end': quadrant_B})
+        results.append({'stereotype': stereotype, 'quadrant_start': quadrant_A, 'quadrant_end': quadrant_B})
 
     # Convert results to DataFrame
     results_df = pd.DataFrame(results)
@@ -181,11 +181,10 @@ def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path):
     logger.success(f"Quadrant analysis saved to {output_file}.")
 
     # Call plot with the results DataFrame, not the file path
-    plot_custom_quadrant_flow_chart(results_df,out_dir_path)
+    plot_custom_quadrant_flow_chart(results_df, out_dir_path)
 
 
 def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
-
     # Create the directory to save if it does not exist
     if not os.path.exists(out_dir_path):
         os.makedirs(out_dir_path)
@@ -198,18 +197,18 @@ def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
     df_B = pd.read_csv(path_file_B)
 
     if "_t_" in path_file_A:
-        # Drop rows where the 'Construct' column has values 'none', 'other', or 'undef'
-        df_A = df_A[~df_A['Construct'].isin(['none', 'other', 'undef'])]
-        df_B = df_B[~df_B['Construct'].isin(['none', 'other', 'undef'])]
+        # Drop rows where the 'Stereotype' column has values 'none', 'other', or 'undef'
+        df_A = df_A[~df_A['Stereotype'].isin(['none', 'other', 'undef'])]
+        df_B = df_B[~df_B['Stereotype'].isin(['none', 'other', 'undef'])]
 
-    # Check if both dataframes have the same constructs and columns
-    assert all(df_A['Construct'] == df_B['Construct']), "The constructs in both moments must match."
+    # Check if both dataframes have the same stereotypes and columns
+    assert all(df_A['Stereotype'] == df_B['Stereotype']), "The stereotypes in both moments must match."
 
-    # Convert 'Construct' column to categorical type for proper ordering
-    df_A['Construct'] = pd.Categorical(df_A['Construct'], categories=df_A['Construct'].unique(), ordered=True)
-    df_B['Construct'] = pd.Categorical(df_B['Construct'], categories=df_B['Construct'].unique(), ordered=True)
+    # Convert 'Stereotype' column to categorical type for proper ordering
+    df_A['Stereotype'] = pd.Categorical(df_A['Stereotype'], categories=df_A['Stereotype'].unique(), ordered=True)
+    df_B['Stereotype'] = pd.Categorical(df_B['Stereotype'], categories=df_B['Stereotype'].unique(), ordered=True)
 
-    # Get all numeric columns (excluding 'Construct')
+    # Get all numeric columns (excluding 'Stereotype')
     numeric_columns = df_A.select_dtypes(include='number').columns
 
     # Generate all unique combinations of two metrics for scatter plots
@@ -221,13 +220,13 @@ def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
 
         texts = []
         # Plot both moments A and B and draw arrows between the points
-        for i, construct in enumerate(df_A['Construct'].unique()):
-            subset_A = df_A[df_A['Construct'] == construct]
-            subset_B = df_B[df_B['Construct'] == construct]
+        for i, stereotype in enumerate(df_A['Stereotype'].unique()):
+            subset_A = df_A[df_A['Stereotype'] == stereotype]
+            subset_B = df_B[df_B['Stereotype'] == stereotype]
 
             # Plot moment A (start point)
             ax.scatter(subset_A[x_metric], subset_A[y_metric], color=extended_palette[i], marker='o', s=100,
-                       edgecolor='w', label=construct)
+                       edgecolor='w', label=stereotype)
 
             # Plot moment B (end point)
             ax.scatter(subset_B[x_metric], subset_B[y_metric], color=extended_palette[i], marker='o', s=100,
@@ -244,7 +243,7 @@ def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
                         arrowprops=dict(arrowstyle="-|>", color=extended_palette[i], lw=1.0))
 
             # Add label next to the start point
-            text = ax.text(subset_A[x_metric].values[0], subset_A[y_metric].values[0], construct, fontsize=8,
+            text = ax.text(subset_A[x_metric].values[0], subset_A[y_metric].values[0], stereotype, fontsize=8,
                            color='black', ha='left', va='top')
             texts.append(text)
 

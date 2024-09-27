@@ -3,23 +3,21 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from icecream import ic
 from loguru import logger
 from matplotlib.font_manager import FontProperties
 
-from src.color_legend import color_text
+from src.utils import color_text
 
 
-def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, file_path,aggr:bool=False):
-
+def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, file_path, aggr: bool = False):
     base_name = os.path.splitext(file_path)[0] + "_" if aggr else ""
 
     df = pd.read_csv(os.path.join(in_dir_path, file_path))
-    # Filter out rows (constructs) with zero occurrences in 'Total Frequency' (or other relevant metrics)
+    # Filter out rows (stereotypes) with zero occurrences in 'Total Frequency' (or other relevant metrics)
     df = df[df['Total Frequency'] > 0]
 
-    # Convert the 'Construct' column to a categorical type to ensure proper ordering in the plots
-    df['Construct'] = pd.Categorical(df['Construct'], categories=df['Construct'].unique(), ordered=True)
+    # Convert the 'Stereotype' column to a categorical type to ensure proper ordering in the plots
+    df['Stereotype'] = pd.Categorical(df['Stereotype'], categories=df['Stereotype'].unique(), ordered=True)
 
     ### 1) Side-by-Side Bar Chart with Double Axis for Total Frequency and Ubiquity Index
 
@@ -30,10 +28,10 @@ def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, 
 
     # Plot Total Frequency on the primary y-axis
     ax1.bar([i - 0.2 for i in x], df['Total Frequency'], color='#254c94', width=0.4, label='Total Frequency')
-    ax1.set_ylabel('Total Construct Frequency', color='#254c94')
+    ax1.set_ylabel('Total Stereotype Frequency', color='#254c94')
     ax1.tick_params(axis='y', labelcolor='#254c94')
     ax1.set_xticks(x)
-    ax1.set_xticklabels(df['Construct'], rotation=90)
+    ax1.set_xticklabels(df['Stereotype'], rotation=90)
 
     # Color specific x-axis labels
     color_text(ax1.get_xticklabels())
@@ -45,12 +43,12 @@ def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, 
     ax2.set_ylabel('Ubiquity Index (Frequency Across Groups)', color='#d9403d')
     ax2.tick_params(axis='y', labelcolor='#d9403d')
 
-    plt.title('Total Frequency and Ubiquity Index by Construct', fontweight='bold')
+    plt.title('Total Frequency and Ubiquity Index by Stereotype', fontweight='bold')
     ax1.legend(loc='upper left')
     ax2.legend(loc='upper right')
     fig.tight_layout()
 
-    fig_name = f'{base_name}total_frequency_vs_ubiquity_index_by_construct.png'
+    fig_name = f'{base_name}total_frequency_vs_ubiquity_index_by_stereotype.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
@@ -65,7 +63,7 @@ def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, 
     ax1.set_ylabel('Total Frequency', color='green')
     ax1.tick_params(axis='y', labelcolor='green')
     ax1.set_xticks([i + 0.2 for i in x])
-    ax1.set_xticklabels(df['Construct'], rotation=90)
+    ax1.set_xticklabels(df['Stereotype'], rotation=90)
 
     # Color specific x-axis labels
     color_text(ax1.get_xticklabels())
@@ -73,15 +71,15 @@ def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, 
     # Create a secondary y-axis for Group Frequency
     ax2 = ax1.twinx()
     ax2.bar([i + 0.4 for i in x], df['Group Frequency'], color='orange', width=0.4, label='Group Frequency')
-    ax2.set_ylabel('Frequency of Constructs in Groups', color='orange')
+    ax2.set_ylabel('Frequency of Stereotypes in Groups', color='orange')
     ax2.tick_params(axis='y', labelcolor='orange')
 
-    plt.title('Total Frequency vs. Group Frequency Across Constructs', fontweight='bold')
+    plt.title('Total Frequency vs. Group Frequency Across Stereotypes', fontweight='bold')
     ax1.legend(loc='upper left')
     ax2.legend(loc='upper right')
     fig.tight_layout()
 
-    fig_name = f'{base_name}total_frequency_vs_group_frequency_across_constructs.png'
+    fig_name = f'{base_name}total_frequency_vs_group_frequency_across_stereotypes.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
@@ -94,8 +92,8 @@ def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, 
 
     # Prepare labels with percentages
     labels_occurrence = [f'{label}: {percentage:.1f}%' for label, percentage in
-                         zip(df['Construct'], percent_occurrence)]
-    labels_group = [f'{label}: {percentage:.1f}%' for label, percentage in zip(df['Construct'], percent_group)]
+                         zip(df['Stereotype'], percent_occurrence)]
+    labels_group = [f'{label}: {percentage:.1f}%' for label, percentage in zip(df['Stereotype'], percent_group)]
 
     # Create a palette with 12 distinct colors
     base_palette = sns.color_palette('tab10',
@@ -109,7 +107,7 @@ def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, 
 
     # Donut chart for Occurrence-wise relative frequency
     wedges, texts, autotexts = ax1.pie(df['Global Relative Frequency (Occurrence-wise)'],
-                                       labels=['' for _ in df['Construct']],  # Empty labels to avoid clutter
+                                       labels=['' for _ in df['Stereotype']],  # Empty labels to avoid clutter
                                        autopct='', startangle=140, colors=extended_palette, wedgeprops=dict(width=0.4))
 
     # Apply dot texture to every other wedge
@@ -118,16 +116,16 @@ def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, 
 
     # Add custom legend with colored text
     bold_font = FontProperties(weight='bold')
-    legend_occurrence = ax1.legend(wedges, labels_occurrence, title="Constructs", loc="center left",
+    legend_occurrence = ax1.legend(wedges, labels_occurrence, title="Stereotypes", loc="center left",
                                    title_fontproperties=bold_font, bbox_to_anchor=(1, 0, 0.5, 1))
 
     color_text(legend_occurrence.get_texts())
 
-    ax1.set_title('Relative Frequency of Constructs by Occurrence', fontweight='bold')
+    ax1.set_title('Relative Frequency of Stereotypes by Occurrence', fontweight='bold')
 
     # Donut chart for Group-wise relative frequency
     wedges, texts, autotexts = ax2.pie(df['Global Relative Frequency (Group-wise)'],
-                                       labels=['' for _ in df['Construct']],  # Empty labels to avoid clutter
+                                       labels=['' for _ in df['Stereotype']],  # Empty labels to avoid clutter
                                        autopct='', startangle=140, colors=extended_palette, wedgeprops=dict(width=0.4))
 
     # Apply dot texture to every other wedge
@@ -135,14 +133,14 @@ def execute_visualization_frequency_analysis_general(in_dir_path, out_dir_path, 
         wedge.set_hatch(hatches[i % 24])  # Use the hatch pattern for every other wedge
 
     # Add custom legend with colored text
-    legend_group = ax2.legend(wedges, labels_group, title="Constructs", loc="center left",
+    legend_group = ax2.legend(wedges, labels_group, title="Stereotypes", loc="center left",
                               title_fontproperties=bold_font, bbox_to_anchor=(1, 0, 0.5, 1))
     color_text(legend_group.get_texts())
 
-    ax2.set_title('Relative Frequency of Constructs by Group Usage', fontweight='bold')
+    ax2.set_title('Relative Frequency of Stereotypes by Group Usage', fontweight='bold')
 
     plt.tight_layout()
-    fig_name = f'{base_name}relative_frequency_of_constructs_by_occurrence_and_group_usage.png'
+    fig_name = f'{base_name}relative_frequency_of_stereotypes_by_occurrence_and_group_usage.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)

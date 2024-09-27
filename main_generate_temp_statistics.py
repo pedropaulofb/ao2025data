@@ -4,14 +4,14 @@ import pandas as pd
 from loguru import logger
 
 
-# Function to generate the first CSV file: Percent occurrence of each construct per year
-def generate_yearly_statistics(constructs_file, years_file, output_file, clean):
+# Function to generate the first CSV file: Percent occurrence of each stereotype per year
+def generate_yearly_statistics(stereotypes_file, years_file, output_file, clean):
     # Load the CSV files into DataFrames
-    constructs_df = pd.read_csv(constructs_file)
+    stereotypes_df = pd.read_csv(stereotypes_file)
     years_df = pd.read_csv(years_file)
 
     # Merge both DataFrames on the 'model' column
-    merged_df = pd.merge(constructs_df, years_df, on='model')
+    merged_df = pd.merge(stereotypes_df, years_df, on='model')
 
     # Validate the input data
     if merged_df.empty:
@@ -31,7 +31,7 @@ def generate_yearly_statistics(constructs_file, years_file, output_file, clean):
     # Group by 'year' and sum occurrences for each year
     yearly_data = merged_df.groupby('year').sum()
 
-    # Calculate the percentage per year so that the sum of all constructs per year equals 100%
+    # Calculate the percentage per year so that the sum of all stereotypes per year equals 100%
     yearly_relative_frequencies = yearly_data.div(yearly_data.sum(axis=1), axis=0)
 
     # Save to CSV with 5 decimal places
@@ -41,13 +41,13 @@ def generate_yearly_statistics(constructs_file, years_file, output_file, clean):
 
 
 # Function to generate the second CSV file: Percent occurrence across all years (but broken down by year)
-def generate_overall_statistics(constructs_file, years_file, output_file, clean: bool):
+def generate_overall_statistics(stereotypes_file, years_file, output_file, clean: bool):
     # Load the CSV files into DataFrames
-    constructs_df = pd.read_csv(constructs_file)
+    stereotypes_df = pd.read_csv(stereotypes_file)
     years_df = pd.read_csv(years_file)
 
     # Merge both DataFrames on the 'model' column
-    merged_df = pd.merge(constructs_df, years_df, on='model')
+    merged_df = pd.merge(stereotypes_df, years_df, on='model')
 
     # Validate the input data
     if merged_df.empty:
@@ -67,7 +67,7 @@ def generate_overall_statistics(constructs_file, years_file, output_file, clean:
     # Group by 'year' and sum occurrences for each year
     yearly_data = merged_df.groupby('year').sum()
 
-    # Calculate the percentage of each construct per year
+    # Calculate the percentage of each stereotype per year
     overall_relative_frequencies = yearly_data.div(yearly_data.sum().sum())
 
     # Add 'year' back as the index (if it is dropped during grouping)
@@ -84,23 +84,24 @@ def generate_overall_statistics(constructs_file, years_file, output_file, clean:
 
 
 if __name__ == "__main__":
-    input_file_constructs = ["./outputs/consolidated_data/cs_ontouml_no_classroom.csv",
+    input_file_stereotypes = ["./outputs/consolidated_data/cs_ontouml_no_classroom.csv",
                              "./outputs/consolidated_data/rs_ontouml_no_classroom.csv"]
     input_file_years = "./outputs/ontouml_no_classroom_years.csv"
 
-    for input_file_construct in input_file_constructs:
-        analysis = os.path.splitext(os.path.basename(input_file_construct))[0]
+    for input_file_stereotype in input_file_stereotypes:
+        analysis = os.path.splitext(os.path.basename(input_file_stereotype))[0]
 
         # Generate the first file: Yearly percentage occurrences
-        generate_yearly_statistics(input_file_construct, input_file_years,
-                                   os.path.join("./outputs/statistics", analysis + "_t", "temporal_yearly_stats.csv"), True)
-        generate_yearly_statistics(input_file_construct, input_file_years,
+        generate_yearly_statistics(input_file_stereotype, input_file_years,
+                                   os.path.join("./outputs/statistics", analysis + "_t", "temporal_yearly_stats.csv"),
+                                   True)
+        generate_yearly_statistics(input_file_stereotype, input_file_years,
                                    os.path.join("./outputs/statistics", analysis + "_f", "temporal_yearly_stats.csv"),
                                    False)
         # Generate the second file: Overall percentage occurrences
-        generate_overall_statistics(input_file_construct, input_file_years,
+        generate_overall_statistics(input_file_stereotype, input_file_years,
                                     os.path.join("./outputs/statistics", analysis + "_t", "temporal_overall_stats.csv"),
                                     True)
-        generate_overall_statistics(input_file_construct, input_file_years,
+        generate_overall_statistics(input_file_stereotype, input_file_years,
                                     os.path.join("./outputs/statistics", analysis + "_f", "temporal_overall_stats.csv"),
                                     False)

@@ -1,8 +1,7 @@
-import numpy as np
-import pandas as pd
 import os
 
-from icecream import ic
+import numpy as np
+import pandas as pd
 from loguru import logger
 from scipy.stats import mode
 
@@ -125,6 +124,7 @@ def calculate_advanced_statistics(df):
 
     return results_df
 
+
 if __name__ == "__main__":
     # Load the input CSV file (the one generated before with aggregated data)
     input_dir = './outputs/consolidated_data/aggregated/'
@@ -132,19 +132,19 @@ if __name__ == "__main__":
 
     output_base_dir = "./outputs/statistics/"
 
-    filters = ["t","f"]
+    filters = ["t", "f"]
 
     for input_file in input_files:
 
-        input_file_path = os.path.join(input_dir,input_file)
-        analysis = input_file.replace(".csv","")
+        input_file_path = os.path.join(input_dir, input_file)
+        analysis = input_file.replace(".csv", "")
         logger.info(f"Generating statistics for {input_file}.")
 
         for filter in filters:
 
             if filter == "t":
                 df = pd.read_csv(input_file_path)
-                df = df.drop(columns=["none","other","undef"])
+                df = df.drop(columns=["none", "other", "undef"])
             else:
                 df = pd.read_csv(input_file_path)
 
@@ -152,8 +152,8 @@ if __name__ == "__main__":
             basic_df = calculate_basic_statistics(df)
 
             # Save the result to a new CSV file
-            output_dir = os.path.join(output_base_dir,analysis+"_"+filter)
-            output_file_path = os.path.join(output_dir,"aggregated_basic_statistics.csv")
+            output_dir = os.path.join(output_base_dir, analysis + "_" + filter)
+            output_file_path = os.path.join(output_dir, "aggregated_basic_statistics.csv")
 
             basic_df.to_csv(output_file_path, index=False)
             logger.success(f"Aggregated basic statistics successfully saved in {output_file_path}.")
@@ -162,6 +162,6 @@ if __name__ == "__main__":
             advanced_df = calculate_advanced_statistics(df)
 
             # Save the result to a new CSV file
-            output_file_path = os.path.join(output_dir,"aggregated_advanced_statistics.csv")
+            output_file_path = os.path.join(output_dir, "aggregated_advanced_statistics.csv")
             advanced_df.to_csv(output_file_path, index=False)
             print(f"Aggregated advanced statistics successfully saved in {output_file_path}.")

@@ -56,13 +56,13 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
     # Number of groups
     group_num = len(df)
 
-    # Total Frequency of Each Construct
+    # Total Frequency of Each Stereotype
     total_frequency = data.sum(axis=0)
 
-    # Total Frequency of Each Construct per Group
+    # Total Frequency of Each Stereotype per Group
     total_frequency_per_group = total_frequency / group_num
 
-    # Group Frequency of Each Construct (count of non-zero occurrences for each column)
+    # Group Frequency of Each Stereotype (count of non-zero occurrences for each column)
     group_frequency = data.astype(bool).sum(axis=0)
 
     # Ubiquity Index (Group Frequency per Group)
@@ -79,12 +79,13 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
     global_relative_frequency_groupwise = group_frequency / total_groups
 
     # Combine all frequency-related data into a single DataFrame
-    frequency_analysis_df = pd.DataFrame({'Construct': total_frequency.index, 'Total Frequency': total_frequency.values,
-                                          'Total Frequency per Group': total_frequency_per_group,
-                                          'Group Frequency': group_frequency.values,
-                                          'Ubiquity Index (Group Frequency per Group)': ubiquity_index,
-                                          'Global Relative Frequency (Occurrence-wise)': global_relative_frequency.values,
-                                          'Global Relative Frequency (Group-wise)': global_relative_frequency_groupwise.values})
+    frequency_analysis_df = pd.DataFrame(
+        {'Stereotype': total_frequency.index, 'Total Frequency': total_frequency.values,
+         'Total Frequency per Group': total_frequency_per_group,
+         'Group Frequency': group_frequency.values,
+         'Ubiquity Index (Group Frequency per Group)': ubiquity_index,
+         'Global Relative Frequency (Occurrence-wise)': global_relative_frequency.values,
+         'Global Relative Frequency (Group-wise)': global_relative_frequency_groupwise.values})
 
     # Save the consolidated frequency analysis data to a single CSV file
     save_to_csv(frequency_analysis_df, output_folder + 'frequency_analysis.csv',
@@ -94,7 +95,7 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
 
     # 2.1 Occurrence-wise
 
-    # Calculate the total frequency of each construct (already computed earlier)
+    # Calculate the total frequency of each stereotype (already computed earlier)
     total_frequency_sorted = total_frequency.sort_values(ascending=False)
 
     # Calculate the total number of occurrences
@@ -102,7 +103,7 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
 
     # Create a DataFrame for rank and frequency
     rank_frequency_df = pd.DataFrame(
-        {'Construct': total_frequency_sorted.index, 'Frequency': total_frequency_sorted.values,
+        {'Stereotype': total_frequency_sorted.index, 'Frequency': total_frequency_sorted.values,
          'Rank': range(1, len(total_frequency_sorted) + 1)})
 
     # Calculate the cumulative frequency
@@ -125,7 +126,7 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
 
     # Create a DataFrame for rank and group-wise frequency
     rank_groupwise_frequency_df = pd.DataFrame(
-        {'Construct': group_frequency_sorted.index, 'Group-wise Frequency': group_frequency_sorted.values,
+        {'Stereotype': group_frequency_sorted.index, 'Group-wise Frequency': group_frequency_sorted.values,
          'Group-wise Rank': range(1, len(group_frequency_sorted) + 1)})
 
     # Calculate the cumulative group-wise frequency
@@ -142,7 +143,7 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
 
     # 3. Diversity and Distribution Measures
 
-    # Define a function to calculate Shannon Entropy for each construct
+    # Define a function to calculate Shannon Entropy for each stereotype
     def calculate_shannon_entropy(series):
         probabilities = series / series.sum()  # Calculate probabilities
         entropy = -np.sum(probabilities * np.log2(probabilities + 1e-9))  # Entropy calculation
@@ -151,7 +152,7 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
     # Apply Shannon Entropy function across the dataframe
     shannon_entropy = data.apply(calculate_shannon_entropy)
 
-    # Define a function to calculate Gini Coefficient for each construct
+    # Define a function to calculate Gini Coefficient for each stereotype
     def calculate_gini_coefficient(series):
         sorted_series = np.sort(series)  # Sort the values
         n = len(series)
@@ -165,7 +166,7 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
     # Apply Gini Coefficient function across the dataframe
     gini_coefficient = data.apply(calculate_gini_coefficient)
 
-    # Define a function to calculate Simpson's Index for each construct
+    # Define a function to calculate Simpson's Index for each stereotype
     def calculate_simpson_index(series):
         total = series.sum()
         if total == 0:
@@ -177,7 +178,7 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
     simpson_index = data.apply(calculate_simpson_index)
 
     # Combine all diversity and distribution measures into a single DataFrame
-    diversity_measures_df = pd.DataFrame({'Construct': df.columns[1:], 'Shannon Entropy': shannon_entropy.values,
+    diversity_measures_df = pd.DataFrame({'Stereotype': df.columns[1:], 'Shannon Entropy': shannon_entropy.values,
                                           'Gini Coefficient': gini_coefficient.values,
                                           'Simpson Index': simpson_index.values})
 
@@ -205,7 +206,7 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
 
     # Combine all central tendency and dispersion statistics into a single DataFrame
     central_tendency_dispersion_df = pd.DataFrame(
-        {'Construct': mean_counts.index, 'Mean': mean_counts.values, 'Median': median_counts.values,
+        {'Stereotype': mean_counts.index, 'Mean': mean_counts.values, 'Median': median_counts.values,
          'Mode': mode_counts.values, 'Standard Deviation': std_counts.values, 'Variance': variance_counts.values,
          'Skewness': skewness_counts.values, 'Kurtosis': kurtosis_counts.values,
          '25th Percentile (Q1)': q1_counts.values, '75th Percentile (Q3)': q3_counts.values,
@@ -219,51 +220,51 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
 
     # 5.1 Occurrence-wise
 
-    # Coverage of Top Percentage of Constructs
+    # Coverage of Top Percentage of Stereotypes
     percentages = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00]  # Define percentages
-    total_constructs = len(total_frequency)  # Total number of constructs
-    total_occurrences = total_frequency.sum()  # Total occurrences of all constructs
+    total_stereotypes = len(total_frequency)  # Total number of stereotypes
+    total_occurrences = total_frequency.sum()  # Total occurrences of all stereotypes
 
     # List to store coverage results
     coverage_list = []
 
     for pct in percentages:
-        k = int(total_constructs * pct)  # Calculate number of top constructs for the given percentage
-        top_k_constructs = total_frequency.sort_values(ascending=False).head(k)  # Get top k constructs by frequency
-        coverage_top_k = top_k_constructs.sum() / total_occurrences  # Calculate coverage
-        coverage_list.append({'Percentage': pct * 100, 'Top k Constructs': k, 'Coverage': coverage_top_k})
+        k = int(total_stereotypes * pct)  # Calculate number of top stereotypes for the given percentage
+        top_k_stereotypes = total_frequency.sort_values(ascending=False).head(k)  # Get top k stereotypes by frequency
+        coverage_top_k = top_k_stereotypes.sum() / total_occurrences  # Calculate coverage
+        coverage_list.append({'Percentage': pct * 100, 'Top k Stereotypes': k, 'Coverage': coverage_top_k})
 
     # Convert the list to a DataFrame
     coverage_df = pd.DataFrame(coverage_list)
 
     # Save the coverage data to a CSV file
     save_to_csv(coverage_df, output_folder + 'coverage_percentage_occurrence.csv',
-                "Coverage of Top Percentage of Constructs saved to CSV.")
+                "Coverage of Top Percentage of Stereotypes saved to CSV.")
 
     # 5.2 Group-wise
 
-    # Coverage of Top Percentage of Constructs (Group-wise)
+    # Coverage of Top Percentage of Stereotypes (Group-wise)
     percentages = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00]  # Define percentages
-    total_constructs_groupwise = len(group_frequency)  # Total number of constructs (group-wise)
+    total_stereotypes_groupwise = len(group_frequency)  # Total number of stereotypes (group-wise)
     total_groupwise_occurrences = group_frequency.sum()  # Total non-zero occurrences across groups
 
     # List to store group-wise coverage results
     groupwise_coverage_list = []
 
     for pct in percentages:
-        k = int(total_constructs_groupwise * pct)  # Calculate number of top constructs for the given percentage
-        top_k_constructs_groupwise = group_frequency.sort_values(ascending=False).head(
-            k)  # Get top k constructs by group-wise frequency
-        coverage_top_k_groupwise = top_k_constructs_groupwise.sum() / total_groupwise_occurrences  # Calculate group-wise coverage
+        k = int(total_stereotypes_groupwise * pct)  # Calculate number of top stereotypes for the given percentage
+        top_k_stereotypes_groupwise = group_frequency.sort_values(ascending=False).head(
+            k)  # Get top k stereotypes by group-wise frequency
+        coverage_top_k_groupwise = top_k_stereotypes_groupwise.sum() / total_groupwise_occurrences  # Calculate group-wise coverage
         groupwise_coverage_list.append(
-            {'Percentage': pct * 100, 'Top k Constructs': k, 'Coverage': coverage_top_k_groupwise})
+            {'Percentage': pct * 100, 'Top k Stereotypes': k, 'Coverage': coverage_top_k_groupwise})
 
     # Convert the list to a DataFrame
     groupwise_coverage_df = pd.DataFrame(groupwise_coverage_list)
 
     # Save the group-wise coverage data to a CSV file
     save_to_csv(groupwise_coverage_df, output_folder + 'coverage_percentage_group.csv',
-                "Group-wise Coverage of Top Percentage of Constructs saved to CSV.")
+                "Group-wise Coverage of Top Percentage of Stereotypes saved to CSV.")
 
     # 6. Similarity Measures
 
@@ -271,28 +272,28 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
     jaccard_similarity = {}
     dice_similarity = {}
 
-    # List of constructs to compare
-    constructs = df.columns[1:]
+    # List of stereotypes to compare
+    stereotypes = df.columns[1:]
 
-    # Calculate Jaccard Similarity and Dice Coefficient for each pair of constructs
-    for (construct1, construct2) in combinations(constructs, 2):
-        set1 = set(df[df[construct1] > 0].index)
-        set2 = set(df[df[construct2] > 0].index)
+    # Calculate Jaccard Similarity and Dice Coefficient for each pair of stereotypes
+    for (stereotype1, stereotype2) in combinations(stereotypes, 2):
+        set1 = set(df[df[stereotype1] > 0].index)
+        set2 = set(df[df[stereotype2] > 0].index)
 
         # Calculate the intersection and union of the sets
         intersection = len(set1.intersection(set2))
         union = len(set1.union(set2))
 
         # Jaccard Similarity calculation
-        jaccard_similarity[(construct1, construct2)] = intersection / union if union != 0 else 0
+        jaccard_similarity[(stereotype1, stereotype2)] = intersection / union if union != 0 else 0
 
         # Dice Coefficient calculation
-        dice_similarity[(construct1, construct2)] = (2 * intersection) / (len(set1) + len(set2)) if (len(set1) + len(
+        dice_similarity[(stereotype1, stereotype2)] = (2 * intersection) / (len(set1) + len(set2)) if (len(set1) + len(
             set2)) != 0 else 0
 
     # Convert the similarity dictionaries to a DataFrame
     similarity_measures_df = pd.DataFrame(
-        {'Construct Pair': list(jaccard_similarity.keys()), 'Jaccard Similarity': list(jaccard_similarity.values()),
+        {'Stereotype Pair': list(jaccard_similarity.keys()), 'Jaccard Similarity': list(jaccard_similarity.values()),
          'Dice Coefficient': list(dice_similarity.values())})
 
     # Save the combined similarity measures data to a single CSV file
@@ -304,10 +305,10 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
     # 7.1. Spearman Correlation Coefficient - Used for other distributions
     spearman_correlation = data.corr(method='spearman')
 
-    # Add 'Construct' as the first column header
-    spearman_correlation.index.name = 'Construct'
+    # Add 'Stereotype' as the first column header
+    spearman_correlation.index.name = 'Stereotype'
 
-    # Convert the index (construct names) into a column
+    # Convert the index (stereotype names) into a column
     spearman_correlation.reset_index(inplace=True)
 
     # Save Spearman Correlation Coefficient to its own CSV file
@@ -317,23 +318,23 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
     # 7.2. Mutual Information - Capture non-linear dependencies
 
     # Initialize a DataFrame to store Mutual Information
-    mutual_info = pd.DataFrame(index=constructs, columns=constructs, dtype=float)
+    mutual_info = pd.DataFrame(index=stereotypes, columns=stereotypes, dtype=float)
 
-    # Compute Mutual Information for all pairs of constructs
-    for construct1, construct2 in combinations(constructs, 2):
-        mi = mutual_info_score(df[construct1], df[construct2])
-        mutual_info.loc[construct1, construct2] = mi
-        mutual_info.loc[construct2, construct1] = mi  # Symmetric matrix
+    # Compute Mutual Information for all pairs of stereotypes
+    for stereotype1, stereotype2 in combinations(stereotypes, 2):
+        mi = mutual_info_score(df[stereotype1], df[stereotype2])
+        mutual_info.loc[stereotype1, stereotype2] = mi
+        mutual_info.loc[stereotype2, stereotype1] = mi  # Symmetric matrix
 
-    # Compute Mutual Information for a construct with itself (entropy)
-    for construct in constructs:
-        entropy_value = entropy(df[construct])
-        mutual_info.loc[construct, construct] = entropy_value
+    # Compute Mutual Information for a stereotype with itself (entropy)
+    for stereotype in stereotypes:
+        entropy_value = entropy(df[stereotype])
+        mutual_info.loc[stereotype, stereotype] = entropy_value
 
-    # Add 'Construct' as the first column header
-    mutual_info.index.name = 'Construct'
+    # Add 'Stereotype' as the first column header
+    mutual_info.index.name = 'Stereotype'
 
-    # Convert the index (construct names) into a column
+    # Convert the index (stereotype names) into a column
     mutual_info.reset_index(inplace=True)
 
     # Save Mutual Information matrix to its own CSV file

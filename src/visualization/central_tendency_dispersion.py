@@ -6,7 +6,7 @@ import pandas as pd
 import seaborn as sns
 from loguru import logger
 
-from src.color_legend import color_text
+from src.utils import color_text
 
 
 def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path, file_path):
@@ -90,7 +90,7 @@ def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path,
     coeffs = np.polyfit(df['Mean'], df['Log_Variance'], degree)
     p = np.poly1d(coeffs)
 
-    # Construct the polynomial equation as a string
+    # Stereotype the polynomial equation as a string
     equation = "y = " + " + ".join([f"{coeff:.3f}*x^{i}" for i, coeff in enumerate(coeffs[::-1])])
 
     # Display the equation on the plot
@@ -113,25 +113,25 @@ def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path,
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
-    # 6. Bar Chart for Mean Values Across Constructs
+    # 6. Bar Chart for Mean Values Across Stereotypes
 
     # Calculate the Standard Error of the Mean (SEM)
-    df['SEM'] = df['SD'] / np.sqrt(1)  # Since count = 1 for each 'Construct', SEM = SD / sqrt(1)
+    df['SEM'] = df['SD'] / np.sqrt(1)  # Since count = 1 for each 'Stereotype', SEM = SD / sqrt(1)
 
     # Calculate asymmetric error bars, ensuring they do not go below zero
     lower_error = np.where(df['Mean'] - df['SEM'] < 0, df['Mean'],
                            df['SEM'])  # Adjust lower error to prevent negative values
     upper_error = df['SEM']
 
-    # Plot: Bar Chart for Mean Values Across Constructs with Error Bars
+    # Plot: Bar Chart for Mean Values Across Stereotypes with Error Bars
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    sns.barplot(x='Construct', y='Mean', data=df, hue='Construct',  # Use 'hue' to match 'x' variable
+    sns.barplot(x='Stereotype', y='Mean', data=df, hue='Stereotype',  # Use 'hue' to match 'x' variable
                 palette='viridis', errorbar=None,  # Replace deprecated 'ci' with 'errorbar=None'
                 legend=False  # Avoid adding a legend
                 )
 
     # Add custom error bars using asymmetric error bars
-    plt.errorbar(x=df['Construct'], y=df['Mean'], yerr=[lower_error, upper_error],
+    plt.errorbar(x=df['Stereotype'], y=df['Mean'], yerr=[lower_error, upper_error],
                  # Asymmetric error bars: lower and upper limits
                  fmt='none',  # No markers, just error bars
                  ecolor='gray',  # Error bar color
@@ -144,7 +144,7 @@ def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path,
     color_text(ax.get_xticklabels())
 
     plt.title('Bar Chart of Mean Values with Standard Deviation Error Bars', fontsize=14, fontweight='bold')
-    plt.xlabel('Construct Type', fontsize=12)
+    plt.xlabel('Stereotype Type', fontsize=12)
     plt.ylabel('Mean Value', fontsize=12)
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
@@ -158,22 +158,22 @@ def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path,
     fig, ax1 = plt.subplots(figsize=(16, 9), tight_layout=True)
 
     # Plot the bar chart for Skewness
-    sns.barplot(x='Construct', y='Skewness', data=df, ax=ax1, hue='Construct',  # Use 'hue' to match 'x' variable
+    sns.barplot(x='Stereotype', y='Skewness', data=df, ax=ax1, hue='Stereotype',  # Use 'hue' to match 'x' variable
                 palette='viridis', errorbar=None,  # Replace deprecated 'ci' with 'errorbar=None'
                 legend=False  # Avoid adding a legend
                 )
 
     # Customize the first y-axis for Skewness
     ax1.set_ylabel('Skewness', fontsize=12)
-    ax1.set_xlabel('Construct', fontsize=12)
+    ax1.set_xlabel('Stereotype', fontsize=12)
     ax1.tick_params(axis='y', labelcolor='tab:blue')
-    ax1.set_title('Bar and Line Plot of Skewness and Kurtosis Across Constructs', fontsize=14, fontweight='bold')
+    ax1.set_title('Bar and Line Plot of Skewness and Kurtosis Across Stereotypes', fontsize=14, fontweight='bold')
 
     # Create a second y-axis for Kurtosis
     ax2 = ax1.twinx()
 
     # Plot the line chart for Kurtosis
-    sns.lineplot(x='Construct', y='Kurtosis', data=df, ax=ax2, color='red', marker='o', linewidth=2, label='Kurtosis')
+    sns.lineplot(x='Stereotype', y='Kurtosis', data=df, ax=ax2, color='red', marker='o', linewidth=2, label='Kurtosis')
 
     # Customize the second y-axis for Kurtosis
     ax2.set_ylabel('Kurtosis', fontsize=12, color='red')
@@ -193,7 +193,7 @@ def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path,
     color_text(ax1.get_xticklabels())
 
     plt.tight_layout()
-    fig_name = 'bar_line_plot_skewness_kurtosis_constructs.png'
+    fig_name = 'bar_line_plot_skewness_kurtosis_stereotypes.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
@@ -212,12 +212,12 @@ def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path,
     plt.close(fig)
 
     # 9. Radar Charts
-    # Select top 5 constructs by mean value
-    top_constructs = df.nlargest(5, 'Mean')
+    # Select top 5 stereotypes by mean value
+    top_stereotypes = df.nlargest(5, 'Mean')
 
     # 9.1. Radar chart for Group 1: Central Tendency Analysis
     central_tendency_columns = ['Mean', 'Median', 'IQR']
-    df_radar_central_tendency = top_constructs[central_tendency_columns]
+    df_radar_central_tendency = top_stereotypes[central_tendency_columns]
     df_radar_central_tendency_normalized = (df_radar_central_tendency - df_radar_central_tendency.min()) / (
             df_radar_central_tendency.max() - df_radar_central_tendency.min())
 
@@ -232,8 +232,8 @@ def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path,
     for index, row in df_radar_central_tendency_normalized.iterrows():
         values = row.tolist()
         values += values[:1]
-        construct_label = top_constructs.loc[index, 'Construct']
-        ax1.plot(angles_central_tendency, values, label=construct_label)
+        stereotype_label = top_stereotypes.loc[index, 'Stereotype']
+        ax1.plot(angles_central_tendency, values, label=stereotype_label)
         ax1.fill(angles_central_tendency, values, alpha=0.1)
 
     plt.xticks(angles_central_tendency[:-1], central_tendency_columns)
@@ -246,7 +246,7 @@ def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path,
 
     # 9.2. Radar chart for Group 2: Variability and Spread
     spread_columns = ['SD', 'Variance', 'IQR', 'Q1', 'Q3']
-    df_radar_spread = top_constructs[spread_columns]
+    df_radar_spread = top_stereotypes[spread_columns]
     df_radar_spread_normalized = (df_radar_spread - df_radar_spread.min()) / (
             df_radar_spread.max() - df_radar_spread.min())
 
@@ -259,8 +259,8 @@ def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path,
     for index, row in df_radar_spread_normalized.iterrows():
         values = row.tolist()
         values += values[:1]
-        construct_label = top_constructs.loc[index, 'Construct']
-        ax2.plot(angles_spread, values, label=construct_label)
+        stereotype_label = top_stereotypes.loc[index, 'Stereotype']
+        ax2.plot(angles_spread, values, label=stereotype_label)
         ax2.fill(angles_spread, values, alpha=0.1)
 
     plt.xticks(angles_spread[:-1], spread_columns)
@@ -273,7 +273,7 @@ def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path,
 
     # 9.3. Radar chart for Group 3: Comprehensive Spread and Shape Analysis
     comprehensive_columns = ['Mean', 'SD', 'Skewness', 'Kurtosis', 'IQR']
-    df_radar_comprehensive = top_constructs[comprehensive_columns]
+    df_radar_comprehensive = top_stereotypes[comprehensive_columns]
     df_radar_comprehensive_normalized = (df_radar_comprehensive - df_radar_comprehensive.min()) / (
             df_radar_comprehensive.max() - df_radar_comprehensive.min())
 
@@ -286,8 +286,8 @@ def execute_visualization_central_tendency_dispersion(in_dir_path, out_dir_path,
     for index, row in df_radar_comprehensive_normalized.iterrows():
         values = row.tolist()
         values += values[:1]
-        construct_label = top_constructs.loc[index, 'Construct']
-        ax4.plot(angles_comprehensive, values, label=construct_label)
+        stereotype_label = top_stereotypes.loc[index, 'Stereotype']
+        ax4.plot(angles_comprehensive, values, label=stereotype_label)
         ax4.fill(angles_comprehensive, values, alpha=0.1)
 
     plt.xticks(angles_comprehensive[:-1], comprehensive_columns)

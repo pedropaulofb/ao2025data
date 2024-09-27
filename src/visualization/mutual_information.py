@@ -7,7 +7,7 @@ import pandas as pd
 import seaborn as sns
 from loguru import logger
 
-from src.color_legend import color_text
+from src.utils import color_text
 
 
 def execute_visualization_mutual_information(in_dir_path, out_dir_path, file_path):
@@ -25,9 +25,9 @@ def execute_visualization_mutual_information(in_dir_path, out_dir_path, file_pat
     color_text(ax.get_yticklabels())
 
     # Customize the plot
-    plt.title('Heatmap of Mutual Information Between Constructs', fontweight='bold')
-    plt.xlabel('Construct')
-    plt.ylabel('Construct')
+    plt.title('Heatmap of Mutual Information Between Stereotypes', fontweight='bold')
+    plt.xlabel('Stereotype')
+    plt.ylabel('Stereotype')
 
     fig_name = 'mutual_information_heatmap.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
@@ -38,16 +38,16 @@ def execute_visualization_mutual_information(in_dir_path, out_dir_path, file_pat
 
     # Convert the DataFrame to a long format for the network graph
     df_long_network = df.stack().reset_index()
-    df_long_network.columns = ['Construct 1', 'Construct 2', 'Mutual Information']
+    df_long_network.columns = ['Stereotype 1', 'Stereotype 2', 'Mutual Information']
 
-    # Remove self-correlations (mutual-information of a construct with itself)
-    df_long_network = df_long_network[df_long_network['Construct 1'] != df_long_network['Construct 2']]
+    # Remove self-correlations (mutual-information of a stereotype with itself)
+    df_long_network = df_long_network[df_long_network['Stereotype 1'] != df_long_network['Stereotype 2']]
 
     # Drop duplicate pairs (e.g., both (A, B) and (B, A))
-    df_long_network['Construct Pair'] = df_long_network.apply(
-        lambda row: tuple(sorted([row['Construct 1'], row['Construct 2']])), axis=1
+    df_long_network['Stereotype Pair'] = df_long_network.apply(
+        lambda row: tuple(sorted([row['Stereotype 1'], row['Stereotype 2']])), axis=1
     )
-    df_long_network = df_long_network.drop_duplicates(subset='Construct Pair')
+    df_long_network = df_long_network.drop_duplicates(subset='Stereotype Pair')
 
     # Select the N most mutual information values
     N = 10
@@ -64,7 +64,7 @@ def execute_visualization_mutual_information(in_dir_path, out_dir_path, file_pat
         # Add edges to the graph, making sure we only add each pair once
         added_edges = set()  # A set to track which edges have already been added
         for _, row in data.iterrows():
-            edge = tuple(sorted([row['Construct 1'], row['Construct 2']]))
+            edge = tuple(sorted([row['Stereotype 1'], row['Stereotype 2']]))
             if edge not in added_edges:
                 G.add_edge(edge[0], edge[1], weight=row[metric_label])
                 added_edges.add(edge)
@@ -101,29 +101,29 @@ def execute_visualization_mutual_information(in_dir_path, out_dir_path, file_pat
 
     # 3. Rank Chart
 
-    # Calculate the sum of the mutual information values for each construct
-    construct_importance_mi = df.sum(axis=1)
+    # Calculate the sum of the mutual information values for each stereotype
+    stereotype_importance_mi = df.sum(axis=1)
 
-    # Sort the constructs by their importance in descending order
-    construct_importance_mi_sorted = construct_importance_mi.sort_values(ascending=False)
+    # Sort the stereotypes by their importance in descending order
+    stereotype_importance_mi_sorted = stereotype_importance_mi.sort_values(ascending=False)
 
-    # Create a bar chart to visualize construct importance
+    # Create a bar chart to visualize stereotype importance
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    ax = sns.barplot(x=construct_importance_mi_sorted.values, y=construct_importance_mi_sorted.index,
-                     hue=construct_importance_mi_sorted.index, palette='viridis', dodge=False, legend=False)
+    ax = sns.barplot(x=stereotype_importance_mi_sorted.values, y=stereotype_importance_mi_sorted.index,
+                     hue=stereotype_importance_mi_sorted.index, palette='viridis', dodge=False, legend=False)
 
-    # Highlight specific constructs if needed
+    # Highlight specific stereotypes if needed
     color_text(ax.get_yticklabels())
 
-    plt.title('Ranking of Constructs by Total Mutual Information', fontweight='bold')
+    plt.title('Ranking of Stereotypes by Total Mutual Information', fontweight='bold')
     plt.xlabel('"Total Mutual Information')
-    plt.ylabel('Construct')
+    plt.ylabel('Stereotype')
     # Customize grid lines: Remove horizontal, keep vertical
     plt.grid(axis='y', linestyle='')  # Remove horizontal grid lines
     plt.grid(axis='x', linestyle='-', color='gray')  # Keep vertical grid lines
     # Set x-axis ticks dynamically based on data range
-    plt.xticks(np.arange(0, construct_importance_mi_sorted.max() + 0.5, 0.5))
-    fig_name = 'construct_ranking_mutual_information.png'
+    plt.xticks(np.arange(0, stereotype_importance_mi_sorted.max() + 0.5, 0.5))
+    fig_name = 'stereotype_ranking_mutual_information.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
@@ -132,18 +132,18 @@ def execute_visualization_mutual_information(in_dir_path, out_dir_path, file_pat
 
     # Convert the DataFrame to a long format for the box plot
     df_long_boxplot = df.stack().reset_index()
-    df_long_boxplot.columns = ['Construct 1', 'Construct 2', 'Mutual Information']
+    df_long_boxplot.columns = ['Stereotype 1', 'Stereotype 2', 'Mutual Information']
 
-    # Remove self-correlations (mutual information of a construct with itself)
-    df_long_boxplot = df_long_boxplot[df_long_boxplot['Construct 1'] != df_long_boxplot['Construct 2']]
+    # Remove self-correlations (mutual information of a stereotype with itself)
+    df_long_boxplot = df_long_boxplot[df_long_boxplot['Stereotype 1'] != df_long_boxplot['Stereotype 2']]
 
-    # Create a box plot to show the distribution of mutual information for each construct
+    # Create a box plot to show the distribution of mutual information for each stereotype
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    ax = sns.boxplot(x='Construct 1', y='Mutual Information', data=df_long_boxplot, hue='Construct 1',
+    ax = sns.boxplot(x='Stereotype 1', y='Mutual Information', data=df_long_boxplot, hue='Stereotype 1',
                      palette='viridis',
                      legend=False)
-    plt.title('Box Plot of Mutual Information by Construct', fontweight='bold')
-    plt.xlabel('Construct')
+    plt.title('Box Plot of Mutual Information by Stereotype', fontweight='bold')
+    plt.xlabel('Stereotype')
     plt.ylabel('Mutual Information')
     plt.xticks(rotation=45)
     plt.grid(axis='y')

@@ -6,30 +6,30 @@ import pandas as pd
 import seaborn as sns
 from loguru import logger
 
-from src.color_legend import color_text
+from src.utils import color_text
 
 
 def execute_visualization_similarity_measures(in_dir_path, out_dir_path, file_path):
     # Read data from the CSV file
     df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
-    # Extract constructs from the 'Construct Pair' column
-    df['Construct 1'] = df['Construct Pair'].apply(lambda x: eval(x)[0])
-    df['Construct 2'] = df['Construct Pair'].apply(lambda x: eval(x)[1])
+    # Extract stereotypes from the 'Stereotype Pair' column
+    df['Stereotype 1'] = df['Stereotype Pair'].apply(lambda x: eval(x)[0])
+    df['Stereotype 2'] = df['Stereotype Pair'].apply(lambda x: eval(x)[1])
 
     ### 1) Heatmap
 
     # 1.1) Heatmap for Jaccard Similarity
 
     # Create a pivot table for Jaccard Similarity
-    jaccard_pivot = df.pivot_table(index='Construct 1', columns='Construct 2', values='Jaccard Similarity')
+    jaccard_pivot = df.pivot_table(index='Stereotype 1', columns='Stereotype 2', values='Jaccard Similarity')
 
     # Mirror the matrix to ensure symmetry
     jaccard_pivot = jaccard_pivot.combine_first(jaccard_pivot.T)
 
     # Fill diagonal with 1s for Jaccard Similarity
-    for construct in jaccard_pivot.index:
-        jaccard_pivot.loc[construct, construct] = 1
+    for stereotype in jaccard_pivot.index:
+        jaccard_pivot.loc[stereotype, stereotype] = 1
 
     # Plot heatmap for Jaccard Similarity
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
@@ -42,8 +42,8 @@ def execute_visualization_similarity_measures(in_dir_path, out_dir_path, file_pa
     color_text(ax.get_xticklabels())
     color_text(ax.get_yticklabels())
 
-    plt.title('Jaccard Similarity Heatmap for Construct Pairs', fontweight='bold')
-    fig_name = 'heatmap_jaccard_similarity_construct_pairs.png'
+    plt.title('Jaccard Similarity Heatmap for Stereotype Pairs', fontweight='bold')
+    fig_name = 'heatmap_jaccard_similarity_stereotype_pairs.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
@@ -51,14 +51,14 @@ def execute_visualization_similarity_measures(in_dir_path, out_dir_path, file_pa
     # 1.2) Heatmap for Dice Coefficient
 
     # Create a pivot table for Dice Coefficient
-    dice_pivot = df.pivot_table(index='Construct 1', columns='Construct 2', values='Dice Coefficient')
+    dice_pivot = df.pivot_table(index='Stereotype 1', columns='Stereotype 2', values='Dice Coefficient')
 
     # Mirror the matrix to ensure symmetry
     dice_pivot = dice_pivot.combine_first(dice_pivot.T)
 
     # Fill diagonal with 1s for Dice Coefficient
-    for construct in dice_pivot.index:
-        dice_pivot.loc[construct, construct] = 1
+    for stereotype in dice_pivot.index:
+        dice_pivot.loc[stereotype, stereotype] = 1
 
     # Plot heatmap for Dice Coefficient
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
@@ -71,8 +71,8 @@ def execute_visualization_similarity_measures(in_dir_path, out_dir_path, file_pa
     color_text(ax.get_xticklabels())
     color_text(ax.get_yticklabels())
 
-    plt.title('Dice Coefficient Heatmap for Construct Pairs', fontweight='bold')
-    fig_name = 'heatmap_dice_coefficient_construct_pairs.png'
+    plt.title('Dice Coefficient Heatmap for Stereotype Pairs', fontweight='bold')
+    fig_name = 'heatmap_dice_coefficient_stereotype_pairs.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
@@ -95,7 +95,7 @@ def execute_visualization_similarity_measures(in_dir_path, out_dir_path, file_pa
 
         # Add edges to the graph
         for _, row in data.iterrows():
-            G.add_edge(row['Construct 1'], row['Construct 2'], weight=row[metric_label])
+            G.add_edge(row['Stereotype 1'], row['Stereotype 2'], weight=row[metric_label])
 
         # Draw the graph
         pos = nx.circular_layout(G)
@@ -129,8 +129,8 @@ def execute_visualization_similarity_measures(in_dir_path, out_dir_path, file_pa
 
     # 3. Scatter plot
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    scatter_plot = sns.scatterplot(data=df, x='Jaccard Similarity', y='Dice Coefficient', hue='Construct Pair',
-                                   # Different colors for different construct pairs
+    scatter_plot = sns.scatterplot(data=df, x='Jaccard Similarity', y='Dice Coefficient', hue='Stereotype Pair',
+                                   # Different colors for different stereotype pairs
                                    palette='viridis',  # Color palette for the scatter plot
                                    s=100,  # Size of the markers
                                    legend=False  # Remove the legend for each point
@@ -153,42 +153,42 @@ def execute_visualization_similarity_measures(in_dir_path, out_dir_path, file_pa
 
     # Create a mirrored dataframe for the missing (y, x) pairs
     mirror_df = df.copy()
-    mirror_df['Construct 1'], mirror_df['Construct 2'] = df['Construct 2'], df['Construct 1']
+    mirror_df['Stereotype 1'], mirror_df['Stereotype 2'] = df['Stereotype 2'], df['Stereotype 1']
 
     # Concatenate the original and mirrored dataframes
     full_df = pd.concat([df, mirror_df], ignore_index=True)
 
-    # Create box plots grouped by the first construct
+    # Create box plots grouped by the first stereotype
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    ax = sns.boxplot(data=full_df, x='Construct 1', y='Jaccard Similarity', hue='Construct 1', palette='viridis',
+    ax = sns.boxplot(data=full_df, x='Stereotype 1', y='Jaccard Similarity', hue='Stereotype 1', palette='viridis',
                      legend=False)
     # Customize x-axis label colors
     color_text(ax.get_xticklabels())
 
-    plt.title('Box Plot of Jaccard Similarity by Construct', fontweight='bold')
-    plt.xlabel('Construct')
+    plt.title('Box Plot of Jaccard Similarity by Stereotype', fontweight='bold')
+    plt.xlabel('Stereotype')
     plt.ylabel('Jaccard Similarity')
     plt.xticks(rotation=45)  # Rotate x-axis labels for better visibility
     plt.grid(True)
     plt.tight_layout()
-    fig_name = 'boxplot_jaccard_similarity_by_construct.png'
+    fig_name = 'boxplot_jaccard_similarity_by_stereotype.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    ax = sns.boxplot(data=full_df, x='Construct 1', y='Dice Coefficient', hue='Construct 1', palette='viridis',
+    ax = sns.boxplot(data=full_df, x='Stereotype 1', y='Dice Coefficient', hue='Stereotype 1', palette='viridis',
                      legend=False)
     # Customize x-axis label colors
     color_text(ax.get_xticklabels())
 
-    plt.title('Box Plot of Dice Coefficient by Construct', fontweight='bold')
-    plt.xlabel('Construct')
+    plt.title('Box Plot of Dice Coefficient by Stereotype', fontweight='bold')
+    plt.xlabel('Stereotype')
     plt.ylabel('Dice Coefficient')
     plt.xticks(rotation=45)  # Rotate x-axis labels for better visibility
     plt.grid(True)
     plt.tight_layout()
-    fig_name = 'boxplot_dice_coefficient_by_construct.png'
+    fig_name = 'boxplot_dice_coefficient_by_stereotype.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)

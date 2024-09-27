@@ -8,7 +8,7 @@ from loguru import logger
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator
 
-from src.color_legend import color_text
+from src.utils import color_text
 
 
 def execute_visualization_mutual_info_vs_jaccard_similarity(input_dir, output_dir, file1_name, file2_name):
@@ -17,17 +17,17 @@ def execute_visualization_mutual_info_vs_jaccard_similarity(input_dir, output_di
     similarity_measures_df = pd.read_csv(os.path.join(input_dir, file2_name))
 
     # Prepare a list for DataFrame creation
-    pairs_data = {'Construct Pair': [], 'Jaccard Similarity': [], 'Mutual Information': []}
+    pairs_data = {'Stereotype Pair': [], 'Jaccard Similarity': [], 'Mutual Information': []}
 
-    # Iterate through the similarity measures dataframe to extract construct pairs and their similarity measures
+    # Iterate through the similarity measures dataframe to extract stereotype pairs and their similarity measures
     for i, row in similarity_measures_df.iterrows():
-        construct_pair = ast.literal_eval(row['Construct Pair'])
-        construct1, construct2 = construct_pair
+        stereotype_pair = ast.literal_eval(row['Stereotype Pair'])
+        stereotype1, stereotype2 = stereotype_pair
 
         # Retrieve mutual information for each pair
-        mi_value = mutual_info_df.loc[mutual_info_df['Construct'] == construct1, construct2].values
+        mi_value = mutual_info_df.loc[mutual_info_df['Stereotype'] == stereotype1, stereotype2].values
         if len(mi_value) > 0:
-            pairs_data['Construct Pair'].append(f"{construct1} - {construct2}")
+            pairs_data['Stereotype Pair'].append(f"{stereotype1} - {stereotype2}")
             pairs_data['Jaccard Similarity'].append(row['Jaccard Similarity'])
             pairs_data['Mutual Information'].append(mi_value[0])
 
@@ -35,7 +35,7 @@ def execute_visualization_mutual_info_vs_jaccard_similarity(input_dir, output_di
     pairs_df = pd.DataFrame(pairs_data)
 
     # Save the results to a CSV file
-    output_file_path = os.path.join(output_dir, 'construct_pairs_jaccard_similarity_info.csv')
+    output_file_path = os.path.join(output_dir, 'stereotype_pairs_jaccard_similarity_info.csv')
     pairs_df.to_csv(output_file_path, index=False)
     print(f"CSV file saved to {output_file_path}")
 
@@ -49,13 +49,13 @@ def execute_visualization_mutual_info_vs_jaccard_similarity(input_dir, output_di
 
     # Create a scatter plot for Mutual Information vs. Jaccard Similarity
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    sns.scatterplot(data=pairs_df, x='Jaccard Similarity', y='Mutual Information', hue='Construct Pair',
+    sns.scatterplot(data=pairs_df, x='Jaccard Similarity', y='Mutual Information', hue='Stereotype Pair',
                     palette='viridis', s=100, legend=False)
 
     # Customize the plot
-    plt.title('Comparison of Mutual Information and Jaccard Similarity for Construct Pairs', fontweight='bold')
-    plt.xlabel('Jaccard Similarity (Construct Pair)')
-    plt.ylabel('Mutual Information (Construct Pair)')
+    plt.title('Comparison of Mutual Information and Jaccard Similarity for Stereotype Pairs', fontweight='bold')
+    plt.xlabel('Jaccard Similarity (Stereotype Pair)')
+    plt.ylabel('Mutual Information (Stereotype Pair)')
     plt.grid(True)
 
     # Draw lines to create quadrants using medians
@@ -68,16 +68,16 @@ def execute_visualization_mutual_info_vs_jaccard_similarity(input_dir, output_di
     #
     # # Annotate only specific points
     # for i in range(len(pairs_df)):
-    #     construct_pair = pairs_df['Construct Pair'][i]
-    #     if construct_pair in pairs_to_annotate:  # Check if the pair is in the list of pairs to annotate
+    #     stereotype_pair = pairs_df['Stereotype Pair'][i]
+    #     if stereotype_pair in pairs_to_annotate:  # Check if the pair is in the list of pairs to annotate
     #         color = 'black'  # Default color
-    #         if 'none' in construct_pair:
+    #         if 'none' in stereotype_pair:
     #             color = 'blue'
-    #         elif 'other' in construct_pair:
+    #         elif 'other' in stereotype_pair:
     #             color = 'red'
     #         plt.text(x=pairs_df['Jaccard Similarity'][i],
     #                  y=pairs_df['Mutual Information'][i],
-    #                  s=construct_pair,
+    #                  s=stereotype_pair,
     #                  fontsize=8,
     #                  ha='right',
     #                  color=color)  # Use the color variable here
@@ -96,14 +96,14 @@ def execute_visualization_mutual_info_vs_jaccard_similarity(input_dir, output_di
     plt.close(fig)
 
 
-def execute_visualization_simpson_diversity_vs_construct_frequency(input_dir, output_dir, file1_name, file2_name):
+def execute_visualization_simpson_diversity_vs_stereotype_frequency(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
     diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
     frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
-    # Merge the dataframes on the 'Construct' column
-    merged_data = pd.merge(diversity_measures[['Construct', 'Simpson Index']],
-                           frequency_analysis[['Construct', 'Total Frequency']], on='Construct')
+    # Merge the dataframes on the 'Stereotype' column
+    merged_data = pd.merge(diversity_measures[['Stereotype', 'Simpson Index']],
+                           frequency_analysis[['Stereotype', 'Total Frequency']], on='Stereotype')
 
     # Calculate thresholds (medians)
     frequency_threshold = merged_data['Total Frequency'].median()  # Median for Total Frequency
@@ -111,12 +111,13 @@ def execute_visualization_simpson_diversity_vs_construct_frequency(input_dir, ou
 
     # Create a scatter plot for Simpson's Index vs. Total Frequency
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    sns.scatterplot(data=merged_data, x='Total Frequency', y='Simpson Index', hue='Construct', palette='viridis', s=100,
+    sns.scatterplot(data=merged_data, x='Total Frequency', y='Simpson Index', hue='Stereotype', palette='viridis',
+                    s=100,
                     legend=False)
 
     # Customize the plot
-    plt.title("Simpson's Diversity Index vs. Total Construct Frequency", fontweight='bold')
-    plt.xlabel('Total Construct Frequency')
+    plt.title("Simpson's Diversity Index vs. Total Stereotype Frequency", fontweight='bold')
+    plt.xlabel('Total Stereotype Frequency')
     plt.ylabel("Simpson's Diversity Index")
     plt.grid(True)
 
@@ -127,12 +128,13 @@ def execute_visualization_simpson_diversity_vs_construct_frequency(input_dir, ou
     # Create an empty list to store text objects
     texts = []
 
-    # Annotate each point with the construct name
+    # Annotate each point with the stereotype name
     for i in range(len(merged_data)):
-        construct_name = merged_data['Construct'][i]
+        stereotype_name = merged_data['Stereotype'][i]
 
         # Create a text object without setting color initially
-        text = plt.text(x=merged_data['Total Frequency'][i], y=merged_data['Simpson Index'][i] + 0.01, s=construct_name,
+        text = plt.text(x=merged_data['Total Frequency'][i], y=merged_data['Simpson Index'][i] + 0.01,
+                        s=stereotype_name,
                         fontsize=8, ha='center', color='black')  # Initial color set to black or any default
 
         # Append the text object to the list
@@ -151,43 +153,43 @@ def execute_visualization_simpson_diversity_vs_construct_frequency(input_dir, ou
              s=f'Median Total Frequency: {frequency_threshold:.2f}', color='grey', fontsize=10, va='bottom', ha='right',
              rotation=90)
 
-    fig_name = 'simpson_diversity_vs_construct_frequency.png'
+    fig_name = 'simpson_diversity_vs_stereotype_frequency.png'
     fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
 
 
-def execute_visualization_mutual_information_vs_construct_rank(input_dir, output_dir, file1_name, file2_name):
+def execute_visualization_mutual_information_vs_stereotype_rank(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
     rank_df = pd.read_csv(os.path.join(input_dir, file1_name))
     mutual_info_df = pd.read_csv(os.path.join(input_dir, file2_name))
 
-    # Calculate the average mutual information for each construct
-    mutual_info_avg = mutual_info_df.drop(columns='Construct').mean(axis=1)
+    # Calculate the average mutual information for each stereotype
+    mutual_info_avg = mutual_info_df.drop(columns='Stereotype').mean(axis=1)
     mutual_info_df['Avg Mutual Information'] = mutual_info_avg
 
     # Merge rank data with mutual information data
-    merged_data = pd.merge(rank_df[['Construct', 'Rank']], mutual_info_df[['Construct', 'Avg Mutual Information']],
-                           on='Construct')
+    merged_data = pd.merge(rank_df[['Stereotype', 'Rank']], mutual_info_df[['Stereotype', 'Avg Mutual Information']],
+                           on='Stereotype')
 
     # Plot the scatter plot
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    sns.scatterplot(data=merged_data, x='Rank', y='Avg Mutual Information', hue='Construct', palette='viridis',
+    sns.scatterplot(data=merged_data, x='Rank', y='Avg Mutual Information', hue='Stereotype', palette='viridis',
                     size='Avg Mutual Information', sizes=(20, 200), legend=False)
 
     # Customize the plot
-    plt.title('Average Mutual Information vs. Construct Rank', fontweight='bold')
-    plt.xlabel('Construct Rank')
+    plt.title('Average Mutual Information vs. Stereotype Rank', fontweight='bold')
+    plt.xlabel('Stereotype Rank')
     plt.ylabel('Mean Mutual Information')
     plt.grid(True)
 
-    # Annotate each point with the construct name
+    # Annotate each point with the stereotype name
     for i in range(len(merged_data)):
         plt.text(x=merged_data['Rank'][i], y=merged_data['Avg Mutual Information'][i] + 0.01,
-                 s=merged_data['Construct'][i], fontsize=8, ha='center')
+                 s=merged_data['Stereotype'][i], fontsize=8, ha='center')
 
     # Show the plot
-    fig_name = 'mutual_information_vs_construct_rank.png'
+    fig_name = 'mutual_information_vs_stereotype_rank.png'
     fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
@@ -198,10 +200,10 @@ def execute_visualization_shannon_entropy_vs_global_frequency(input_dir, output_
     diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
     frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
-    # Merge the dataframes on the 'Construct' column
-    merged_data = pd.merge(diversity_measures[['Construct', 'Shannon Entropy']],
-                           frequency_analysis[['Construct', 'Global Relative Frequency (Occurrence-wise)']],
-                           on='Construct')
+    # Merge the dataframes on the 'Stereotype' column
+    merged_data = pd.merge(diversity_measures[['Stereotype', 'Shannon Entropy']],
+                           frequency_analysis[['Stereotype', 'Global Relative Frequency (Occurrence-wise)']],
+                           on='Stereotype')
 
     # Calculate thresholds
     entropy_threshold = merged_data['Shannon Entropy'].median()  # Using median as a threshold
@@ -211,7 +213,7 @@ def execute_visualization_shannon_entropy_vs_global_frequency(input_dir, output_
     # Plot with Seaborn scatter plot
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
     sns.scatterplot(data=merged_data, x='Shannon Entropy', y='Global Relative Frequency (Occurrence-wise)',
-                    hue='Construct', palette='viridis', size='Global Relative Frequency (Occurrence-wise)',
+                    hue='Stereotype', palette='viridis', size='Global Relative Frequency (Occurrence-wise)',
                     legend=False, sizes=(20, 200))
 
     # Customize the plot
@@ -225,14 +227,14 @@ def execute_visualization_shannon_entropy_vs_global_frequency(input_dir, output_
     plt.axhline(y=frequency_threshold, color='grey', linestyle='--', linewidth=1)  # Horizontal line
     plt.axvline(x=entropy_threshold, color='grey', linestyle='--', linewidth=1)  # Vertical line
 
-    # Annotate each point with the construct name
+    # Annotate each point with the stereotype name
     texts = []  # Initialize an empty list to store text objects
     for i in range(len(merged_data)):
-        construct_name = merged_data['Construct'][i]
+        stereotype_name = merged_data['Stereotype'][i]
 
         # Create text object with default color (black)
         text = plt.text(x=merged_data['Shannon Entropy'][i],
-                        y=merged_data['Global Relative Frequency (Occurrence-wise)'][i], s=construct_name, fontsize=8,
+                        y=merged_data['Global Relative Frequency (Occurrence-wise)'][i], s=stereotype_name, fontsize=8,
                         ha='right', color='black')
         texts.append(text)  # Append the text object to the list
 
@@ -252,14 +254,14 @@ def execute_visualization_shannon_entropy_vs_global_frequency(input_dir, output_
     plt.close(fig)
 
 
-def execute_visualization_shannon_entropy_vs_group_frequency_constructs(input_dir, output_dir, file1_name, file2_name):
+def execute_visualization_shannon_entropy_vs_group_frequency_stereotypes(input_dir, output_dir, file1_name, file2_name):
     # Load the data from the CSV files
     diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
     frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
-    # Merge the dataframes on the 'Construct' column
-    merged_data = pd.merge(diversity_measures[['Construct', 'Shannon Entropy']],
-                           frequency_analysis[['Construct', 'Group Frequency']], on='Construct')
+    # Merge the dataframes on the 'Stereotype' column
+    merged_data = pd.merge(diversity_measures[['Stereotype', 'Shannon Entropy']],
+                           frequency_analysis[['Stereotype', 'Group Frequency']], on='Stereotype')
 
     # Calculate thresholds (medians)
     entropy_threshold = merged_data['Shannon Entropy'].median()  # Median for Shannon Entropy
@@ -267,13 +269,13 @@ def execute_visualization_shannon_entropy_vs_group_frequency_constructs(input_di
 
     # Create a scatter plot for Shannon Entropy vs Group Frequency
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    sns.scatterplot(data=merged_data, x='Shannon Entropy', y='Group Frequency', hue='Construct', palette='viridis',
+    sns.scatterplot(data=merged_data, x='Shannon Entropy', y='Group Frequency', hue='Stereotype', palette='viridis',
                     legend=False, s=100)
 
     # Customize the plot
-    plt.title('Shannon Entropy vs. Group Frequency of Constructs', fontweight='bold')
+    plt.title('Shannon Entropy vs. Group Frequency of Stereotypes', fontweight='bold')
     plt.xlabel('Shannon Entropy (Diversity Measure)')
-    plt.ylabel('Construct Group Frequency')
+    plt.ylabel('Stereotype Group Frequency')
     plt.grid(True)
 
     # Draw lines to create quadrants using medians
@@ -283,13 +285,13 @@ def execute_visualization_shannon_entropy_vs_group_frequency_constructs(input_di
     # Create an empty list to store text objects
     texts = []
 
-    # Annotate each point with the construct name
+    # Annotate each point with the stereotype name
     for i in range(len(merged_data)):
-        construct_name = merged_data['Construct'][i]
+        stereotype_name = merged_data['Stereotype'][i]
 
         # Create a text object without setting color initially
         text = plt.text(x=merged_data['Shannon Entropy'][i], y=merged_data['Group Frequency'][i] + 1.2,
-                        s=construct_name, fontsize=8, ha='center',
+                        s=stereotype_name, fontsize=8, ha='center',
                         color='black')  # Set initial color to black or any default
 
         # Append the text object to the list
@@ -305,7 +307,7 @@ def execute_visualization_shannon_entropy_vs_group_frequency_constructs(input_di
              s=f'Median Shannon Entropy: {entropy_threshold:.2f}', color='grey', fontsize=10, va='bottom', ha='right',
              rotation=90)
 
-    fig_name = 'shannon_entropy_vs_group_frequency_constructs.png'
+    fig_name = 'shannon_entropy_vs_group_frequency_stereotypes.png'
     fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
@@ -316,10 +318,10 @@ def execute_visualization_ubiquity_vs_gini_coefficient(input_dir, output_dir, fi
     diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
     frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
-    # Merge the dataframes on the 'Construct' column
-    merged_data = pd.merge(diversity_measures[['Construct', 'Gini Coefficient']],
-                           frequency_analysis[['Construct', 'Ubiquity Index (Group Frequency per Group)']],
-                           on='Construct')
+    # Merge the dataframes on the 'Stereotype' column
+    merged_data = pd.merge(diversity_measures[['Stereotype', 'Gini Coefficient']],
+                           frequency_analysis[['Stereotype', 'Ubiquity Index (Group Frequency per Group)']],
+                           on='Stereotype')
 
     # Calculate thresholds
     gini_threshold = merged_data['Gini Coefficient'].median()  # Using median as a threshold
@@ -329,7 +331,8 @@ def execute_visualization_ubiquity_vs_gini_coefficient(input_dir, output_dir, fi
     # Plot with Seaborn scatter plot
     fig = plt.figure(figsize=(16, 9))
     sns.scatterplot(data=merged_data, x='Gini Coefficient', y='Ubiquity Index (Group Frequency per Group)',
-                    hue='Construct', palette='viridis', size='Ubiquity Index (Group Frequency per Group)', legend=False,
+                    hue='Stereotype', palette='viridis', size='Ubiquity Index (Group Frequency per Group)',
+                    legend=False,
                     sizes=(20, 200))
 
     # Customize the plot
@@ -342,14 +345,14 @@ def execute_visualization_ubiquity_vs_gini_coefficient(input_dir, output_dir, fi
     plt.axhline(y=ubiquity_threshold, color='grey', linestyle='--', linewidth=1)  # Horizontal line
     plt.axvline(x=gini_threshold, color='grey', linestyle='--', linewidth=1)  # Vertical line
 
-    # Annotate each point with the construct name
+    # Annotate each point with the stereotype name
     texts = []  # Initialize an empty list to store text objects
     for i in range(len(merged_data)):
-        construct_name = merged_data['Construct'][i]
+        stereotype_name = merged_data['Stereotype'][i]
 
         # Create text object with default color (black)
         text = plt.text(x=merged_data['Gini Coefficient'][i],
-                        y=merged_data['Ubiquity Index (Group Frequency per Group)'][i] + 0.01, s=construct_name,
+                        y=merged_data['Ubiquity Index (Group Frequency per Group)'][i] + 0.01, s=stereotype_name,
                         fontsize=8, ha='right', color='black')  # Initially set all colors to black
         texts.append(text)  # Append the text object to the list
 
@@ -377,10 +380,10 @@ def execute_visualization_gini_coefficient_vs_global_frequency(input_dir, output
     diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
     frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
-    # Merge the dataframes on the 'Construct' column
-    merged_data = pd.merge(diversity_measures[['Construct', 'Gini Coefficient']],
-                           frequency_analysis[['Construct', 'Global Relative Frequency (Occurrence-wise)']],
-                           on='Construct')
+    # Merge the dataframes on the 'Stereotype' column
+    merged_data = pd.merge(diversity_measures[['Stereotype', 'Gini Coefficient']],
+                           frequency_analysis[['Stereotype', 'Global Relative Frequency (Occurrence-wise)']],
+                           on='Stereotype')
 
     # Calculate thresholds
     gini_median = merged_data['Gini Coefficient'].median()  # Using median as a threshold
@@ -390,7 +393,7 @@ def execute_visualization_gini_coefficient_vs_global_frequency(input_dir, output
     # Plot with Seaborn scatter plot
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
     sns.scatterplot(data=merged_data, x='Gini Coefficient', y='Global Relative Frequency (Occurrence-wise)',
-                    hue='Construct', palette='viridis', size='Global Relative Frequency (Occurrence-wise)',
+                    hue='Stereotype', palette='viridis', size='Global Relative Frequency (Occurrence-wise)',
                     legend=False, sizes=(20, 200))
 
     # Customize the plot
@@ -404,14 +407,14 @@ def execute_visualization_gini_coefficient_vs_global_frequency(input_dir, output
     plt.axhline(y=frequency_threshold, color='grey', linestyle='--', linewidth=1)  # Horizontal line
     plt.axvline(x=gini_median, color='grey', linestyle='--', linewidth=1)  # Vertical line
 
-    # Annotate each point with the construct name
+    # Annotate each point with the stereotype name
     texts = []  # Initialize an empty list to store text objects
     for i in range(len(merged_data)):
-        construct_name = merged_data['Construct'][i]
+        stereotype_name = merged_data['Stereotype'][i]
 
         # Create text object with default color (black)
         text = plt.text(x=merged_data['Gini Coefficient'][i],
-                        y=merged_data['Global Relative Frequency (Occurrence-wise)'][i], s=construct_name, fontsize=8,
+                        y=merged_data['Global Relative Frequency (Occurrence-wise)'][i], s=stereotype_name, fontsize=8,
                         ha='right', color='black')
         texts.append(text)  # Append the text object to the list
 
@@ -431,14 +434,15 @@ def execute_visualization_gini_coefficient_vs_global_frequency(input_dir, output
     plt.close(fig)
 
 
-def execute_visualization_gini_coefficient_vs_group_frequency_constructs(input_dir, output_dir, file1_name, file2_name):
+def execute_visualization_gini_coefficient_vs_group_frequency_stereotypes(input_dir, output_dir, file1_name,
+                                                                          file2_name):
     # Load the data from the CSV files
     diversity_measures = pd.read_csv(os.path.join(input_dir, file1_name))
     frequency_analysis = pd.read_csv(os.path.join(input_dir, file2_name))
 
-    # Merge the dataframes on the 'Construct' column
-    merged_data = pd.merge(diversity_measures[['Construct', 'Gini Coefficient']],
-                           frequency_analysis[['Construct', 'Group Frequency']], on='Construct')
+    # Merge the dataframes on the 'Stereotype' column
+    merged_data = pd.merge(diversity_measures[['Stereotype', 'Gini Coefficient']],
+                           frequency_analysis[['Stereotype', 'Group Frequency']], on='Stereotype')
 
     # Calculate thresholds (medians)
     gini_median = merged_data['Gini Coefficient'].median()  # Median for Gini Coefficient
@@ -446,13 +450,13 @@ def execute_visualization_gini_coefficient_vs_group_frequency_constructs(input_d
 
     # Create a scatter plot for Gini Coefficient vs Group Frequency
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    sns.scatterplot(data=merged_data, x='Gini Coefficient', y='Group Frequency', hue='Construct', palette='viridis',
+    sns.scatterplot(data=merged_data, x='Gini Coefficient', y='Group Frequency', hue='Stereotype', palette='viridis',
                     legend=False, s=100)
 
     # Customize the plot
-    plt.title('Gini Coefficient vs. Group Frequency of Constructs', fontweight='bold')
+    plt.title('Gini Coefficient vs. Group Frequency of Stereotypes', fontweight='bold')
     plt.xlabel('Gini Coefficient (Diversity Measure)')
-    plt.ylabel('Construct Group Frequency')
+    plt.ylabel('Stereotype Group Frequency')
     plt.grid(True)
 
     # Draw lines to create quadrants using medians
@@ -462,13 +466,13 @@ def execute_visualization_gini_coefficient_vs_group_frequency_constructs(input_d
     # Create an empty list to store text objects
     texts = []
 
-    # Annotate each point with the construct name
+    # Annotate each point with the stereotype name
     for i in range(len(merged_data)):
-        construct_name = merged_data['Construct'][i]
+        stereotype_name = merged_data['Stereotype'][i]
 
         # Create a text object without setting color initially
         text = plt.text(x=merged_data['Gini Coefficient'][i], y=merged_data['Group Frequency'][i] + 1.2,
-                        s=construct_name, fontsize=8, ha='center',
+                        s=stereotype_name, fontsize=8, ha='center',
                         color='black')  # Set initial color to black or any default
 
         # Append the text object to the list
@@ -483,7 +487,7 @@ def execute_visualization_gini_coefficient_vs_group_frequency_constructs(input_d
     plt.text(x=gini_median, y=merged_data['Group Frequency'].min(), s=f'Median Gini Coefficient: {gini_median:.2f}',
              color='grey', fontsize=10, va='bottom', ha='right', rotation=90)
 
-    fig_name = 'gini_coefficient_vs_group_frequency_constructs.png'
+    fig_name = 'gini_coefficient_vs_group_frequency_stereotypes.png'
     fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
@@ -495,17 +499,17 @@ def execute_visualization_mutual_info_vs_dice_coefficient(input_dir, output_dir,
     similarity_measures_df = pd.read_csv(os.path.join(input_dir, file2_name))
 
     # Prepare a list for DataFrame creation
-    pairs_data = {'Construct Pair': [], 'Dice Coefficient': [], 'Mutual Information': []}
+    pairs_data = {'Stereotype Pair': [], 'Dice Coefficient': [], 'Mutual Information': []}
 
-    # Iterate through the similarity measures dataframe to extract construct pairs and their similarity measures
+    # Iterate through the similarity measures dataframe to extract stereotype pairs and their similarity measures
     for i, row in similarity_measures_df.iterrows():
-        construct_pair = ast.literal_eval(row['Construct Pair'])
-        construct1, construct2 = construct_pair
+        stereotype_pair = ast.literal_eval(row['Stereotype Pair'])
+        stereotype1, stereotype2 = stereotype_pair
 
         # Retrieve mutual information for each pair
-        mi_value = mutual_info_df.loc[mutual_info_df['Construct'] == construct1, construct2].values
+        mi_value = mutual_info_df.loc[mutual_info_df['Stereotype'] == stereotype1, stereotype2].values
         if len(mi_value) > 0:
-            pairs_data['Construct Pair'].append(f"{construct1} - {construct2}")
+            pairs_data['Stereotype Pair'].append(f"{stereotype1} - {stereotype2}")
             pairs_data['Dice Coefficient'].append(row['Dice Coefficient'])
             pairs_data['Mutual Information'].append(mi_value[0])
 
@@ -513,7 +517,7 @@ def execute_visualization_mutual_info_vs_dice_coefficient(input_dir, output_dir,
     pairs_df = pd.DataFrame(pairs_data)
 
     # Save the results to a CSV file
-    output_file_path = os.path.join(output_dir, 'construct_pairs_dice_similarity_info.csv')
+    output_file_path = os.path.join(output_dir, 'stereotype_pairs_dice_similarity_info.csv')
     pairs_df.to_csv(output_file_path, index=False)
     print(f"CSV file saved to {output_file_path}")
 
@@ -527,13 +531,13 @@ def execute_visualization_mutual_info_vs_dice_coefficient(input_dir, output_dir,
 
     # Create a scatter plot for Mutual Information vs. Dice Coefficient
     fig = plt.figure(figsize=(16, 9), tight_layout=True)
-    sns.scatterplot(data=pairs_df, x='Dice Coefficient', y='Mutual Information', hue='Construct Pair',
+    sns.scatterplot(data=pairs_df, x='Dice Coefficient', y='Mutual Information', hue='Stereotype Pair',
                     palette='viridis', s=100, legend=False)
 
     # Customize the plot
-    plt.title('Comparison of Mutual Information and Dice Coefficient for Construct Pairs', fontweight='bold')
-    plt.xlabel('Dice Coefficient (Construct Pair)')
-    plt.ylabel('Mutual Information (Construct Pair)')
+    plt.title('Comparison of Mutual Information and Dice Coefficient for Stereotype Pairs', fontweight='bold')
+    plt.xlabel('Dice Coefficient (Stereotype Pair)')
+    plt.ylabel('Mutual Information (Stereotype Pair)')
     plt.grid(True)
 
     # Draw lines to create quadrants using medians
@@ -546,16 +550,16 @@ def execute_visualization_mutual_info_vs_dice_coefficient(input_dir, output_dir,
     #
     # # Annotate only specific points
     # for i in range(len(pairs_df)):
-    #     construct_pair = pairs_df['Construct Pair'][i]
-    #     if construct_pair in pairs_to_annotate:  # Check if the pair is in the list of pairs to annotate
+    #     stereotype_pair = pairs_df['Stereotype Pair'][i]
+    #     if stereotype_pair in pairs_to_annotate:  # Check if the pair is in the list of pairs to annotate
     #         color = 'black'  # Default color
-    #         if 'none' in construct_pair:
+    #         if 'none' in stereotype_pair:
     #             color = 'blue'
-    #         elif 'other' in construct_pair:
+    #         elif 'other' in stereotype_pair:
     #             color = 'red'
     #         plt.text(x=pairs_df['Dice Coefficient'][i],
     #                  y=pairs_df['Mutual Information'][i],
-    #                  s=construct_pair,
+    #                  s=stereotype_pair,
     #                  fontsize=8,
     #                  ha='right',
     #                  color=color)  # Use the color variable here
@@ -590,24 +594,26 @@ def execute_visualization_coverage_percentage_all(in_dir_path, out_dir_path, fil
                  color='green')
 
     # Improved title and labels
-    plt.title('Coverage vs. Top Percentages of Constructs (Occurrence-wise and Group-wise)', fontsize=14,
+    plt.title('Coverage vs. Top Percentages of Stereotypes (Occurrence-wise and Group-wise)', fontsize=14,
               fontweight='bold')
-    plt.xlabel('Percentage of Constructs Considered (%)', fontsize=12)
-    plt.ylabel('Coverage of Construct Occurrences', fontsize=12)
+    plt.xlabel('Percentage of Stereotypes Considered (%)', fontsize=12)
+    plt.ylabel('Coverage of Stereotype Occurrences', fontsize=12)
 
     # Add annotations for each point (occurrence-wise)
     for i in range(len(data_occurrence)):
         plt.text(data_occurrence['Percentage'][i] + 1,  # Slightly adjust the x position (move to the right)
                  data_occurrence['Coverage'][i] + 0.015,  # Slightly adjust the y position (move upwards)
-            f"k={data_occurrence['Top k Constructs'][i]}", fontsize=10, color='blue', ha='right'  # Horizontal alignment
-        )
+                 f"k={data_occurrence['Top k Stereotypes'][i]}", fontsize=10, color='blue', ha='right'
+                 # Horizontal alignment
+                 )
 
     # Add annotations for each point (group-wise)
     for i in range(len(data_groupwise)):
         plt.text(data_groupwise['Percentage'][i] + 1,  # Slightly adjust the x position (move to the right)
                  data_groupwise['Coverage'][i] + 0.015,  # Slightly adjust the y position (move upwards)
-            f"k={data_groupwise['Top k Constructs'][i]}", fontsize=10, color='green', ha='right'  # Horizontal alignment
-        )
+                 f"k={data_groupwise['Top k Stereotypes'][i]}", fontsize=10, color='green', ha='right'
+                 # Horizontal alignment
+                 )
 
     # Additional formatting
     plt.xticks(fontsize=10)
@@ -619,14 +625,14 @@ def execute_visualization_coverage_percentage_all(in_dir_path, out_dir_path, fil
     plt.legend(loc='upper left')
 
     # Save the combined coverage plot
-    fig_name = 'coverage_vs_construct_percentage_all.png'
+    fig_name = 'coverage_vs_stereotype_percentage_all.png'
     fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     plt.close(fig)
 
 
 def execute_visualization_pareto_combined(in_dir_path, out_dir_path, file_path_occurrence,
-                                                          file_path_group):
+                                          file_path_group):
     # Load the CSV files into DataFrames
     data_occurrence = pd.read_csv(os.path.join(in_dir_path, file_path_occurrence))
     data_groupwise = pd.read_csv(os.path.join(in_dir_path, file_path_group))
@@ -645,17 +651,17 @@ def execute_visualization_pareto_combined(in_dir_path, out_dir_path, file_path_o
 
     # Bar plot for occurrence-wise frequency
     bar_width = 0.4
-    ax1.bar(data_occurrence['Construct'], data_occurrence['Percentage Frequency'], width=bar_width,
+    ax1.bar(data_occurrence['Stereotype'], data_occurrence['Percentage Frequency'], width=bar_width,
             label='Occurrence-wise Frequency', align='center', color='skyblue')
 
     # Bar plot for group-wise frequency (shifted to the right)
-    ax1.bar(data_groupwise['Construct'], data_groupwise['Percentage Group-wise Frequency'], width=bar_width,
+    ax1.bar(data_groupwise['Stereotype'], data_groupwise['Percentage Group-wise Frequency'], width=bar_width,
             label='Group-wise Frequency', align='edge', color='lightgreen')
 
     # Set labels and title
-    ax1.set_xlabel('Construct', fontsize=12)
+    ax1.set_xlabel('Stereotype', fontsize=12)
     ax1.set_ylabel('Relative Frequency (%)', fontsize=12)
-    ax1.set_title('Pareto Chart: Occurrence-wise and Group-wise Construct Frequencies', fontweight='bold', fontsize=14)
+    ax1.set_title('Pareto Chart: Occurrence-wise and Group-wise Stereotype Frequencies', fontweight='bold', fontsize=14)
 
     # Rotate the labels by 90 degrees for better readability
     ax1.tick_params(axis='x', rotation=90)
