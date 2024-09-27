@@ -8,7 +8,7 @@ from scipy.stats import mode
 
 
 # Function to calculate group statistics (support, coverage, total occurrences, and average occurrences)
-def calculate_group_statistics(df):
+def calculate_basic_statistics(df):
     total_models = len(df)  # Get the total number of models
     results_dict = {}
 
@@ -118,7 +118,7 @@ def calculate_advanced_statistics(df):
 
     # Convert the results dictionary to a DataFrame
     results_df = pd.DataFrame.from_dict(results_dict, orient='index').reset_index()
-    results_df.columns = ['Element', 'Max Occurrences', 'Min Occurrences', 'Min Non-zero Occurrences',
+    results_df.columns = ['Group', 'Max Occurrences', 'Min Occurrences', 'Min Non-zero Occurrences',
                           'Range', 'Range Non-zero', 'Median Occurrences', 'Mode Occurrences',
                           'Standard Deviation', 'Variance', 'Q1', 'Q2',
                           'Q3', 'IQR', 'Skewness', 'Kurtosis']
@@ -149,7 +149,7 @@ if __name__ == "__main__":
                 df = pd.read_csv(input_file_path)
 
             # Calculate the group coverage based on the CSV headers
-            basic_df = calculate_group_statistics(df)
+            basic_df = calculate_basic_statistics(df)
 
             # Save the result to a new CSV file
             output_dir = os.path.join(output_base_dir,analysis+"_"+filter)

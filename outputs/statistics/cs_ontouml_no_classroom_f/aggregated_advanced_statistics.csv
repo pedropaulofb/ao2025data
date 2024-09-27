@@ -1,4 +1,4 @@
-Element,Max Occurrences,Min Occurrences,Min Non-zero Occurrences,Range,Range Non-zero,Median Occurrences,Mode Occurrences,Standard Deviation,Variance,Q1,Q2,Q3,IQR,Skewness,Kurtosis
+Group,Max Occurrences,Min Occurrences,Min Non-zero Occurrences,Range,Range Non-zero,Median Occurrences,Mode Occurrences,Standard Deviation,Variance,Q1,Q2,Q3,IQR,Skewness,Kurtosis
 sortal,3391,0,1,3391,3390,24.0,19,309.1809610352272,95592.86666666668,14.0,24.0,45.0,31.0,10.531125814786774,113.82600452671771
 non_sortal,354,0,1,354,353,4.0,0,33.59963391837827,1128.9353994490355,1.0,4.0,9.0,8.0,9.139516338308713,92.7481769944769
 rigid,2306,0,1,2306,2305,19.0,12,210.48960372958308,44305.87327823691,12.0,19.0,39.0,27.0,10.398902255706307,111.93034454029201
