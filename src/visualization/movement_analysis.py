@@ -9,10 +9,12 @@ import seaborn as sns
 from adjustText import adjust_text
 from loguru import logger
 
+from src.utils import format_metric_name
 
-def plot_custom_quadrant_flow_chart(results_df, out_dir_path):
+
+def plot_custom_quadrant_flow_chart(results_df, out_dir_path, first_column_name):
     # Data setup from your DataFrame
-    stereotypes = results_df['stereotype']  # Stereotype labels (first column)
+    stereotypes = results_df[first_column_name]  # Dynamically use the first column name
     quadrant_start = results_df['quadrant_start']  # Start quadrants (A)
     quadrant_end = results_df['quadrant_end']  # End quadrants (B)
 
@@ -132,7 +134,7 @@ def plot_custom_quadrant_flow_chart(results_df, out_dir_path):
     plt.close(fig)
 
 
-def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path):
+def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path, first_column_name):
     # Calculate median values for moment A
     median_y_A = df_A[y_metric].median()
     median_x_A = df_A[x_metric].median()
@@ -156,9 +158,9 @@ def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path):
     results = []
 
     # Iterate over each stereotype and determine its quadrant in A and B
-    for stereotype in df_A['Stereotype'].unique():
-        subset_A = df_A[df_A['Stereotype'] == stereotype]
-        subset_B = df_B[df_B['Stereotype'] == stereotype]
+    for stereotype in df_A[first_column_name].unique():
+        subset_A = df_A[df_A[first_column_name] == stereotype]
+        subset_B = df_B[df_B[first_column_name] == stereotype]
 
         # Get the x and y values for this stereotype in moment A and B
         x_A, y_A = subset_A[x_metric].values[0], subset_A[y_metric].values[0]
@@ -169,7 +171,7 @@ def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path):
         quadrant_B = get_quadrant(x_B, y_B, median_x_B, median_y_B)
 
         # Append the results as a dictionary
-        results.append({'stereotype': stereotype, 'quadrant_start': quadrant_A, 'quadrant_end': quadrant_B})
+        results.append({first_column_name: stereotype, 'quadrant_start': quadrant_A, 'quadrant_end': quadrant_B})
 
     # Convert results to DataFrame
     results_df = pd.DataFrame(results)
@@ -181,34 +183,29 @@ def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path):
     logger.success(f"Quadrant analysis saved to {output_file}.")
 
     # Call plot with the results DataFrame, not the file path
-    plot_custom_quadrant_flow_chart(results_df, out_dir_path)
+    plot_custom_quadrant_flow_chart(results_df, out_dir_path, first_column_name)
 
 
-def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
+def execute_visualization_movement(path_file_A, path_file_B, out_dir_path, plot_medians=True):
     # Create the directory to save if it does not exist
     if not os.path.exists(out_dir_path):
         os.makedirs(out_dir_path)
-        logger.success(f"Created directory: {out_dir_path}")
-    else:
-        logger.info(f"Directory already exists: {out_dir_path}")
 
     # Load data from moment A and moment B using the provided file paths
     df_A = pd.read_csv(path_file_A)
     df_B = pd.read_csv(path_file_B)
 
-    if "_t_" in path_file_A:
-        # Drop rows where the 'Stereotype' column has values 'none', 'other', or 'undef'
-        df_A = df_A[~df_A['Stereotype'].isin(['none', 'other', 'undef'])]
-        df_B = df_B[~df_B['Stereotype'].isin(['none', 'other', 'undef'])]
+    # Get the first column name dynamically
+    first_column_name = df_A.columns[0]
 
-    # Check if both dataframes have the same stereotypes and columns
-    assert all(df_A['Stereotype'] == df_B['Stereotype']), "The stereotypes in both moments must match."
+    # Check if both dataframes have the same values in the first column
+    assert all(df_A[first_column_name] == df_B[first_column_name]), "The values in the first column must match."
 
-    # Convert 'Stereotype' column to categorical type for proper ordering
-    df_A['Stereotype'] = pd.Categorical(df_A['Stereotype'], categories=df_A['Stereotype'].unique(), ordered=True)
-    df_B['Stereotype'] = pd.Categorical(df_B['Stereotype'], categories=df_B['Stereotype'].unique(), ordered=True)
+    # Convert the first column to categorical type for proper ordering
+    df_A[first_column_name] = pd.Categorical(df_A[first_column_name], categories=df_A[first_column_name].unique(), ordered=True)
+    df_B[first_column_name] = pd.Categorical(df_B[first_column_name], categories=df_B[first_column_name].unique(), ordered=True)
 
-    # Get all numeric columns (excluding 'Stereotype')
+    # Get all numeric columns (excluding the first column)
     numeric_columns = df_A.select_dtypes(include='number').columns
 
     # Generate all unique combinations of two metrics for scatter plots
@@ -220,9 +217,9 @@ def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
 
         texts = []
         # Plot both moments A and B and draw arrows between the points
-        for i, stereotype in enumerate(df_A['Stereotype'].unique()):
-            subset_A = df_A[df_A['Stereotype'] == stereotype]
-            subset_B = df_B[df_B['Stereotype'] == stereotype]
+        for i, stereotype in enumerate(df_A[first_column_name].unique()):
+            subset_A = df_A[df_A[first_column_name] == stereotype]
+            subset_B = df_B[df_B[first_column_name] == stereotype]
 
             # Plot moment A (start point)
             ax.scatter(subset_A[x_metric], subset_A[y_metric], color=extended_palette[i], marker='o', s=100,
@@ -242,11 +239,11 @@ def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
                         xytext=(subset_A[x_metric].values[0], subset_A[y_metric].values[0]),  # starts at A
                         arrowprops=dict(arrowstyle="-|>", color=extended_palette[i], lw=1.0))
 
-            # Add label next to the start point
-            text = ax.text(subset_A[x_metric].values[0], subset_A[y_metric].values[0], stereotype, fontsize=8,
-                           color='black', ha='left', va='top')
-            texts.append(text)
+            # Add label next to the **end point**
+            text = ax.text(subset_B[x_metric].values[0], subset_B[y_metric].values[0], stereotype, fontsize=8,
+                           color='black', ha='right', va='top')
 
+            texts.append(text)
         # Adjust text to avoid overlap
         adjust_text(texts)
 
@@ -256,39 +253,41 @@ def execute_visualization_movement(path_file_A, path_file_B, out_dir_path):
         ax.set_title(f'Movement of {x_metric.replace("_", " ").title()} vs. {y_metric.replace("_", " ").title()}',
                      fontweight='bold')
 
-        # Calculate median values for moment A
-        median_y_A = df_A[y_metric].median()
-        median_x_A = df_A[x_metric].median()
+        if plot_medians:
 
-        # Calculate median values for moment B
-        median_y_B = df_B[y_metric].median()
-        median_x_B = df_B[x_metric].median()
+            # Calculate median values for moment A
+            median_y_A = df_A[y_metric].median()
+            median_x_A = df_A[x_metric].median()
 
-        # Plot median lines for moment A (light red)
-        ax.axhline(y=median_y_A, color='lightcoral', linestyle='--', linewidth=1, label=f'Median {y_metric} (A)')
-        ax.axvline(x=median_x_A, color='lightcoral', linestyle='--', linewidth=1, label=f'Median {x_metric} (A)')
+            # Calculate median values for moment B
+            median_y_B = df_B[y_metric].median()
+            median_x_B = df_B[x_metric].median()
 
-        # Plot median lines for moment B (light blue)
-        ax.axhline(y=median_y_B, color='lightblue', linestyle='--', linewidth=1, label=f'Median {y_metric} (B)')
-        ax.axvline(x=median_x_B, color='lightblue', linestyle='--', linewidth=1, label=f'Median {x_metric} (B)')
+            # Plot median lines for moment A (light red)
+            ax.axhline(y=median_y_A, color='lightcoral', linestyle='--', linewidth=1, label=f'Median {y_metric} (A)')
+            ax.axvline(x=median_x_A, color='lightcoral', linestyle='--', linewidth=1, label=f'Median {x_metric} (A)')
 
-        # Optionally add text for the median values
-        ax.text(df_B[x_metric].max(), median_y_B, f'median B: {median_y_B:.2f}', color='lightblue', fontsize=10,
-                ha='right', va='bottom')
-        ax.text(df_A[x_metric].max(), median_y_A, f'median A: {median_y_A:.2f}', color='lightcoral', fontsize=10,
-                ha='right', va='bottom')
+            # Plot median lines for moment B (light blue)
+            ax.axhline(y=median_y_B, color='#7c93e0', linestyle='--', linewidth=1, label=f'Median {y_metric} (B)')
+            ax.axvline(x=median_x_B, color='#7c93e0', linestyle='--', linewidth=1, label=f'Median {x_metric} (B)')
 
-        ax.text(median_x_B, df_B[y_metric].max(), f'median B: {median_x_B:.2f}', color='lightblue', fontsize=10,
-                ha='right', va='top', rotation=90)
-        ax.text(median_x_A, df_A[y_metric].max(), f'median A: {median_x_A:.2f}', color='lightcoral', fontsize=10,
-                ha='right', va='top', rotation=90)
+            # Optionally add text for the median values
+            ax.text(df_B[x_metric].max(), median_y_B, f'median B: {median_y_B:.2f}', color='lightblue', fontsize=10,
+                    ha='right', va='bottom')
+            ax.text(df_A[x_metric].max(), median_y_A, f'median A: {median_y_A:.2f}', color='lightcoral', fontsize=10,
+                    ha='right', va='bottom')
+
+            ax.text(median_x_B, df_B[y_metric].max(), f'median B: {median_x_B:.2f}', color='lightblue', fontsize=10,
+                    ha='right', va='top', rotation=90)
+            ax.text(median_x_A, df_A[y_metric].max(), f'median A: {median_x_A:.2f}', color='lightcoral', fontsize=10,
+                    ha='right', va='top', rotation=90)
 
         # Save figure
-        formatted_x_metric = x_metric.replace('_', ' ').title()
-        formatted_y_metric = y_metric.replace('_', ' ').title()
+        formatted_x_metric = format_metric_name(x_metric)  # Apply formatting to x_metric
+        formatted_y_metric = format_metric_name(y_metric)  # Apply formatting to y_metric
         fig_name = f'movement_analysis_{formatted_x_metric}_vs_{formatted_y_metric}.png'
         fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
         logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
         plt.close(fig)
 
-        calculate_quadrants(df_A, df_B, 'Total Frequency', 'Group Frequency', out_dir_path)
+        calculate_quadrants(df_A, df_B, 'Total Frequency', 'Group Frequency', out_dir_path, first_column_name)
