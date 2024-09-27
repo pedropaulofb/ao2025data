@@ -176,8 +176,11 @@ def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path, first_colu
     # Convert results to DataFrame
     results_df = pd.DataFrame(results)
 
+    formatted_x_metric = format_metric_name(x_metric)  # Apply formatting to x_metric
+    formatted_y_metric = format_metric_name(y_metric)  # Apply formatting to y_metric
+
     # Save the results to a CSV file
-    output_file = os.path.join(out_dir_path, f'quadrant_analysis_{x_metric}_vs_{y_metric}.csv')
+    output_file = os.path.join(out_dir_path, f'quadrant_analysis_{formatted_x_metric}_vs_{formatted_y_metric}.csv')
     results_df.to_csv(output_file, index=False)
 
     logger.success(f"Quadrant analysis saved to {output_file}.")
@@ -190,6 +193,7 @@ def execute_visualization_movement(path_file_A, path_file_B, out_dir_path, plot_
     # Create the directory to save if it does not exist
     if not os.path.exists(out_dir_path):
         os.makedirs(out_dir_path)
+        logger.success(f"Output path created: {out_dir_path}.")
 
     # Load data from moment A and moment B using the provided file paths
     df_A = pd.read_csv(path_file_A)
@@ -290,4 +294,5 @@ def execute_visualization_movement(path_file_A, path_file_B, out_dir_path, plot_
         logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
         plt.close(fig)
 
-        calculate_quadrants(df_A, df_B, 'Total Frequency', 'Group Frequency', out_dir_path, first_column_name)
+        if plot_medians:
+            calculate_quadrants(df_A, df_B, 'Total Frequency', 'Group Frequency', out_dir_path, first_column_name)
