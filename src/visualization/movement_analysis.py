@@ -38,8 +38,8 @@ def plot_custom_quadrant_flow_chart(results_df, out_dir_path, first_column_name)
             return [lower_limit + margin * (i + 1) for i in range(n)]  # Space stereotypes evenly with margins
 
     # Group stereotypes by their start and end quadrants for spacing purposes
-    stereotypes_by_start = results_df.groupby('quadrant_start')['stereotype'].apply(list).to_dict()
-    stereotypes_by_end = results_df.groupby('quadrant_end')['stereotype'].apply(list).to_dict()
+    stereotypes_by_start = results_df.groupby('quadrant_start')['Stereotype'].apply(list).to_dict()
+    stereotypes_by_end = results_df.groupby('quadrant_end')['Stereotype'].apply(list).to_dict()
 
     # Apply even spacing within each quadrant for start and end positions
     start_spacing = {}

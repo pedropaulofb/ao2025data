@@ -1,4 +1,4 @@
-Construct Pair,Jaccard Similarity,Dice Coefficient
+Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('abstract', 'category')",0.011627906976744186,0.022988505747126436
 "('abstract', 'collective')",0.0,0.0
 "('abstract', 'datatype')",0.0,0.0

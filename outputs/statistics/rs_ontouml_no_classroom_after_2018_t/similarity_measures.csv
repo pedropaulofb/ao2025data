@@ -1,4 +1,4 @@
-Construct Pair,Jaccard Similarity,Dice Coefficient
+Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('bringsAbout', 'characterization')",0.1896551724137931,0.3188405797101449
 "('bringsAbout', 'comparative')",0.21428571428571427,0.35294117647058826
 "('bringsAbout', 'componentOf')",0.1282051282051282,0.22727272727272727
