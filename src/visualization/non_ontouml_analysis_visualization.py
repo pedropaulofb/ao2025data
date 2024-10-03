@@ -31,33 +31,40 @@ def generate_non_ontouml_visualization(in_dir_path, out_dir_path, file_path):
     df_filtered['other_moving_avg'] = df_filtered['other'].rolling(window=5, min_periods=1).mean()
 
     # Reshape the DataFrame for Seaborn plotting
-    df_melted = df_filtered.melt(id_vars='year', value_vars=['none', 'other'], var_name='Element',
+    df_filtered.melt(id_vars='year', value_vars=['none', 'other'], var_name='Element',
                                  value_name='Frequency')
 
+    # Define specific hex colors for 'none' and 'other' bars
+    bar_colors = {'none': '#d62728', 'other': '#1f77b4'}  # Red for 'none' and blue for 'other' bars
+
+    # Define specific hex colors for 'none' and 'other' lines (darker shades for higher contrast)
+    line_colors = {'none': '#8c1e1e', 'other': '#0d3f6b'}  # Darker red for 'none' and darker blue for 'other' lines
+
     # Create the plot
-    plt.figure(figsize=(16, 9))  # Adjusted figure size for better layout
+    fig, ax1 = plt.subplots(figsize=(16, 9))  # Adjusted figure size for better layout
     sns.set(style="whitegrid")
 
-    # Define specific colors for 'none' and 'other'
-    colors = {'none': 'blue', 'other': 'red'}
+    # Plot 'none' and 'other' bars with manual color application
+    years = df_filtered['year']
 
-    # Barplot with bars side by side (dodge=True ensures side-by-side bars)
-    ax = sns.barplot(x='year', y='Frequency', hue='Element', data=df_melted, dodge=True, alpha=0.7, palette=colors)
+    # Manually plot the 'none' bars
+    ax1.bar(years, df_filtered['none'], color=bar_colors['none'], alpha=0.7, label='none (occurrence-wise)', width=0.4,
+            align='center', edgecolor='none')
 
-    # Plot 'none' moving average with the same blue color and label for the legend
-    sns.lineplot(x='year', y='none_moving_avg', data=df_filtered, color='blue', linewidth=2.5,
+    # Manually plot the 'other' bars
+    ax1.bar(years, df_filtered['other'], color=bar_colors['other'], alpha=0.7, label='other (occurrence-wise)',
+            width=0.4, align='edge', edgecolor='none')
+
+    # Plot 'none' moving average with different color for the line
+    sns.lineplot(x='year', y='none_moving_avg', data=df_filtered, ax=ax1, color=line_colors['none'], linewidth=2.5,
                  label='none (5-year avg)')
 
-    # Plot 'other' moving average with the same red color and label for the legend
-    sns.lineplot(x='year', y='other_moving_avg', data=df_filtered, color='red', linewidth=2.5,
+    # Plot 'other' moving average with different color for the line
+    sns.lineplot(x='year', y='other_moving_avg', data=df_filtered, ax=ax1, color=line_colors['other'], linewidth=2.5,
                  label='other (5-year avg)')
 
     # Improve readability by rotating x-axis labels and reducing the number of ticks
     plt.xticks(rotation=45, ha='right')
-
-    # Adjust number of x-ticks for large datasets
-    if len(df_filtered['year'].unique()) > 20:  # Arbitrary limit, adjust as needed
-        ax.set_xticks(ax.get_xticks()[::2])  # Show every second year
 
     # Determine if the file is model-wise or occurrence-wise and yearly or overall normalized
     if 'modelwise' in file_path:
@@ -80,6 +87,11 @@ def generate_non_ontouml_visualization(in_dir_path, out_dir_path, file_path):
     plt.xlabel('Year')
     plt.ylabel('Frequency (%)')  # If the values represent percentages; otherwise, remove (%)
     plt.title(title, fontweight='bold')
+
+    # Ensure both vertical and horizontal gridlines are displayed
+    ax1.grid(True, which='both', axis='both')  # Ensure both x and y gridlines are shown
+    # Move gridlines behind the bars
+    ax1.set_axisbelow(True)
 
     # Ensure output directory exists
     if not os.path.exists(out_dir_path):
