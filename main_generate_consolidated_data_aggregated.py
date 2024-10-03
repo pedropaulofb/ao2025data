@@ -22,7 +22,7 @@ aggregation_groups["non_rigid_sortal"] = list(set(aggregation_groups["non_rigid"
 aggregation_groups["non_rigid_non_sortal"] = list(
     set(aggregation_groups["non_rigid"]) & set(aggregation_groups["non_sortal"]))
 
-aggregation_groups["undef"] = list(set().union(*[aggregation_groups["none"], aggregation_groups["other"]]))
+aggregation_groups["non_ontouml"] = list(set().union(*[aggregation_groups["none"], aggregation_groups["other"]]))
 
 
 # Function to calculate occurrences for each group
