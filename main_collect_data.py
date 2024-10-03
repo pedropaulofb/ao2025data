@@ -46,7 +46,7 @@ def filter_models(models_to_filter, output_file_name) -> None:
     # filtered = [model for model in filtered if (model.issued <= 2018) and (model.modified <= 2018)]
 
     # Custom filtering to get models after 2019
-    filtered = [model for model in filtered if (model.issued > 2018) or (model.modified > 2018)]
+    filtered = [model for model in filtered if (model.issued > 2015) or (model.modified > 2015)]
 
 
     # Save filtered models to a file
@@ -132,7 +132,7 @@ def generate_list_models_years(models_to_list, output_file_path):
 if __name__ == "__main__":
     # loaded_models = load_all_models("non_filtered_models")
     filtered = filter_models("./outputs/loaded_models/ontouml_no_classroom.object.gz",
-                             "loaded_models/ontouml_no_classroom_after_2019")
-    query_filtered_models(filtered, "outputs/queries_results/ontouml_no_classroom_after_2019")
+                             "loaded_models/ontouml_no_classroom_after_2015")
+    query_filtered_models(filtered, "outputs/queries_results/ontouml_no_classroom_after_2015")
     # generate_list_models_years("./outputs/loaded_models/ontouml_no_classroom.object.gz",
     #                            "./outputs/ontouml_no_classroom_years.csv")

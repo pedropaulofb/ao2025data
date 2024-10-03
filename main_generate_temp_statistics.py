@@ -150,8 +150,8 @@ def generate_overall_modelwise_statistics(stereotypes_file, years_file, output_f
 
 
 if __name__ == "__main__":
-    input_file_stereotypes = ["./outputs/consolidated_data/cs_ontouml_no_classroom.csv",
-                              "./outputs/consolidated_data/rs_ontouml_no_classroom.csv"]
+    input_file_stereotypes = ["./outputs/consolidated_data/cs_ontouml_no_classroom_after_2015.csv",
+                              "./outputs/consolidated_data/rs_ontouml_no_classroom_after_2015.csv"]
     input_file_years = "./outputs/ontouml_no_classroom_years.csv"
 
     for input_file_stereotype in input_file_stereotypes:

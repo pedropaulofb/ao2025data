@@ -115,12 +115,12 @@ def filter_csv_by_headers(input_csv_path: str, output_csv_path: str, valid_heade
 
 if __name__ == "__main__":
     consolidate_stereotypes_data("class",
-                                 "./outputs/loaded_models/ontouml_no_classroom_after_2019.txt",
-                                 "./outputs/queries_results/ontouml_no_classroom_after_2019/query_cs_consolidated.csv",
-                                 "./outputs/queries_results/ontouml_no_classroom_after_2019/query_c_consolidated.csv",
-                                 "outputs/consolidated_data/cs_ontouml_no_classroom_after_2019.csv")
+                                 "./outputs/loaded_models/ontouml_no_classroom_after_2015.txt",
+                                 "./outputs/queries_results/ontouml_no_classroom_after_2015/query_cs_consolidated.csv",
+                                 "./outputs/queries_results/ontouml_no_classroom_after_2015/query_c_consolidated.csv",
+                                 "outputs/consolidated_data/cs_ontouml_no_classroom_after_2015.csv")
     consolidate_stereotypes_data("relation",
-                                 "./outputs/loaded_models/ontouml_no_classroom_after_2019.txt",
-                                 "./outputs/queries_results/ontouml_no_classroom_after_2019/query_rs_consolidated.csv",
-                                 "./outputs/queries_results/ontouml_no_classroom_after_2019/query_r_consolidated.csv",
-                                 "outputs/consolidated_data/rs_ontouml_no_classroom_after_2019.csv")
+                                 "./outputs/loaded_models/ontouml_no_classroom_after_2015.txt",
+                                 "./outputs/queries_results/ontouml_no_classroom_after_2015/query_rs_consolidated.csv",
+                                 "./outputs/queries_results/ontouml_no_classroom_after_2015/query_r_consolidated.csv",
+                                 "outputs/consolidated_data/rs_ontouml_no_classroom_after_2015.csv")

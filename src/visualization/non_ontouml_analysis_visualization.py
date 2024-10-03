@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from loguru import logger
 
 
-def generate_non_ontouml_visualization(in_dir_path, out_dir_path, file_path):
+def generate_non_ontouml_visualization(in_dir_path, out_dir_path, file_path, window_size=5):
     # Load your data
     df = pd.read_csv(os.path.join(in_dir_path, file_path))
 
@@ -26,13 +26,12 @@ def generate_non_ontouml_visualization(in_dir_path, out_dir_path, file_path):
     # Sort by year just in case it's not sorted
     df_filtered = df_filtered.sort_values('year')
 
-    # Calculate the 5-year moving average for 'none' and 'other'
-    df_filtered['none_moving_avg'] = df_filtered['none'].rolling(window=5, min_periods=1).mean()
-    df_filtered['other_moving_avg'] = df_filtered['other'].rolling(window=5, min_periods=1).mean()
+    # Calculate the moving average with the specified window size
+    df_filtered['none_moving_avg'] = df_filtered['none'].rolling(window=window_size, min_periods=1).mean()
+    df_filtered['other_moving_avg'] = df_filtered['other'].rolling(window=window_size, min_periods=1).mean()
 
     # Reshape the DataFrame for Seaborn plotting
-    df_filtered.melt(id_vars='year', value_vars=['none', 'other'], var_name='Element',
-                                 value_name='Frequency')
+    df_filtered.melt(id_vars='year', value_vars=['none', 'other'], var_name='Element', value_name='Frequency')
 
     # Define specific hex colors for 'none' and 'other' bars
     bar_colors = {'none': '#d62728', 'other': '#1f77b4'}  # Red for 'none' and blue for 'other' bars
@@ -57,11 +56,11 @@ def generate_non_ontouml_visualization(in_dir_path, out_dir_path, file_path):
 
     # Plot 'none' moving average with different color for the line
     sns.lineplot(x='year', y='none_moving_avg', data=df_filtered, ax=ax1, color=line_colors['none'], linewidth=2.5,
-                 label='none (5-year avg)')
+                 label=f'none ({window_size}-year avg)')
 
     # Plot 'other' moving average with different color for the line
     sns.lineplot(x='year', y='other_moving_avg', data=df_filtered, ax=ax1, color=line_colors['other'], linewidth=2.5,
-                 label='other (5-year avg)')
+                 label=f'other ({window_size}-year avg)')
 
     # Improve readability by rotating x-axis labels and reducing the number of ticks
     plt.xticks(rotation=45, ha='right')
@@ -77,11 +76,11 @@ def generate_non_ontouml_visualization(in_dir_path, out_dir_path, file_path):
     else:
         normalization_type = 'Overall-normalized'
 
-    # Build the title
-    title = f"{frequency_type} {normalization_type} Data of 'none' and 'other'"
+    # Build the title with window size for moving average
+    title = f"{frequency_type} {normalization_type} Data of 'none' and 'other' ({window_size}-year avg)"
 
     # Generate a figure name from the file_path (remove extension and append .png)
-    fig_name = os.path.splitext(file_path)[0] + "_visualization.png"
+    fig_name = os.path.splitext(file_path)[0] + f"_visualization_{window_size}_year_avg.png"
 
     # Add labels and title
     plt.xlabel('Year')
@@ -103,3 +102,4 @@ def generate_non_ontouml_visualization(in_dir_path, out_dir_path, file_path):
 
     # Close the plot to free memory
     plt.close()
+

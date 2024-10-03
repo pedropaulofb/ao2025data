@@ -8,7 +8,7 @@ from src.visualization.non_ontouml_analysis_visualization import generate_non_on
 if __name__ == "__main__":
     base_in_dir = "outputs/statistics/"
     base_out_dir = r"outputs/visualizations/"
-    analyses = ["cs_ontouml_no_classroom_f", "rs_ontouml_no_classroom_f"]
+    analyses = ["cs_ontouml_no_classroom_after_2015_f", "rs_ontouml_no_classroom_after_2015_f"]
     input_files = ["temporal_overall_modelwise_stats.csv","temporal_overall_stats.csv","temporal_yearly_modelwise_stats.csv","temporal_yearly_stats.csv"]
 
     combined_in_files = [("temporal_overall_stats.csv", "temporal_overall_modelwise_stats.csv"),
@@ -25,5 +25,5 @@ if __name__ == "__main__":
             generate_non_ontouml_combined_visualization(input_file_path, output_dir_path, combined_in_file_ow, combined_in_file_mw)
 
         for input_file in input_files:
-            generate_non_ontouml_visualization(input_file_path, output_dir_path, input_file)
+            generate_non_ontouml_visualization(input_file_path, output_dir_path, input_file,3)
 
