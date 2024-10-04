@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import pandas as pd
 from loguru import logger
 
@@ -26,8 +27,12 @@ def calculate_distance_from_origin_and_save(df, x_metric, y_metric, out_dir_path
     # Convert results to DataFrame
     results_df = pd.DataFrame(results)
 
-    # Rank the results based on distance from origin (farthest ranked first)
-    results_df['Rank'] = results_df['DistanceFromOrigin'].rank(ascending=False, method='dense').astype(int)
+    # Filter out non-finite values from DistanceFromOrigin
+    valid_distance_mask = pd.notnull(results_df['DistanceFromOrigin']) & np.isfinite(results_df['DistanceFromOrigin'])
+
+    # Perform ranking only on valid values
+    results_df.loc[valid_distance_mask, 'Rank'] = results_df.loc[valid_distance_mask, 'DistanceFromOrigin'].rank(
+        ascending=False, method='dense').astype(int)
 
     # Sort the DataFrame by rank for better readability (optional)
     results_df = results_df.sort_values(by='Rank')

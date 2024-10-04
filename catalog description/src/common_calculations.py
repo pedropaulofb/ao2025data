@@ -72,3 +72,56 @@ def calculate_class_and_relation_metrics(df, label):
         f'ontouml_{label}': ontouml.sum(),
         f'non_ontouml_{label}': non_ontouml.sum()
     }, total, stereotyped, non_stereotyped, ontouml, non_ontouml
+
+
+def calculate_ratios(total_classes, total_relations, total_stereotyped_classes, total_stereotyped_relations,
+                     total_non_stereotyped_classes, total_non_stereotyped_relations,
+                     total_ontouml_classes, total_ontouml_relations, total_non_ontouml_classes, total_non_ontouml_relations):
+    ratios = {}
+
+    # 1. Classes/Relations ratio
+    if total_relations > 0:
+        ratios['ratio_classes_relations'] = total_classes / total_relations
+    else:
+        ratios['ratio_classes_relations'] = np.nan  # Avoid division by zero
+
+    # 2. Stereotyped classes/relations ratio (all types)
+    if total_stereotyped_relations > 0:
+        ratios['ratio_stereotyped_classes_relations'] = total_stereotyped_classes / total_stereotyped_relations
+    else:
+        ratios['ratio_stereotyped_classes_relations'] = np.nan
+
+    # 3. Stereotyped classes/total classes ratio
+    if total_classes > 0:
+        ratios['ratio_stereotyped_classes_total'] = total_stereotyped_classes / total_classes
+        ratios['ratio_non_stereotyped_classes_total'] = total_non_stereotyped_classes / total_classes
+    else:
+        ratios['ratio_stereotyped_classes_total'] = np.nan
+        ratios['ratio_non_stereotyped_classes_total'] = np.nan
+
+    # 4. Stereotyped relations/total relations ratio
+    if total_relations > 0:
+        ratios['ratio_stereotyped_relations_total'] = total_stereotyped_relations / total_relations
+        ratios['ratio_non_stereotyped_relations_total'] = total_non_stereotyped_relations / total_relations
+    else:
+        ratios['ratio_stereotyped_relations_total'] = np.nan
+        ratios['ratio_non_stereotyped_relations_total'] = np.nan
+
+    # 5. OntoUML classes/total classes ratio
+    if total_classes > 0:
+        ratios['ratio_ontouml_classes_total'] = total_ontouml_classes / total_classes
+        ratios['ratio_non_ontouml_classes_total'] = total_non_ontouml_classes / total_classes
+    else:
+        ratios['ratio_ontouml_classes_total'] = np.nan
+        ratios['ratio_non_ontouml_classes_total'] = np.nan
+
+    # 6. OntoUML relations/total relations ratio
+    if total_relations > 0:
+        ratios['ratio_ontouml_relations_total'] = total_ontouml_relations / total_relations
+        ratios['ratio_non_ontouml_relations_total'] = total_non_ontouml_relations / total_relations
+    else:
+        ratios['ratio_ontouml_relations_total'] = np.nan
+        ratios['ratio_non_ontouml_relations_total'] = np.nan
+
+    return ratios
+

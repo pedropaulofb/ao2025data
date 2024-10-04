@@ -13,7 +13,7 @@ from src.utils import format_metric_name
 
 
 # Function to create all possible scatter plots for the metric combinations
-def execute_visualization_scatter(in_file_path, out_dir_path, plot_medians: bool = True):
+def execute_visualization_scatter(in_file_path, out_dir_path, plot_medians: bool = True, selected_combinations=None):
     # Read the CSV file
     df = pd.read_csv(in_file_path)
 
@@ -24,13 +24,36 @@ def execute_visualization_scatter(in_file_path, out_dir_path, plot_medians: bool
     # Get all numeric columns (excluding the first column)
     numeric_columns = df.select_dtypes(include='number').columns
 
-    # Generate all unique combinations of two numeric columns
-    for x_metric, y_metric in combinations(numeric_columns, 2):
+    # Check if selected_combinations is provided, otherwise use all combinations of numeric columns
+    if selected_combinations is None or not selected_combinations:
+        # Generate all unique combinations of two numeric columns if no specific combinations are provided
+        combinations_to_plot = list(combinations(numeric_columns, 2))
+    else:
+        # Use the provided list of combinations (assumed to be a list of tuples)
+        combinations_to_plot = selected_combinations
+
+    # Generate the scatter plots for each combination
+    for x_metric, y_metric in combinations_to_plot:
+        # Check if the x_metric and y_metric are valid numeric columns
+        if x_metric not in numeric_columns or y_metric not in numeric_columns:
+            logger.warning(
+                f"Skipping invalid combination ({x_metric}, {y_metric}) - One or both metrics are not numeric columns.")
+            continue
+
         fig = plt.figure(figsize=(16, 9), tight_layout=True)
 
-        # Define the base colors for the plot (12 distinct colors)
-        base_palette = sns.color_palette('tab10', n_colors=12)
-        extended_palette = base_palette + base_palette[:11]  # 12 colors + 11 more to make 23 total
+        # Dynamically generate a color palette based on the number of unique categories
+        num_unique_values = len(df[index_col].unique())
+
+        # Check if the number of unique values is less than or equal to 23
+        if num_unique_values <= 23:
+            # Use 'tab10' (10 colors) + extended palette (23 colors total)
+            base_palette = sns.color_palette('tab10', n_colors=12)
+            extended_palette = base_palette + base_palette[:11]  # Repeat some colors to get up to 23
+            palette = extended_palette[:num_unique_values]  # Use only as many colors as needed
+        else:
+            # Use 'hsv' palette if more than 23 unique values
+            palette = sns.color_palette('hsv', n_colors=num_unique_values)
 
         texts = []
         # Plotting the scatter plot with circles and adding labels to each point
@@ -46,7 +69,7 @@ def execute_visualization_scatter(in_file_path, out_dir_path, plot_medians: bool
 
             # Plot the point (circle marker)
             plt.scatter(subset[x_metric], subset[y_metric],
-                        color=extended_palette[i], marker='o', s=100, edgecolor='w', label=index_value)
+                        color=palette[i], marker='o', s=100, edgecolor='w', label=index_value)
 
             # Add label next to each point
             for j in range(len(subset)):
@@ -96,3 +119,4 @@ def execute_visualization_scatter(in_file_path, out_dir_path, plot_medians: bool
         fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
         logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
         plt.close(fig)
+

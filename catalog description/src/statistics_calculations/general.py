@@ -1,9 +1,6 @@
 import pandas as pd
 from loguru import logger
-from src.common_calculations import calculate_stats, calculate_class_and_relation_metrics
-
-
-
+from ..common_calculations import calculate_stats, calculate_class_and_relation_metrics, calculate_ratios
 
 
 def calculate_metrics_general(models_df, classes_df, relations_df, output_file):
@@ -13,7 +10,6 @@ def calculate_metrics_general(models_df, classes_df, relations_df, output_file):
     relation_metrics, relation_total, relation_stereotyped, relation_non_stereotyped, relation_ontouml, relation_non_ontouml = calculate_class_and_relation_metrics(
         relations_df, 'relations')
 
-    # Calculate per-model statistics
     metrics = {
         'class_total': calculate_stats(class_total),
         'class_stereotyped': calculate_stats(class_stereotyped),
@@ -27,10 +23,19 @@ def calculate_metrics_general(models_df, classes_df, relations_df, output_file):
         'relation_non_ontouml': calculate_stats(relation_non_ontouml)
     }
 
+    # Calculate ratios for the entire dataset (general case)
+    ratios = calculate_ratios(class_metrics['total_classes'], relation_metrics['total_relations'],
+                              class_metrics['stereotyped_classes'], relation_metrics['stereotyped_relations'],
+                              class_metrics['non_stereotyped_classes'], relation_metrics['non_stereotyped_relations'],
+                              class_metrics['ontouml_classes'], relation_metrics['ontouml_relations'],
+                              class_metrics['non_ontouml_classes'], relation_metrics['non_ontouml_relations'])
+
+
     # Prepare data for output
     output_data = {}
     output_data.update(class_metrics)
     output_data.update(relation_metrics)
+    output_data.update(ratios)
 
     for key, stat_dict in metrics.items():
         for stat_name, value in stat_dict.items():
