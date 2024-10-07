@@ -1,0 +1,9 @@
+PREFIX ontouml: <https://w3id.org/ontouml#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT (COUNT(?class) AS ?count_class) (COUNT(?relation) AS ?count_relation)
+WHERE {
+  { ?class rdf:type ontouml:Class . }
+  UNION
+  { ?relation rdf:type ontouml:Relation . }
+}
