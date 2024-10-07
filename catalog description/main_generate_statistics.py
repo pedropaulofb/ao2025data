@@ -42,7 +42,7 @@ if __name__ == "__main__":
     calculate_metrics_per_model(models_df, classes_df, relations_df, output_file_per_model)
 
     # Calculating without outliers
-    models_file = 'statistics/catalog_statistics_per_model_no_outliers.csv'  # THIS FILE CONTAINS 'total_classes' column
+    models_file = 'statistics/catalog_statistics_per_model.csv'  # THIS FILE CONTAINS 'total_classes' column
     models_file_years = '../outputs/ontouml_no_classroom_years.csv'
     output_file_per_model_no_outliers = 'statistics/catalog_statistics_per_model_no_outliers.csv'
     output_file_general_no_outliers = 'statistics/catalog_statistics_general_no_outliers.csv'

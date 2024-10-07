@@ -1,7 +1,0 @@
-﻿Query;Description
-query_s;ontouml object elements and their respective quantities in the model
-query_p;ontouml predicate element and their respective quantities in the model
-query_o;ontouml subject element and their respective quantities in the model
-query_cs;ontouml class stereotypes and their respective quantities in the model
-query_rs;ontouml relation stereotypes and their respective quantities in the model
-query_t;ontouml types and their respective quantities in the model
