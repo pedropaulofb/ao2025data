@@ -1,9 +1,11 @@
 import os
 
+from loguru import logger
+
 from src.Dataset import Dataset
 from src.collect_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
 from src.load_models_data import instantiate_models_from_csv
-from src.save_datasets_stats_to_csv import save_datasets_statistics_to_csv
+from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
 
 CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
 OUTPUT_DIR = "./outputs"
@@ -21,7 +23,7 @@ def query_data(all_models):
     query_models(all_models, "queries", os.path.join(OUTPUT_DIR, "01_loaded_data/"))
 
 
-def create_datasets_instances(models_list):
+def create_specific_datasets_instances(models_list, suffix: str = ""):
     """Create datasets based on classroom and non-classroom models."""
 
     datasets = []
@@ -42,25 +44,25 @@ def create_datasets_instances(models_list):
     return datasets
 
 
-def create_datasets(datasets):
-    datasets = create_datasets_instances(datasets)
-
+def calculate_and_save_datasets_statistics(datasets):
     for dataset in datasets:
         save_dataset_info(dataset)
-        dataset.calculate_statistics()
 
-    save_datasets_statistics_to_csv(datasets, os.path.join(OUTPUT_DIR, "02_datasets"))
+        dataset.calculate_dataset_statistics()
+        dataset.save_dataset_statistics_to_csv(os.path.join(OUTPUT_DIR, "02_datasets"))
 
-    return datasets
+        dataset.calculate_models_statistics()
+        dataset.save_models_statistics_to_csv(os.path.join(OUTPUT_DIR, "02_datasets"))
 
 
 def load_models_data():
     """Load model data and count stereotypes for each model."""
-    models_list = instantiate_models_from_csv(os.path.join(OUTPUT_DIR, "01_loaded_data/models_data.csv"),
-        os.path.join(OUTPUT_DIR, "01_loaded_data/query_count_number_classes_relations_consolidated.csv"))
+    models_list = instantiate_models_from_csv(os.path.join(OUTPUT_DIR, "01_loaded_data", "models_data.csv"),
+                                              os.path.join(OUTPUT_DIR, "01_loaded_data",
+                                                           "query_count_number_classes_relations_consolidated.csv"))
 
-    class_csv = os.path.join(OUTPUT_DIR, "01_loaded_data/query_get_all_class_stereotypes_consolidated.csv")
-    relation_csv = os.path.join(OUTPUT_DIR, "01_loaded_data/query_get_all_relation_stereotypes_consolidated.csv")
+    class_csv = os.path.join(OUTPUT_DIR, "01_loaded_data", "query_get_all_class_stereotypes_consolidated.csv")
+    relation_csv = os.path.join(OUTPUT_DIR, "01_loaded_data", "query_get_all_relation_stereotypes_consolidated.csv")
 
     # Count stereotypes and calculate 'none' for each model
     for model in models_list:
@@ -76,9 +78,34 @@ def save_dataset_info(dataset):
     dataset.generate_dataset_class_data_csv(os.path.join(OUTPUT_DIR, "02_datasets"))
     dataset.generate_dataset_relation_data_csv(os.path.join(OUTPUT_DIR, "02_datasets"))
 
+
 if __name__ == "__main__":
     # all_models = load_data_from_catalog(CATALOG_PATH)   # Uncomment to load models
     # query_data(all_models)     # Uncomment to query stereotypes
 
     all_models = load_models_data()  # Load model data and count stereotypes
-    datasets = create_datasets(all_models)
+    datasets = create_specific_datasets_instances(all_models)
+    calculate_and_save_datasets_statistics(datasets)
+
+    for dataset in datasets:
+        if dataset.name == 'all_models':
+            all_models_outliers = dataset.identify_outliers()
+        if dataset.name == 'non_classroom_models':
+            non_classroom_models_outliers = dataset.identify_outliers()
+        if dataset.name == 'classroom_models':
+            classroom_models_outliers = dataset.identify_outliers()
+
+    no_outliers_datasets = []
+    for dataset in datasets:
+        if 'non_classroom' in dataset.name:
+            no_outliers_datasets.append(dataset.fork_without_outliers(non_classroom_models_outliers))
+        elif 'classroom' in dataset.name:
+            no_outliers_datasets.append(dataset.fork_without_outliers(classroom_models_outliers))
+        elif dataset.name == 'all_models':
+            no_outliers_datasets.append(dataset.fork_without_outliers(all_models_outliers))
+        else:
+            logger.warning(f"Dataset {dataset.name} had no outliers cleaned.")
+
+    calculate_and_save_datasets_statistics(no_outliers_datasets)
+    all_datasets = datasets + no_outliers_datasets
+    save_datasets_statistics_to_csv(all_datasets, os.path.join(OUTPUT_DIR, "02_datasets"))

@@ -1,5 +1,7 @@
 import csv
 
+from src.statistics_calculations import calculate_ratios
+
 
 class ModelData:
     def __init__(self, name: str, year: int, is_classroom: bool, total_class:int, total_relation:int) -> None:
@@ -9,6 +11,7 @@ class ModelData:
         self.is_classroom: bool = is_classroom
         self.total_class_number: int = total_class
         self.total_relation_number: int = total_relation
+        self.statistics: dict = {}
 
 
         # List of attributes stored in the 'stats' dictionary
@@ -72,3 +75,58 @@ class ModelData:
         # Calculate 'none' for relation stereotypes
         total_relation_counted = sum(value for key, value in self.relation_stereotypes.items() if key != "none")
         self.relation_stereotypes["none"] = self.total_relation_number - total_relation_counted
+
+    def calculate_statistics(self) -> None:
+        """
+        Calculate statistics based on the class and relation stereotypes and store them in self.statistics.
+        """
+        # Calculate total and stereotyped/non-stereotyped classes and relations
+        total_classes = self.total_class_number
+        total_relations = self.total_relation_number
+
+        stereotyped_classes = total_classes - self.class_stereotypes["none"]
+        non_stereotyped_classes = self.class_stereotypes["none"]
+
+        stereotyped_relations = total_relations - self.relation_stereotypes["none"]
+        non_stereotyped_relations = self.relation_stereotypes["none"]
+
+        # OntoUML stereotypes exclude 'none' and 'other'
+        ontouml_classes = total_classes - self.class_stereotypes["none"] - self.class_stereotypes["other"]
+        ontouml_relations = total_relations - self.relation_stereotypes["none"] - self.relation_stereotypes["other"]
+
+        non_ontouml_classes = self.class_stereotypes["none"] + self.class_stereotypes["other"]
+        non_ontouml_relations = self.relation_stereotypes["none"] + self.relation_stereotypes["other"]
+
+        # Step 1: Calculate ratios
+        ratios = calculate_ratios(
+            total_classes, total_relations,
+            stereotyped_classes, stereotyped_relations,
+            non_stereotyped_classes, non_stereotyped_relations,
+            ontouml_classes, ontouml_relations,
+            non_ontouml_classes, non_ontouml_relations
+        )
+
+        # Step 2: Count unique class and relation stereotypes (excluding "none" and "other")
+        unique_class_stereotypes = sum(
+            1 for key, value in self.class_stereotypes.items() if value > 0 and key not in ["none", "other"])
+        unique_relation_stereotypes = sum(
+            1 for key, value in self.relation_stereotypes.items() if value > 0 and key not in ["none", "other"])
+
+        # Step 3: Store statistics in self.statistics
+        self.statistics = {
+            "total_classes": total_classes,
+            "stereotyped_classes": stereotyped_classes,
+            "non_stereotyped_classes": non_stereotyped_classes,
+            "ontouml_classes": ontouml_classes,
+            "non_ontouml_classes": non_ontouml_classes,
+            "total_relations": total_relations,
+            "stereotyped_relations": stereotyped_relations,
+            "non_stereotyped_relations": non_stereotyped_relations,
+            "ontouml_relations": ontouml_relations,
+            "non_ontouml_relations": non_ontouml_relations,
+            "unique_class_stereotypes": unique_class_stereotypes,
+            "unique_relation_stereotypes": unique_relation_stereotypes
+        }
+
+        # Add the ratios to the statistics
+        self.statistics.update(ratios)
