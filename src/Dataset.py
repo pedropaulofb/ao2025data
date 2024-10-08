@@ -4,7 +4,6 @@ import os
 
 import numpy as np
 import pandas as pd
-from icecream import ic
 from loguru import logger
 
 from src import ModelData
@@ -23,7 +22,14 @@ class Dataset():
         """Return the number of models in the dataset."""
         return len(self.models)
 
-    def generate_dataset_general_data_csv(self, output_dir: str) -> None:
+    def save_dataset_general_data_csv(self, output_dir: str) -> None:
+
+        output_dir = os.path.join(output_dir, self.name)
+
+        # Create folder if it does not exist
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
         with open(os.path.join(output_dir, f'{self.name}.csv'), mode='w', newline='') as file:
             writer = csv.writer(file)
             # Write the header
@@ -32,7 +38,13 @@ class Dataset():
             for model in self.models:
                 writer.writerow([model.name, model.year, model.total_class_number, model.total_relation_number])
 
-    def generate_dataset_class_data_csv(self, output_dir: str) -> None:
+    def save_dataset_class_data_csv(self, output_dir: str) -> None:
+        output_dir = os.path.join(output_dir, self.name)
+
+        # Create folder if it does not exist
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
         with open(os.path.join(output_dir, f'{self.name}_class.csv'), mode='w', newline='') as file:
             writer = csv.writer(file)
             # Extract all the stereotypes from the first model (assuming all models have the same stereotypes)
@@ -44,7 +56,13 @@ class Dataset():
                 row = [model.name] + [model.class_stereotypes[st] for st in stereotypes]
                 writer.writerow(row)
 
-    def generate_dataset_relation_data_csv(self, output_dir: str) -> None:
+    def save_dataset_relation_data_csv(self, output_dir: str) -> None:
+        output_dir = os.path.join(output_dir, self.name)
+
+        # Create folder if it does not exist
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
         with open(os.path.join(output_dir, f'{self.name}_relation.csv'), mode='w', newline='') as file:
             writer = csv.writer(file)
             # Extract all the stereotypes from the first model's relation_stereotypes
@@ -118,9 +136,7 @@ class Dataset():
 
     def calculate_models_statistics(self) -> None:
         """
-        Calculate the statistics for all models in the dataset and save them to a CSV file.
-
-        :param output_dir: The directory where the CSV file will be saved.
+        Calculate the statistics for all models in the dataset.
         """
         # Ensure statistics are calculated for each model
         for model in self.models:
@@ -139,7 +155,13 @@ class Dataset():
         for model in self.models:
             append_unique_preserving_order(all_keys, model.statistics.keys())
 
-        output_path = os.path.join(output_csv_dir, f"{self.name}_models_statistics.csv")
+        output_dir = os.path.join(output_csv_dir, self.name)
+
+        # Create folder if it does not exist
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        output_path = os.path.join(output_dir, f"{self.name}_models_statistics.csv")
 
         # Open the CSV file for writing
         with open(output_path, mode='w', newline='') as file:
@@ -168,15 +190,21 @@ class Dataset():
         """
         # Define the header with the statistics to export
         headers = ['model', 'total_classes', 'stereotyped_classes', 'non_stereotyped_classes', 'ontouml_classes',
-            'non_ontouml_classes', 'total_relations', 'stereotyped_relations', 'non_stereotyped_relations',
-            'ontouml_relations', 'non_ontouml_relations', 'ratio_classes_relations',
-            'ratio_stereotyped_classes_relations', 'ratio_stereotyped_classes_total',
-            'ratio_non_stereotyped_classes_total', 'ratio_stereotyped_relations_total',
-            'ratio_non_stereotyped_relations_total', 'ratio_ontouml_classes_total', 'ratio_non_ontouml_classes_total',
-            'ratio_ontouml_relations_total', 'ratio_non_ontouml_relations_total', 'unique_class_stereotypes',
-            'unique_relation_stereotypes']
+                   'non_ontouml_classes', 'total_relations', 'stereotyped_relations', 'non_stereotyped_relations',
+                   'ontouml_relations', 'non_ontouml_relations', 'ratio_classes_relations',
+                   'ratio_stereotyped_classes_relations', 'ratio_stereotyped_classes_total',
+                   'ratio_non_stereotyped_classes_total', 'ratio_stereotyped_relations_total',
+                   'ratio_non_stereotyped_relations_total', 'ratio_ontouml_classes_total',
+                   'ratio_non_ontouml_classes_total', 'ratio_ontouml_relations_total',
+                   'ratio_non_ontouml_relations_total', 'unique_class_stereotypes', 'unique_relation_stereotypes']
 
-        output_path = os.path.join(output_csv_dir, f"{self.name}_statistics.csv")
+        output_dir = os.path.join(output_csv_dir, self.name)
+
+        # Create folder if it does not exist
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        output_path = os.path.join(output_dir, f"{self.name}_statistics.csv")
 
         # Open the CSV file for writing
         with open(output_path, mode='w', newline='') as file:
@@ -188,26 +216,27 @@ class Dataset():
             # Write the statistics for each model
             for model in self.models:
                 row = [model.name, model.statistics.get('total_classes', 'N/A'),
-                    model.statistics.get('stereotyped_classes', 'N/A'),
-                    model.statistics.get('non_stereotyped_classes', 'N/A'),
-                    model.statistics.get('ontouml_classes', 'N/A'), model.statistics.get('non_ontouml_classes', 'N/A'),
-                    model.statistics.get('total_relations', 'N/A'),
-                    model.statistics.get('stereotyped_relations', 'N/A'),
-                    model.statistics.get('non_stereotyped_relations', 'N/A'),
-                    model.statistics.get('ontouml_relations', 'N/A'),
-                    model.statistics.get('non_ontouml_relations', 'N/A'),
-                    model.statistics.get('ratio_classes_relations', 'N/A'),
-                    model.statistics.get('ratio_stereotyped_classes_relations', 'N/A'),
-                    model.statistics.get('ratio_stereotyped_classes_total', 'N/A'),
-                    model.statistics.get('ratio_non_stereotyped_classes_total', 'N/A'),
-                    model.statistics.get('ratio_stereotyped_relations_total', 'N/A'),
-                    model.statistics.get('ratio_non_stereotyped_relations_total', 'N/A'),
-                    model.statistics.get('ratio_ontouml_classes_total', 'N/A'),
-                    model.statistics.get('ratio_non_ontouml_classes_total', 'N/A'),
-                    model.statistics.get('ratio_ontouml_relations_total', 'N/A'),
-                    model.statistics.get('ratio_non_ontouml_relations_total', 'N/A'),
-                    model.statistics.get('unique_class_stereotypes', 'N/A'),
-                    model.statistics.get('unique_relation_stereotypes', 'N/A')]
+                       model.statistics.get('stereotyped_classes', 'N/A'),
+                       model.statistics.get('non_stereotyped_classes', 'N/A'),
+                       model.statistics.get('ontouml_classes', 'N/A'),
+                       model.statistics.get('non_ontouml_classes', 'N/A'),
+                       model.statistics.get('total_relations', 'N/A'),
+                       model.statistics.get('stereotyped_relations', 'N/A'),
+                       model.statistics.get('non_stereotyped_relations', 'N/A'),
+                       model.statistics.get('ontouml_relations', 'N/A'),
+                       model.statistics.get('non_ontouml_relations', 'N/A'),
+                       model.statistics.get('ratio_classes_relations', 'N/A'),
+                       model.statistics.get('ratio_stereotyped_classes_relations', 'N/A'),
+                       model.statistics.get('ratio_stereotyped_classes_total', 'N/A'),
+                       model.statistics.get('ratio_non_stereotyped_classes_total', 'N/A'),
+                       model.statistics.get('ratio_stereotyped_relations_total', 'N/A'),
+                       model.statistics.get('ratio_non_stereotyped_relations_total', 'N/A'),
+                       model.statistics.get('ratio_ontouml_classes_total', 'N/A'),
+                       model.statistics.get('ratio_non_ontouml_classes_total', 'N/A'),
+                       model.statistics.get('ratio_ontouml_relations_total', 'N/A'),
+                       model.statistics.get('ratio_non_ontouml_relations_total', 'N/A'),
+                       model.statistics.get('unique_class_stereotypes', 'N/A'),
+                       model.statistics.get('unique_relation_stereotypes', 'N/A')]
                 # Write the row to the CSV file
                 writer.writerow(row)
 
@@ -231,12 +260,10 @@ class Dataset():
         # Calculate the class-to-relation ratio for each model
         ratios = [model.total_class_number / model.total_relation_number if model.total_relation_number > 0 else np.nan
                   for model in self.models]
-        df = pd.DataFrame({
-            'model': [model.name for model in self.models],
-            'total_classes': [model.total_class_number for model in self.models],
-            'total_relations': [model.total_relation_number for model in self.models],
-            'class_relation_ratio': ratios
-        })
+        df = pd.DataFrame({'model': [model.name for model in self.models],
+                           'total_classes': [model.total_class_number for model in self.models],
+                           'total_relations': [model.total_relation_number for model in self.models],
+                           'class_relation_ratio': ratios})
 
         # Step 1: Define the bounds for non-outliers using the IQR method for total_classes and total_relations
         lower_bound_classes = Q1_classes - 1.5 * IQR_classes

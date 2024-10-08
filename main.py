@@ -8,19 +8,21 @@ from src.load_models_data import instantiate_models_from_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
 
 CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
-OUTPUT_DIR = "./outputs"
+BASE_OUTPUT_DIR = "./outputs"
+OUTPUT_DIR_01 = os.path.join(BASE_OUTPUT_DIR,"01_loaded_data")
+OUTPUT_DIR_02 = os.path.join(BASE_OUTPUT_DIR,"02_datasets")
 
 
 def load_data_from_catalog(catalog_path):
     """Load and save catalog models, and generate a CSV for model data."""
-    all_models = load_and_save_catalog_models(catalog_path, os.path.join(OUTPUT_DIR, "01_loaded_data/"))
-    generate_list_models_data_csv(all_models, os.path.join(OUTPUT_DIR, "01_loaded_data", "models_data.csv"))
+    all_models = load_and_save_catalog_models(catalog_path, os.path.join(BASE_OUTPUT_DIR, "01_loaded_data/"))
+    generate_list_models_data_csv(all_models, os.path.join(OUTPUT_DIR_01, "models_data.csv"))
     return all_models
 
 
 def query_data(all_models):
     """Query class and relation stereotypes data for all models."""
-    query_models(all_models, "queries", os.path.join(OUTPUT_DIR, "01_loaded_data/"))
+    query_models(all_models, "queries", os.path.join(BASE_OUTPUT_DIR, "01_loaded_data/"))
 
 
 def create_specific_datasets_instances(models_list, suffix: str = ""):
@@ -49,20 +51,20 @@ def calculate_and_save_datasets_statistics(datasets):
         save_dataset_info(dataset)
 
         dataset.calculate_dataset_statistics()
-        dataset.save_dataset_statistics_to_csv(os.path.join(OUTPUT_DIR, "02_datasets"))
+        dataset.save_dataset_statistics_to_csv(OUTPUT_DIR_02)
 
         dataset.calculate_models_statistics()
-        dataset.save_models_statistics_to_csv(os.path.join(OUTPUT_DIR, "02_datasets"))
+        dataset.save_models_statistics_to_csv(OUTPUT_DIR_02)
 
 
 def load_models_data():
     """Load model data and count stereotypes for each model."""
-    models_list = instantiate_models_from_csv(os.path.join(OUTPUT_DIR, "01_loaded_data", "models_data.csv"),
-                                              os.path.join(OUTPUT_DIR, "01_loaded_data",
+    models_list = instantiate_models_from_csv(os.path.join(OUTPUT_DIR_01, "models_data.csv"),
+                                              os.path.join(OUTPUT_DIR_01,
                                                            "query_count_number_classes_relations_consolidated.csv"))
 
-    class_csv = os.path.join(OUTPUT_DIR, "01_loaded_data", "query_get_all_class_stereotypes_consolidated.csv")
-    relation_csv = os.path.join(OUTPUT_DIR, "01_loaded_data", "query_get_all_relation_stereotypes_consolidated.csv")
+    class_csv = os.path.join(OUTPUT_DIR_01, "query_get_all_class_stereotypes_consolidated.csv")
+    relation_csv = os.path.join(OUTPUT_DIR_01, "query_get_all_relation_stereotypes_consolidated.csv")
 
     # Count stereotypes and calculate 'none' for each model
     for model in models_list:
@@ -74,9 +76,9 @@ def load_models_data():
 
 
 def save_dataset_info(dataset):
-    dataset.generate_dataset_general_data_csv(os.path.join(OUTPUT_DIR, "02_datasets"))
-    dataset.generate_dataset_class_data_csv(os.path.join(OUTPUT_DIR, "02_datasets"))
-    dataset.generate_dataset_relation_data_csv(os.path.join(OUTPUT_DIR, "02_datasets"))
+    dataset.save_dataset_general_data_csv(OUTPUT_DIR_02)
+    dataset.save_dataset_class_data_csv(OUTPUT_DIR_02)
+    dataset.save_dataset_relation_data_csv(OUTPUT_DIR_02)
 
 
 if __name__ == "__main__":
@@ -108,4 +110,4 @@ if __name__ == "__main__":
 
     calculate_and_save_datasets_statistics(no_outliers_datasets)
     all_datasets = datasets + no_outliers_datasets
-    save_datasets_statistics_to_csv(all_datasets, os.path.join(OUTPUT_DIR, "02_datasets"))
+    save_datasets_statistics_to_csv(all_datasets, OUTPUT_DIR_02)
