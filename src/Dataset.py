@@ -10,6 +10,7 @@ from loguru import logger
 from src import ModelData
 from src.statistics_calculations_datasets import calculate_class_and_relation_metrics, calculate_stats, calculate_ratios
 from src.statistics_calculations_stereotypes import calculate_stereotype_metrics
+from src.statistics_calculations_stereotypes_extra import classify_and_save_spearman_correlations
 from src.utils import append_unique_preserving_order, save_to_csv
 
 
@@ -339,3 +340,33 @@ class Dataset():
                 filepath = os.path.join(output_subdir, f"{stat_name_cleaned}.csv")
                 save_to_csv(dataframe, filepath, f"Dataset {self.name}, case '{subdir}', statistic '{stat_name}' saved successfully in '{filepath}'.")
 
+
+    def classify_and_save_spearman_correlation(self, output_dir: str) -> None:
+        """
+        Classify the Spearman correlations for both class and relation stereotypes (raw and clean)
+        and save the results in a CSV file.
+        """
+        # Define subdirectories for class/relation and raw/clean data
+        subdirs = {
+            'class_raw': self.class_statistics_raw,
+            'relation_raw': self.relation_statistics_raw,
+            'class_clean': self.class_statistics_clean,
+            'relation_clean': self.relation_statistics_clean
+        }
+
+        # Iterate through the statistics to classify and save the Spearman correlation
+        for subdir, statistics in subdirs.items():
+            output_subdir = os.path.join(output_dir, self.name, subdir)
+            if not os.path.exists(output_subdir):
+                os.makedirs(output_subdir)
+
+            # Access the Spearman correlation result
+            if 'spearman_correlation' in statistics:
+                spearman_correlation = statistics['spearman_correlation']
+
+                # Generate file path for saving
+                filepath = os.path.join(output_subdir, 'spearman_correlation_classified.csv')
+
+                # Call the classification and save function (you already have this defined)
+                classify_and_save_spearman_correlations(spearman_correlation, filepath)
+                logger.success(f"Dataset {self.name}, case '{subdir}', Spearman correlations classified and saved successfully in '{filepath}'.")

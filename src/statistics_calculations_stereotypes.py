@@ -235,7 +235,7 @@ def calculate_similarity_measures(data: pd.DataFrame) -> pd.DataFrame:
 
 
 # Function to calculate Spearman Correlation
-def calculate_spearman_correlation(data: pd.DataFrame) -> pd.DataFrame:
+def calculate_spearman_correlation(data: pd.DataFrame, extra_calculation:bool=True) -> pd.DataFrame:
     spearman_correlation = data.corr(method='spearman')
     spearman_correlation.index.name = 'Stereotype'
     spearman_correlation.reset_index(inplace=True)

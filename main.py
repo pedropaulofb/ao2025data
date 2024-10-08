@@ -12,6 +12,7 @@ CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
 BASE_OUTPUT_DIR = "./outputs"
 OUTPUT_DIR_01 = os.path.join(BASE_OUTPUT_DIR, "01_loaded_data")
 OUTPUT_DIR_02 = os.path.join(BASE_OUTPUT_DIR, "02_datasets")
+OUTPUT_DIR_03 = os.path.join(BASE_OUTPUT_DIR, "03_visualizations")
 
 
 def load_data_from_catalog(catalog_path):
@@ -122,6 +123,7 @@ def calculate_and_save_datasets_stereotypes_statistics(all_datasets):
     for dataset in all_datasets:
         dataset.calculate_stereotype_statistics()
         dataset.save_stereotype_statistics(OUTPUT_DIR_02)
+        dataset.classify_and_save_spearman_correlation(OUTPUT_DIR_02)
 
 
 if __name__ == "__main__":
