@@ -1,6 +1,8 @@
 import csv
 import os
 
+from loguru import logger
+
 
 def save_datasets_statistics_to_csv(datasets: list, output_csv_dir: str) -> None:
     """
@@ -34,4 +36,4 @@ def save_datasets_statistics_to_csv(datasets: list, output_csv_dir: str) -> None
             # Write the row to the CSV file
             writer.writerow(row)
 
-    print(f"Datasets' statistics successfully saved in {output_path}.")
+    logger.success(f"Datasets' statistics successfully saved in {output_path}.")

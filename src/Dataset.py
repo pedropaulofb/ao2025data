@@ -1,9 +1,11 @@
 import copy
 import csv
+import math
 import os
 
 import numpy as np
 import pandas as pd
+from icecream import ic
 from loguru import logger
 
 from src import ModelData
@@ -30,7 +32,7 @@ class Dataset():
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        with open(os.path.join(output_dir, f'{self.name}.csv'), mode='w', newline='') as file:
+        with open(os.path.join(output_dir, f'{self.name}_data.csv'), mode='w', newline='') as file:
             writer = csv.writer(file)
             # Write the header
             writer.writerow(["model", "year", "total_class_number", "total_relation_number"])
@@ -45,7 +47,7 @@ class Dataset():
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        with open(os.path.join(output_dir, f'{self.name}_class.csv'), mode='w', newline='') as file:
+        with open(os.path.join(output_dir, f'{self.name}_class_data.csv'), mode='w', newline='') as file:
             writer = csv.writer(file)
             # Extract all the stereotypes from the first model (assuming all models have the same stereotypes)
             stereotypes = list(self.models[0].class_stereotypes.keys())
@@ -63,7 +65,7 @@ class Dataset():
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        with open(os.path.join(output_dir, f'{self.name}_relation.csv'), mode='w', newline='') as file:
+        with open(os.path.join(output_dir, f'{self.name}_relation_data.csv'), mode='w', newline='') as file:
             writer = csv.writer(file)
             # Extract all the stereotypes from the first model's relation_stereotypes
             stereotypes = list(self.models[0].relation_stereotypes.keys())
@@ -138,26 +140,30 @@ class Dataset():
         """
         Calculate the statistics for all models in the dataset.
         """
+
         # Ensure statistics are calculated for each model
         for model in self.models:
             model.calculate_statistics()
 
-    def save_dataset_statistics_to_csv(self, output_csv_dir: str) -> None:
+    def save_models_statistics_to_csv(self, output_csv_dir: str) -> None:
         """
-        Save statistics for all models in the current Dataset to a CSV file.
-
-        :param output_csv_dir: Directory in which the output CSV file will be saved.
+        Save statistics from a list of models to a CSV file dynamically.
         """
         # Use a list to preserve insertion order and avoid duplicates
         all_keys = []
 
         # Collect all the unique statistics keys from the models in this dataset
         for model in self.models:
-            append_unique_preserving_order(all_keys, model.statistics.keys())
+            # Add logging to check if model.statistics exists and is a dictionary
+            if isinstance(model.statistics, dict):
+                all_keys = append_unique_preserving_order(all_keys, model.statistics.keys())
+            else:
+                logger.error(f"Model '{model.name}' does not have a valid statistics dictionary.")
 
+        # Define the output directory
         output_dir = os.path.join(output_csv_dir, self.name)
 
-        # Create folder if it does not exist
+        # Create the folder if it does not exist
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -167,76 +173,23 @@ class Dataset():
         with open(output_path, mode='w', newline='') as file:
             writer = csv.writer(file)
 
-            # Write the header (model, stat1, stat2, ..., statN)
+            # Write the header (model, dynamic keys)
             writer.writerow(['model'] + all_keys)
-
-            # Write the statistics for each model in this dataset
-            for model in self.models:
-                row = [model.name]  # Start the row with the model name
-
-                # Add the statistics for this model, ensuring to handle missing values
-                row.extend([model.statistics.get(key, 'N/A') for key in all_keys])
-
-                # Write the row to the CSV file
-                writer.writerow(row)
-
-        logger.success(f"Statistics for dataset '{self.name}' successfully saved in {output_path}.")
-
-    def save_models_statistics_to_csv(self, output_csv_dir: str) -> None:
-        """
-        Save statistics from a list of models to a CSV file.
-
-        :param output_csv_dir: Path to save the output CSV file.
-        """
-        # Define the header with the statistics to export
-        headers = ['model', 'total_classes', 'stereotyped_classes', 'non_stereotyped_classes', 'ontouml_classes',
-                   'non_ontouml_classes', 'total_relations', 'stereotyped_relations', 'non_stereotyped_relations',
-                   'ontouml_relations', 'non_ontouml_relations', 'ratio_classes_relations',
-                   'ratio_stereotyped_classes_relations', 'ratio_stereotyped_classes_total',
-                   'ratio_non_stereotyped_classes_total', 'ratio_stereotyped_relations_total',
-                   'ratio_non_stereotyped_relations_total', 'ratio_ontouml_classes_total',
-                   'ratio_non_ontouml_classes_total', 'ratio_ontouml_relations_total',
-                   'ratio_non_ontouml_relations_total', 'unique_class_stereotypes', 'unique_relation_stereotypes']
-
-        output_dir = os.path.join(output_csv_dir, self.name)
-
-        # Create folder if it does not exist
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
-        output_path = os.path.join(output_dir, f"{self.name}_statistics.csv")
-
-        # Open the CSV file for writing
-        with open(output_path, mode='w', newline='') as file:
-            writer = csv.writer(file)
-
-            # Write the header to the CSV file
-            writer.writerow(headers)
 
             # Write the statistics for each model
             for model in self.models:
-                row = [model.name, model.statistics.get('total_classes', 'N/A'),
-                       model.statistics.get('stereotyped_classes', 'N/A'),
-                       model.statistics.get('non_stereotyped_classes', 'N/A'),
-                       model.statistics.get('ontouml_classes', 'N/A'),
-                       model.statistics.get('non_ontouml_classes', 'N/A'),
-                       model.statistics.get('total_relations', 'N/A'),
-                       model.statistics.get('stereotyped_relations', 'N/A'),
-                       model.statistics.get('non_stereotyped_relations', 'N/A'),
-                       model.statistics.get('ontouml_relations', 'N/A'),
-                       model.statistics.get('non_ontouml_relations', 'N/A'),
-                       model.statistics.get('ratio_classes_relations', 'N/A'),
-                       model.statistics.get('ratio_stereotyped_classes_relations', 'N/A'),
-                       model.statistics.get('ratio_stereotyped_classes_total', 'N/A'),
-                       model.statistics.get('ratio_non_stereotyped_classes_total', 'N/A'),
-                       model.statistics.get('ratio_stereotyped_relations_total', 'N/A'),
-                       model.statistics.get('ratio_non_stereotyped_relations_total', 'N/A'),
-                       model.statistics.get('ratio_ontouml_classes_total', 'N/A'),
-                       model.statistics.get('ratio_non_ontouml_classes_total', 'N/A'),
-                       model.statistics.get('ratio_ontouml_relations_total', 'N/A'),
-                       model.statistics.get('ratio_non_ontouml_relations_total', 'N/A'),
-                       model.statistics.get('unique_class_stereotypes', 'N/A'),
-                       model.statistics.get('unique_relation_stereotypes', 'N/A')]
+                row = [model.name]  # Start the row with the model name
+
+                # Check for each key, retrieve the value, handle NaN if applicable
+                for key in all_keys:
+                    value = model.statistics.get(key, 'N/A')  # Get the value or default to 'N/A'
+
+                    # Check if the value is a number and if it's NaN
+                    if isinstance(value, (int, float)) and math.isnan(value):
+                        row.append('N/A')
+                    else:
+                        row.append(value)
+
                 # Write the row to the CSV file
                 writer.writerow(row)
 

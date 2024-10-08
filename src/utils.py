@@ -4,3 +4,4 @@ def append_unique_preserving_order(existing_list, new_keys):
     for key in new_keys:
         if key not in existing_list:
             existing_list.append(key)
+    return existing_list

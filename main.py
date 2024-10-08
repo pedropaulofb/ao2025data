@@ -1,5 +1,6 @@
 import os
 
+from icecream import ic
 from loguru import logger
 
 from src.Dataset import Dataset
@@ -9,8 +10,8 @@ from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
 
 CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
 BASE_OUTPUT_DIR = "./outputs"
-OUTPUT_DIR_01 = os.path.join(BASE_OUTPUT_DIR,"01_loaded_data")
-OUTPUT_DIR_02 = os.path.join(BASE_OUTPUT_DIR,"02_datasets")
+OUTPUT_DIR_01 = os.path.join(BASE_OUTPUT_DIR, "01_loaded_data")
+OUTPUT_DIR_02 = os.path.join(BASE_OUTPUT_DIR, "02_datasets")
 
 
 def load_data_from_catalog(catalog_path):
@@ -29,19 +30,19 @@ def create_specific_datasets_instances(models_list, suffix: str = ""):
     """Create datasets based on classroom and non-classroom models."""
 
     datasets = []
-    datasets.append(Dataset("all_models", models_list))
+    datasets.append(Dataset("ontouml_all", models_list))
 
-    classroom_models = [model for model in models_list if model.is_classroom]
-    datasets.append(Dataset("classroom_models", classroom_models))
+    ontouml_classroom = [model for model in models_list if model.is_classroom]
+    datasets.append(Dataset("ontouml_classroom", ontouml_classroom))
 
-    non_classroom_models = [model for model in models_list if not model.is_classroom]
-    datasets.append(Dataset("non_classroom_models", non_classroom_models))
+    ontouml_non_classroom = [model for model in models_list if not model.is_classroom]
+    datasets.append(Dataset("ontouml_non_classroom", ontouml_non_classroom))
 
-    non_classroom_models_until_2018 = [model for model in non_classroom_models if model.year <= 2018]
-    datasets.append(Dataset("non_classroom_models_until_2018", non_classroom_models_until_2018))
+    ontouml_non_classroom_until_2018 = [model for model in ontouml_non_classroom if model.year <= 2018]
+    datasets.append(Dataset("ontouml_non_classroom_until_2018", ontouml_non_classroom_until_2018))
 
-    non_classroom_models_after_2019 = [model for model in non_classroom_models if model.year >= 2019]
-    datasets.append(Dataset("non_classroom_models_after_2019", non_classroom_models_after_2019))
+    ontouml_non_classroom_after_2019 = [model for model in ontouml_non_classroom if model.year >= 2019]
+    datasets.append(Dataset("ontouml_non_classroom_after_2019", ontouml_non_classroom_after_2019))
 
     return datasets
 
@@ -51,8 +52,6 @@ def calculate_and_save_datasets_statistics(datasets):
         save_dataset_info(dataset)
 
         dataset.calculate_dataset_statistics()
-        dataset.save_dataset_statistics_to_csv(OUTPUT_DIR_02)
-
         dataset.calculate_models_statistics()
         dataset.save_models_statistics_to_csv(OUTPUT_DIR_02)
 
@@ -81,6 +80,48 @@ def save_dataset_info(dataset):
     dataset.save_dataset_relation_data_csv(OUTPUT_DIR_02)
 
 
+def calculate_and_save_datasets_statistics_outliers(datasets):
+
+    # Initialize outlier lists to avoid UnboundLocalError if no outliers are found
+    ontouml_all_outliers = []
+    ontouml_non_classroom_outliers = []
+    ontouml_classroom_outliers = []
+
+    # Identify outliers for each dataset
+    for dataset in datasets:
+        if dataset.name == 'ontouml_all':
+            ontouml_all_outliers = dataset.identify_outliers()
+        if dataset.name == 'ontouml_non_classroom':
+            ontouml_non_classroom_outliers = dataset.identify_outliers()
+        if dataset.name == 'ontouml_classroom':
+            ontouml_classroom_outliers = dataset.identify_outliers()
+
+    # Create new datasets without the identified outliers
+    no_outliers_datasets = []
+    for dataset in datasets:
+        if 'non_classroom' in dataset.name:
+            no_outliers_datasets.append(dataset.fork_without_outliers(ontouml_non_classroom_outliers))
+        elif 'classroom' in dataset.name:
+            no_outliers_datasets.append(dataset.fork_without_outliers(ontouml_classroom_outliers))
+        elif dataset.name == 'ontouml_all':
+            no_outliers_datasets.append(dataset.fork_without_outliers(ontouml_all_outliers))
+        else:
+            logger.warning(f"Dataset {dataset.name} had no outliers cleaned.")
+
+    # Calculate and save statistics for the datasets without outliers
+    calculate_and_save_datasets_statistics(no_outliers_datasets)
+
+    # Combine original datasets with filtered ones and save combined statistics
+    all_datasets = datasets + no_outliers_datasets
+    save_datasets_statistics_to_csv(all_datasets, OUTPUT_DIR_02)
+
+    return all_datasets
+
+
+def calculate_and_save_datasets_stereotypes_statistics(all_datasets):
+    pass
+
+
 if __name__ == "__main__":
     # all_models = load_data_from_catalog(CATALOG_PATH)   # Uncomment to load models
     # query_data(all_models)     # Uncomment to query stereotypes
@@ -88,26 +129,5 @@ if __name__ == "__main__":
     all_models = load_models_data()  # Load model data and count stereotypes
     datasets = create_specific_datasets_instances(all_models)
     calculate_and_save_datasets_statistics(datasets)
-
-    for dataset in datasets:
-        if dataset.name == 'all_models':
-            all_models_outliers = dataset.identify_outliers()
-        if dataset.name == 'non_classroom_models':
-            non_classroom_models_outliers = dataset.identify_outliers()
-        if dataset.name == 'classroom_models':
-            classroom_models_outliers = dataset.identify_outliers()
-
-    no_outliers_datasets = []
-    for dataset in datasets:
-        if 'non_classroom' in dataset.name:
-            no_outliers_datasets.append(dataset.fork_without_outliers(non_classroom_models_outliers))
-        elif 'classroom' in dataset.name:
-            no_outliers_datasets.append(dataset.fork_without_outliers(classroom_models_outliers))
-        elif dataset.name == 'all_models':
-            no_outliers_datasets.append(dataset.fork_without_outliers(all_models_outliers))
-        else:
-            logger.warning(f"Dataset {dataset.name} had no outliers cleaned.")
-
-    calculate_and_save_datasets_statistics(no_outliers_datasets)
-    all_datasets = datasets + no_outliers_datasets
-    save_datasets_statistics_to_csv(all_datasets, OUTPUT_DIR_02)
+    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
+    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
