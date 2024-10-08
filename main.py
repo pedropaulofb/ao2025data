@@ -119,7 +119,9 @@ def calculate_and_save_datasets_statistics_outliers(datasets):
 
 
 def calculate_and_save_datasets_stereotypes_statistics(all_datasets):
-    pass
+    for dataset in all_datasets:
+        dataset.calculate_stereotype_statistics()
+        dataset.save_stereotype_statistics(OUTPUT_DIR_02)
 
 
 if __name__ == "__main__":

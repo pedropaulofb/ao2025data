@@ -1,6 +1,6 @@
 import csv
 
-from src.statistics_calculations import calculate_ratios
+from src.dataset_statistics_calculations import calculate_ratios
 
 
 class ModelData:

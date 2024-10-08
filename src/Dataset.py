@@ -5,12 +5,12 @@ import os
 
 import numpy as np
 import pandas as pd
-from icecream import ic
 from loguru import logger
 
 from src import ModelData
-from src.statistics_calculations import calculate_class_and_relation_metrics, calculate_stats, calculate_ratios
-from src.utils import append_unique_preserving_order
+from src.dataset_statistics_calculations import calculate_class_and_relation_metrics, calculate_stats, calculate_ratios
+from src.stereotypes_statistics_calculations import calculate_stereotype_metrics
+from src.utils import append_unique_preserving_order, save_to_csv
 
 
 class Dataset():
@@ -18,27 +18,33 @@ class Dataset():
 
         self.name: str = name
         self.models: list[ModelData] = models
+
         self.statistics = {}
+
+        self.class_statistics_raw = {}
+        self.relation_statistics_raw = {}
+        self.class_statistics_clean = {}
+        self.relation_statistics_clean = {}
 
     def count_models(self) -> int:
         """Return the number of models in the dataset."""
         return len(self.models)
 
     def save_dataset_general_data_csv(self, output_dir: str) -> None:
-
         output_dir = os.path.join(output_dir, self.name)
 
         # Create folder if it does not exist
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        with open(os.path.join(output_dir, f'{self.name}_data.csv'), mode='w', newline='') as file:
-            writer = csv.writer(file)
-            # Write the header
-            writer.writerow(["model", "year", "total_class_number", "total_relation_number"])
-            # Write the data for each model
-            for model in self.models:
-                writer.writerow([model.name, model.year, model.total_class_number, model.total_relation_number])
+        # Prepare the data for the CSV
+        data = [[model.name, model.year, model.total_class_number, model.total_relation_number] for model in
+                self.models]
+        df = pd.DataFrame(data, columns=["model", "year", "total_class_number", "total_relation_number"])
+
+        # Save to CSV using the common utility function
+        filepath = os.path.join(output_dir, f'{self.name}_data.csv')
+        save_to_csv(df, filepath, f"General data for dataset '{self.name}' successfully saved to {filepath}.")
 
     def save_dataset_class_data_csv(self, output_dir: str) -> None:
         output_dir = os.path.join(output_dir, self.name)
@@ -47,16 +53,16 @@ class Dataset():
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        with open(os.path.join(output_dir, f'{self.name}_class_data.csv'), mode='w', newline='') as file:
-            writer = csv.writer(file)
-            # Extract all the stereotypes from the first model (assuming all models have the same stereotypes)
-            stereotypes = list(self.models[0].class_stereotypes.keys())
-            # Write the header
-            writer.writerow(["model"] + stereotypes)
-            # Write the data for each model
-            for model in self.models:
-                row = [model.name] + [model.class_stereotypes[st] for st in stereotypes]
-                writer.writerow(row)
+        # Extract all the stereotypes from the first model
+        stereotypes = list(self.models[0].class_stereotypes.keys())
+
+        # Create a DataFrame for class data
+        data = [[model.name] + [model.class_stereotypes[st] for st in stereotypes] for model in self.models]
+        df = pd.DataFrame(data, columns=["model"] + stereotypes)
+
+        # Save to CSV using the common utility function
+        filepath = os.path.join(output_dir, f'{self.name}_class_data.csv')
+        save_to_csv(df, filepath, f"Class data for dataset '{self.name}' successfully saved to {filepath}.")
 
     def save_dataset_relation_data_csv(self, output_dir: str) -> None:
         output_dir = os.path.join(output_dir, self.name)
@@ -65,16 +71,16 @@ class Dataset():
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        with open(os.path.join(output_dir, f'{self.name}_relation_data.csv'), mode='w', newline='') as file:
-            writer = csv.writer(file)
-            # Extract all the stereotypes from the first model's relation_stereotypes
-            stereotypes = list(self.models[0].relation_stereotypes.keys())
-            # Write the header
-            writer.writerow(["model"] + stereotypes)
-            # Write the data for each model
-            for model in self.models:
-                row = [model.name] + [model.relation_stereotypes[st] for st in stereotypes]
-                writer.writerow(row)
+        # Extract all the relation stereotypes from the first model
+        stereotypes = list(self.models[0].relation_stereotypes.keys())
+
+        # Create a DataFrame for relation data
+        data = [[model.name] + [model.relation_stereotypes[st] for st in stereotypes] for model in self.models]
+        df = pd.DataFrame(data, columns=["model"] + stereotypes)
+
+        # Save to CSV using the common utility function
+        filepath = os.path.join(output_dir, f'{self.name}_relation_data.csv')
+        save_to_csv(df, filepath, f"Relation data for dataset '{self.name}' successfully saved to {filepath}.")
 
     def calculate_dataset_statistics(self) -> None:
         """Calculates statistics and metrics for the dataset and stores them in self.statistics."""
@@ -118,7 +124,7 @@ class Dataset():
             for stat_name, value in stat_dict.items():
                 self.statistics[f'{key}_{stat_name}'] = value
 
-        logger.success(f"Statistics calculated for dataset '{self.name}' and stored in 'self.statistics'.")
+        logger.success(f"Statistics calculated for dataset '{self.name}'.")
 
     def _create_dataframe_for_stereotypes(self, stereotype_type: str) -> pd.DataFrame:
         """Helper function to create a DataFrame from class or relation stereotypes."""
@@ -294,3 +300,42 @@ class Dataset():
         for model in self.models:
             model.statistics = {}  # Reset statistics for each model as well
         logger.info(f"Statistics reset for dataset '{self.name}' and all its models.")
+
+    def calculate_stereotype_statistics(self) -> None:
+        """
+        Calculate stereotype statistics for class and relation stereotypes, both raw and clean,
+        and store the results in the corresponding dictionaries.
+        """
+        # Step 1: Calculate raw statistics (without cleaning) for class and relation stereotypes
+        self.class_statistics_raw = calculate_stereotype_metrics(self.models, 'class', filter_type='gross')
+        self.relation_statistics_raw = calculate_stereotype_metrics(self.models, 'relation', filter_type='gross')
+
+        # Step 2: Calculate clean statistics (with filtering) for class and relation stereotypes
+        self.class_statistics_clean = calculate_stereotype_metrics(self.models, 'class', filter_type='net')
+        self.relation_statistics_clean = calculate_stereotype_metrics(self.models, 'relation', filter_type='net')
+
+        logger.success(f"Stereotype statistics calculated for dataset '{self.name}'.")
+
+    def save_stereotype_statistics(self, output_dir: str) -> None:
+        """
+        Save all stereotype statistics (class/relation, raw/clean) to separate CSV files in different folders.
+        :param output_dir: Directory where the CSV files will be saved.
+        """
+        # Define subdirectories for class/relation and raw/clean data
+        subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
+            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean}
+
+        # Create the output directories and save the statistics
+        for subdir, statistics in subdirs.items():
+            # Create the specific folder (e.g., class_raw, relation_raw, etc.)
+            output_subdir = os.path.join(output_dir, self.name, subdir)
+
+            if not os.path.exists(output_subdir):
+                os.makedirs(output_subdir)
+
+            # Save the statistics to CSV files
+            for stat_name, dataframe in statistics.items():
+                stat_name_cleaned = stat_name.lower().replace(" ", "_")
+                filepath = os.path.join(output_subdir, f"{stat_name_cleaned}.csv")
+                save_to_csv(dataframe, filepath, f"Dataset {self.name}, case '{subdir}', statistic '{stat_name}' saved successfully in '{filepath}'.")
+
