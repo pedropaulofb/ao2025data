@@ -19,6 +19,7 @@ class Dataset():
 
         self.name: str = name
         self.models: list[ModelData] = models
+        self.num_models: int = len(models)
 
         self.statistics = {}
 
@@ -26,10 +27,6 @@ class Dataset():
         self.relation_statistics_raw = {}
         self.class_statistics_clean = {}
         self.relation_statistics_clean = {}
-
-    def count_models(self) -> int:
-        """Return the number of models in the dataset."""
-        return len(self.models)
 
     def save_dataset_general_data_csv(self, output_dir: str) -> None:
         output_dir = os.path.join(output_dir, self.name)

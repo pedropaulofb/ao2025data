@@ -1,12 +1,14 @@
+import gzip
 import os
+import pickle
 
-from icecream import ic
 from loguru import logger
 
 from src.Dataset import Dataset
 from src.collect_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
 from src.load_models_data import instantiate_models_from_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
+from src.visualization.heatmap import create_heatmap
 
 CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
 BASE_OUTPUT_DIR = "./outputs"
@@ -119,37 +121,61 @@ def calculate_and_save_datasets_statistics_outliers(datasets):
     return all_datasets
 
 
-def calculate_and_save_datasets_stereotypes_statistics(all_datasets):
-    for dataset in all_datasets:
+def calculate_and_save_datasets_stereotypes_statistics(datasets):
+    for dataset in datasets:
         dataset.calculate_stereotype_statistics()
         dataset.save_stereotype_statistics(OUTPUT_DIR_02)
         dataset.classify_and_save_spearman_correlation(OUTPUT_DIR_02)
 
 
+def generate_visualizations(datasets, output_dir):
+
+    if isinstance(datasets, str):
+        # Deserialize (unpickle) the object
+        logger.info(f"Loading datasets from {datasets}.")
+        with gzip.open(datasets, "rb") as file:
+            datasets = pickle.load(file)
+        logger.success(f"Successfully loaded {len(datasets)} datasets.")
+
+    for dataset in datasets:
+        # create_boxplot(dataset, output_dir)
+        create_heatmap(dataset, output_dir)
+
 if __name__ == "__main__":
-    # all_models = load_data_from_catalog(CATALOG_PATH)   # Uncomment to load models
-    # query_data(all_models)     # Uncomment to query stereotypes
+    # UNCOMMENT TO LOAD MODELS
+    # all_models = load_data_from_catalog(CATALOG_PATH)
 
-    all_models = load_models_data()  # Load model data and count stereotypes
-    datasets = create_specific_datasets_instances(all_models)
-    calculate_and_save_datasets_statistics(datasets)
-    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
-    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    # UNCOMMENT TO QUERY STEREOTYPES
+    # query_data(all_models)
 
-# boxplot for occurrences (for ontouml_all). Use as example boxplot_dice_coeficient_by_construct
-# construct_ranking_mutual_information (for filtered and clean)
+    # UNCOMMENT TO GENERATE STATISTICS
+    # all_models = load_models_data()
+    # datasets = create_specific_datasets_instances(all_models)
+    # calculate_and_save_datasets_statistics(datasets)
+    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
+    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    # save_datasets(all_datasets, OUTPUT_DIR_02)
+
+    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+
 # coverage_vs_construct_percentage (for filtered and clean)
-# distance_from_origin_global_relative_frequency_vs_global_relative_frequency (for filtered and not-clean)
-# distance_from_origin_total_frequency_vs_group_frequency (for filtered and not-clean)
+
+# construct_ranking_mutual_information (for filtered and clean)
 # learning_tree_mutual_information (ontouml_non_classroom and ontouml_classroom) (for filtered and clean)
 # learning_tree_spearman_correlation (ontouml_non_classroom and ontouml_classroom) (for filtered and clean)
+
+# spearman_correlation_heatmap (for filtered and clean)
 # network_top_negative_spearman_correlations (for filtered and clean)
 # network_top_positive_spearman_correlations (for filtered and clean)
+
 # pareto_chart_construct_frequency_cumulative_percentage (for filtered and clean)
 # pareto_chart_groupwise_construct_frequency_cumulative_percentage (for filtered and clean)
 # pareto_combined_occurrence_groupwise_rank_frequency (for filtered and clean)
+
 # scatter_plot_global_relative_frequency_vs_global_relative_frequency (for filtered and non-clean)
-# spearman_correlation_heatmap (for filtered and clean)
+# distance_from_origin_global_relative_frequency_vs_global_relative_frequency (for filtered and not-clean)
+# distance_from_origin_total_frequency_vs_group_frequency (for filtered and not-clean)
+
 # temporal_overall_stats_combined_visualization (for filtered and non-clean)
 # movement_analysis_global_relative_frequency_vs_global_relative_frequency (until 2018 and after 2019) (for filtered and non-clean)
-# quandrant movement_analysis_global_relative_frequency_vs_global_relative_frequency (until 2018 and after 2019) (for filtered and non-clean)
+# quadrant movement_analysis_global_relative_frequency_vs_global_relative_frequency (until 2018 and after 2019) (for filtered and non-clean)

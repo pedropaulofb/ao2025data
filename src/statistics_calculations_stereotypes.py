@@ -138,11 +138,11 @@ def calculate_diversity_measures(data: pd.DataFrame) -> pd.DataFrame:
     return diversity_measures_df
 
 
-# Function to calculate central tendency and dispersion measures
+# Function to calculate central tendency and dispersion measures with additional metrics
 def calculate_central_tendency(data: pd.DataFrame) -> pd.DataFrame:
     mean = data.mean(axis=0)
     median = data.median(axis=0)
-    mode = data.mode(axis=0).iloc[0]
+    mode = data.mode(axis=0).iloc[0] if not data.mode(axis=0).empty else np.nan
     std = data.std(axis=0)
     variance = data.var(axis=0)
     skewness = data.skew(axis=0)
@@ -150,9 +150,19 @@ def calculate_central_tendency(data: pd.DataFrame) -> pd.DataFrame:
     q1 = data.quantile(0.25, axis=0)
     q3 = data.quantile(0.75, axis=0)
     iqr = q3 - q1
+    max_value = data.max(axis=0)
+    min_value = data.min(axis=0)
+    range_value = max_value - min_value
+
+    # Handling non-zero values
+    non_zero_data = data.apply(lambda x: x[x > 0], axis=0)
+    min_non_zero = non_zero_data.min(axis=0)
+    range_non_zero = max_value - min_non_zero
+    total = data.sum(axis=0)
 
     central_tendency_df = pd.DataFrame({
         'Stereotype': data.columns,
+        'Total': total.values,
         'Mean': mean.values,
         'Median': median.values,
         'Mode': mode.values,
@@ -162,10 +172,16 @@ def calculate_central_tendency(data: pd.DataFrame) -> pd.DataFrame:
         'Kurtosis': kurtosis.values,
         'Q1': q1.values,
         'Q3': q3.values,
-        'IQR': iqr.values
+        'IQR': iqr.values,
+        'Min': min_value.values,
+        'Max': max_value.values,
+        'Range': range_value.values,
+        'Min Non-Zero': min_non_zero.values,
+        'Range Non-Zero': range_non_zero.values
     })
 
     return central_tendency_df
+
 
 
 # Function to calculate coverage metrics (occurrence-wise and group-wise)
