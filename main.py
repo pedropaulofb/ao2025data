@@ -8,7 +8,9 @@ from src.Dataset import Dataset
 from src.collect_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
 from src.load_models_data import instantiate_models_from_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
+from src.visualization.boxplot import create_boxplot
 from src.visualization.heatmap import create_heatmap
+from src.visualization.pareto import plot_pareto_combined_frequencies, plot_pareto
 
 CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
 BASE_OUTPUT_DIR = "./outputs"
@@ -139,7 +141,11 @@ def generate_visualizations(datasets, output_dir):
 
     for dataset in datasets:
         # create_boxplot(dataset, output_dir)
+        # create_boxplot(dataset, output_dir,True)
         create_heatmap(dataset, output_dir)
+        # plot_pareto(dataset, output_dir,"occurrence")
+        # plot_pareto(dataset, output_dir, "group")
+        # plot_pareto_combined_frequencies(dataset, output_dir)
 
 if __name__ == "__main__":
     # UNCOMMENT TO LOAD MODELS
@@ -160,21 +166,13 @@ if __name__ == "__main__":
 
 # coverage_vs_construct_percentage (for filtered and clean)
 
-# construct_ranking_mutual_information (for filtered and clean)
-# learning_tree_mutual_information (ontouml_non_classroom and ontouml_classroom) (for filtered and clean)
-# learning_tree_spearman_correlation (ontouml_non_classroom and ontouml_classroom) (for filtered and clean)
-
-# spearman_correlation_heatmap (for filtered and clean)
-# network_top_negative_spearman_correlations (for filtered and clean)
-# network_top_positive_spearman_correlations (for filtered and clean)
-
-# pareto_chart_construct_frequency_cumulative_percentage (for filtered and clean)
-# pareto_chart_groupwise_construct_frequency_cumulative_percentage (for filtered and clean)
-# pareto_combined_occurrence_groupwise_rank_frequency (for filtered and clean)
-
 # scatter_plot_global_relative_frequency_vs_global_relative_frequency (for filtered and non-clean)
 # distance_from_origin_global_relative_frequency_vs_global_relative_frequency (for filtered and not-clean)
 # distance_from_origin_total_frequency_vs_group_frequency (for filtered and not-clean)
+
+# construct_ranking_mutual_information (for filtered and clean)
+# learning_tree_mutual_information (ontouml_non_classroom and ontouml_classroom) (for filtered and clean)
+# learning_tree_spearman_correlation (ontouml_non_classroom and ontouml_classroom) (for filtered and clean)
 
 # temporal_overall_stats_combined_visualization (for filtered and non-clean)
 # movement_analysis_global_relative_frequency_vs_global_relative_frequency (until 2018 and after 2019) (for filtered and non-clean)

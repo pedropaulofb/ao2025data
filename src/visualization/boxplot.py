@@ -2,14 +2,13 @@ import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from icecream import ic
 from loguru import logger
 from matplotlib import patches
 
 from src.utils import color_text, create_visualizations_out_dirs
 
 
-def create_boxplot(dataset, output_dir: str) -> None:
+def create_boxplot(dataset, output_dir: str, log_scale: bool = False) -> None:
     """
     Create separate boxplots for class and relation stereotype statistics (both raw and clean)
     and save them as separate images.
@@ -20,7 +19,7 @@ def create_boxplot(dataset, output_dir: str) -> None:
     class_raw_out, class_clean_out, relation_raw_out, relation_clean_out = create_visualizations_out_dirs(output_dir, dataset.name)
 
     # Define a helper function to plot the boxplot for each dataframe
-    def plot_custom_boxplot(df, title, fig_name, specific_output_dir):
+    def plot_custom_boxplot(df, title, fig_name, specific_output_dir, log_scale):
         if df.empty:
             logger.warning(f"No data available in dataframe for {title}.")
             return
@@ -32,6 +31,14 @@ def create_boxplot(dataset, output_dir: str) -> None:
             return
 
         fig, ax = plt.subplots(figsize=(16, 9), tight_layout=True)
+
+        # Set y-axis limits
+        if log_scale:
+            # Avoid setting the lower limit to 0 in log scale, use a small positive number instead
+            plt.ylim(1e-2, max(df['Max'] * 1.05))
+        else:
+            # For linear scale, keep 0 as the lower bound
+            plt.ylim(0, max(df['Max'] * 1.05))
 
         # Loop through each stereotype to plot the boxplot manually
         stereotypes = df['Stereotype'].unique()
@@ -54,7 +61,8 @@ def create_boxplot(dataset, output_dir: str) -> None:
             # Add a solid rectangle for Q1 to Q3 box
             rect = patches.Rectangle((pos - 0.35, q1_value), 0.7, q3_value - q1_value, color='blue', zorder=3)
             ax.add_patch(rect)
-            ax.plot(pos, median_value, 'r_', markersize=30, markeredgewidth=2, linewidth=30, zorder=4)
+            ax.plot([pos - 0.35, pos + 0.35],
+                    [median_value, median_value], 'r-', linewidth=2, zorder=4)
 
         # Set y-axis limits to ensure the box starts at 0
         plt.ylim(0, max(df['Max'] * 1.05))
@@ -62,7 +70,7 @@ def create_boxplot(dataset, output_dir: str) -> None:
         # Customize the plot
         ax.set_title(title, fontweight='bold')
         ax.set_xlabel('Stereotype')
-        ax.set_ylabel('Value')
+        ax.set_ylabel('Occurrences')
         ax.set_xticks(positions)
         ax.set_xticklabels(stereotypes, rotation=45, ha='right')  # Rotate x-axis labels for better visibility
         plt.grid(True)
@@ -80,20 +88,19 @@ def create_boxplot(dataset, output_dir: str) -> None:
     class_clean_df = pd.DataFrame(dataset.class_statistics_clean["central_tendency_dispersion"])
     relation_clean_df = pd.DataFrame(dataset.relation_statistics_clean["central_tendency_dispersion"])
 
-    # Plot for class raw statistics
-    plot_custom_boxplot(class_raw_df, 'Box Plot of Class Raw Stereotype Statistics',
-                        'boxplot_stereotype_statistics.png', class_raw_out)
-
-    # Plot for relation raw statistics
-    plot_custom_boxplot(relation_raw_df, 'Box Plot of Relation Raw Stereotype Statistics',
-                        'boxplot_stereotype_statistics.png', relation_raw_out)
-
-    # Plot for class clean statistics
-    plot_custom_boxplot(class_clean_df, 'Box Plot of Class Clean Stereotype Statistics',
-                        'boxplot_stereotype_statistics.png', class_clean_out)
-
-    # Plot for relation clean statistics
-    plot_custom_boxplot(relation_clean_df, 'Box Plot of Relation Clean Stereotype Statistics',
-                        'boxplot_stereotype_statistics.png', relation_clean_out)
+    if log_scale:
+        suffix_title = " (Log-scale)"
+        suffix_name = "_log"
+    else:
+        suffix_title = ""
+        suffix_name = ""
 
 
+    plot_custom_boxplot(class_raw_df, 'Box Plot of Class Raw Stereotype Statistics'+suffix_title,
+                        'boxplot_stereotype_statistics'+suffix_name+'.png', class_raw_out, log_scale)
+    plot_custom_boxplot(relation_raw_df, 'Box Plot of Relation Raw Stereotype Statistics'+suffix_title,
+                        'boxplot_stereotype_statistics'+suffix_name+'.png', relation_raw_out, log_scale)
+    plot_custom_boxplot(class_clean_df, 'Box Plot of Class Clean Stereotype Statistics'+suffix_title,
+                        'boxplot_stereotype_statistics'+suffix_name+'.png', class_clean_out, log_scale)
+    plot_custom_boxplot(relation_clean_df, 'Box Plot of Relation Clean Stereotype Statistics'+suffix_title,
+                        'boxplot_stereotype_statistics'+suffix_name+'.png', relation_clean_out, log_scale)
