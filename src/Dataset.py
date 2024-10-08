@@ -8,8 +8,8 @@ import pandas as pd
 from loguru import logger
 
 from src import ModelData
-from src.dataset_statistics_calculations import calculate_class_and_relation_metrics, calculate_stats, calculate_ratios
-from src.stereotypes_statistics_calculations import calculate_stereotype_metrics
+from src.statistics_calculations_datasets import calculate_class_and_relation_metrics, calculate_stats, calculate_ratios
+from src.statistics_calculations_stereotypes import calculate_stereotype_metrics
 from src.utils import append_unique_preserving_order, save_to_csv
 
 
@@ -306,13 +306,13 @@ class Dataset():
         Calculate stereotype statistics for class and relation stereotypes, both raw and clean,
         and store the results in the corresponding dictionaries.
         """
-        # Step 1: Calculate raw statistics (without cleaning) for class and relation stereotypes
-        self.class_statistics_raw = calculate_stereotype_metrics(self.models, 'class', filter_type='gross')
-        self.relation_statistics_raw = calculate_stereotype_metrics(self.models, 'relation', filter_type='gross')
+        # Step 1: Calculate raw statistics (without cleaning 'none' and 'other') for class and relation stereotypes
+        self.class_statistics_raw = calculate_stereotype_metrics(self.models, 'class', filter_type=False)
+        self.relation_statistics_raw = calculate_stereotype_metrics(self.models, 'relation', filter_type=False)
 
-        # Step 2: Calculate clean statistics (with filtering) for class and relation stereotypes
-        self.class_statistics_clean = calculate_stereotype_metrics(self.models, 'class', filter_type='net')
-        self.relation_statistics_clean = calculate_stereotype_metrics(self.models, 'relation', filter_type='net')
+        # Step 2: Calculate clean statistics (with filtering 'none' and 'other') for class and relation stereotypes
+        self.class_statistics_clean = calculate_stereotype_metrics(self.models, 'class', filter_type=True)
+        self.relation_statistics_clean = calculate_stereotype_metrics(self.models, 'relation', filter_type=True)
 
         logger.success(f"Stereotype statistics calculated for dataset '{self.name}'.")
 
