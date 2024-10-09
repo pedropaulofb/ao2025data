@@ -9,7 +9,7 @@ Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('bringsAbout', 'instantiation')",1.0,1.0
 "('bringsAbout', 'manifestation')",1.0,1.0
 "('bringsAbout', 'material')",0.0,0.0
-"('bringsAbout', 'mediation')",0.07142857142857142,0.13333333333333333
+"('bringsAbout', 'mediation')",0.06666666666666667,0.125
 "('bringsAbout', 'memberOf')",0.0,0.0
 "('bringsAbout', 'participation')",0.5,0.6666666666666666
 "('bringsAbout', 'participational')",0.0,0.0
@@ -26,7 +26,7 @@ Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('characterization', 'instantiation')",0.1,0.18181818181818182
 "('characterization', 'manifestation')",0.1,0.18181818181818182
 "('characterization', 'material')",0.15,0.2608695652173913
-"('characterization', 'mediation')",0.6,0.75
+"('characterization', 'mediation')",0.5625,0.72
 "('characterization', 'memberOf')",0.23076923076923078,0.375
 "('characterization', 'participation')",0.2,0.3333333333333333
 "('characterization', 'participational')",0.0,0.0
@@ -57,7 +57,7 @@ Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('componentOf', 'instantiation')",0.0,0.0
 "('componentOf', 'manifestation')",0.0,0.0
 "('componentOf', 'material')",0.2777777777777778,0.43478260869565216
-"('componentOf', 'mediation')",0.2631578947368421,0.4166666666666667
+"('componentOf', 'mediation')",0.25,0.4
 "('componentOf', 'memberOf')",0.23076923076923078,0.375
 "('componentOf', 'participation')",0.0,0.0
 "('componentOf', 'participational')",0.0,0.0
@@ -84,7 +84,7 @@ Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('derivation', 'instantiation')",0.0,0.0
 "('derivation', 'manifestation')",0.0,0.0
 "('derivation', 'material')",0.46153846153846156,0.631578947368421
-"('derivation', 'mediation')",0.3333333333333333,0.5
+"('derivation', 'mediation')",0.3125,0.47619047619047616
 "('derivation', 'memberOf')",0.2,0.3333333333333333
 "('derivation', 'participation')",0.0,0.0
 "('derivation', 'participational')",0.0,0.0
@@ -96,7 +96,7 @@ Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('externalDependence', 'instantiation')",0.5,0.6666666666666666
 "('externalDependence', 'manifestation')",0.5,0.6666666666666666
 "('externalDependence', 'material')",0.0,0.0
-"('externalDependence', 'mediation')",0.14285714285714285,0.25
+"('externalDependence', 'mediation')",0.13333333333333333,0.23529411764705882
 "('externalDependence', 'memberOf')",0.14285714285714285,0.25
 "('externalDependence', 'participation')",1.0,1.0
 "('externalDependence', 'participational')",0.0,0.0
@@ -107,7 +107,7 @@ Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('historicalDependence', 'instantiation')",1.0,1.0
 "('historicalDependence', 'manifestation')",1.0,1.0
 "('historicalDependence', 'material')",0.0,0.0
-"('historicalDependence', 'mediation')",0.07142857142857142,0.13333333333333333
+"('historicalDependence', 'mediation')",0.06666666666666667,0.125
 "('historicalDependence', 'memberOf')",0.0,0.0
 "('historicalDependence', 'participation')",0.5,0.6666666666666666
 "('historicalDependence', 'participational')",0.0,0.0
@@ -117,7 +117,7 @@ Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('historicalDependence', 'triggers')",1.0,1.0
 "('instantiation', 'manifestation')",1.0,1.0
 "('instantiation', 'material')",0.0,0.0
-"('instantiation', 'mediation')",0.07142857142857142,0.13333333333333333
+"('instantiation', 'mediation')",0.06666666666666667,0.125
 "('instantiation', 'memberOf')",0.0,0.0
 "('instantiation', 'participation')",0.5,0.6666666666666666
 "('instantiation', 'participational')",0.0,0.0
@@ -126,7 +126,7 @@ Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('instantiation', 'termination')",0.0,0.0
 "('instantiation', 'triggers')",1.0,1.0
 "('manifestation', 'material')",0.0,0.0
-"('manifestation', 'mediation')",0.07142857142857142,0.13333333333333333
+"('manifestation', 'mediation')",0.06666666666666667,0.125
 "('manifestation', 'memberOf')",0.0,0.0
 "('manifestation', 'participation')",0.5,0.6666666666666666
 "('manifestation', 'participational')",0.0,0.0
@@ -134,7 +134,7 @@ Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('manifestation', 'subQuantityOf')",0.0,0.0
 "('manifestation', 'termination')",0.0,0.0
 "('manifestation', 'triggers')",1.0,1.0
-"('material', 'mediation')",0.35,0.5185185185185185
+"('material', 'mediation')",0.3333333333333333,0.5
 "('material', 'memberOf')",0.11764705882352941,0.21052631578947367
 "('material', 'participation')",0.0,0.0
 "('material', 'participational')",0.0,0.0
@@ -142,13 +142,13 @@ Stereotype Pair,Jaccard Similarity,Dice Coefficient
 "('material', 'subQuantityOf')",0.0,0.0
 "('material', 'termination')",0.0,0.0
 "('material', 'triggers')",0.0,0.0
-"('mediation', 'memberOf')",0.25,0.4
-"('mediation', 'participation')",0.14285714285714285,0.25
+"('mediation', 'memberOf')",0.23529411764705882,0.38095238095238093
+"('mediation', 'participation')",0.13333333333333333,0.23529411764705882
 "('mediation', 'participational')",0.0,0.0
-"('mediation', 'subCollectionOf')",0.06666666666666667,0.125
+"('mediation', 'subCollectionOf')",0.0625,0.11764705882352941
 "('mediation', 'subQuantityOf')",0.0,0.0
 "('mediation', 'termination')",0.0,0.0
-"('mediation', 'triggers')",0.07142857142857142,0.13333333333333333
+"('mediation', 'triggers')",0.06666666666666667,0.125
 "('memberOf', 'participation')",0.14285714285714285,0.25
 "('memberOf', 'participational')",0.0,0.0
 "('memberOf', 'subCollectionOf')",0.3333333333333333,0.5

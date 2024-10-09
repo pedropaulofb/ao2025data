@@ -229,39 +229,40 @@ class Dataset():
         lower_bound_relations = Q1_relations - 1.5 * IQR_relations
         upper_bound_relations = Q3_relations + 1.5 * IQR_relations
 
-        # Step 2: Calculate IQR for the class-to-relation ratio
-        Q1_ratio = df['class_relation_ratio'].quantile(0.25)
-        Q3_ratio = df['class_relation_ratio'].quantile(0.75)
-        IQR_ratio = Q3_ratio - Q1_ratio
-
-        lower_bound_ratio = Q1_ratio - 1.5 * IQR_ratio
-        upper_bound_ratio = Q3_ratio + 1.5 * IQR_ratio
+        # # Step 2: Calculate IQR for the class-to-relation ratio - DISCARDED
+        # Q1_ratio = df['class_relation_ratio'].quantile(0.25)
+        # Q3_ratio = df['class_relation_ratio'].quantile(0.75)
+        # IQR_ratio = Q3_ratio - Q1_ratio
+        #
+        # lower_bound_ratio = Q1_ratio - 1.5 * IQR_ratio
+        # upper_bound_ratio = Q3_ratio + 1.5 * IQR_ratio
 
         # Step 3: Identify outliers
         outliers = {}
 
         for index, model in df.iterrows():
-            class_outlier = model['total_classes'] < lower_bound_classes or model['total_classes'] > upper_bound_classes
-            relation_outlier = model['total_relations'] < lower_bound_relations or model[
-                'total_relations'] > upper_bound_relations
-            ratio_outlier = model['class_relation_ratio'] < lower_bound_ratio or model[
-                'class_relation_ratio'] > upper_bound_ratio
+            class_outlier = (model['total_classes'] < lower_bound_classes or
+                             model['total_classes'] > upper_bound_classes)
+            relation_outlier = (model['total_relations'] < lower_bound_relations or
+                                model['total_relations'] > upper_bound_relations)
+            # ratio_outlier = (model['class_relation_ratio'] < lower_bound_ratio or
+            #                  model['class_relation_ratio'] > upper_bound_ratio)
 
             # Determine if it's a class outlier, relation outlier, ratio outlier, or a combination
-            if class_outlier and relation_outlier and ratio_outlier:
-                outliers[model['model']] = 'class, relation, ratio;'
-            elif class_outlier and relation_outlier:
+            # if class_outlier and relation_outlier and ratio_outlier:
+            #     outliers[model['model']] = 'class, relation, ratio;'
+            if class_outlier and relation_outlier:
                 outliers[model['model']] = 'class, relation;'
-            elif class_outlier and ratio_outlier:
-                outliers[model['model']] = 'class, ratio;'
-            elif relation_outlier and ratio_outlier:
-                outliers[model['model']] = 'relation, ratio;'
+            # elif class_outlier and ratio_outlier:
+            #     outliers[model['model']] = 'class, ratio;'
+            # elif relation_outlier and ratio_outlier:
+            #     outliers[model['model']] = 'relation, ratio;'
             elif class_outlier:
                 outliers[model['model']] = 'class;'
             elif relation_outlier:
                 outliers[model['model']] = 'relation;'
-            elif ratio_outlier:
-                outliers[model['model']] = 'ratio;'
+            # elif ratio_outlier:
+            #     outliers[model['model']] = 'ratio;'
 
         # Step 4: Log the results
         if not outliers:

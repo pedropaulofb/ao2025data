@@ -8,6 +8,7 @@ from src.Dataset import Dataset
 from src.collect_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
 from src.load_models_data import instantiate_models_from_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
+from src.utils import save_datasets
 from src.visualization.boxplot import create_boxplot
 from src.visualization.heatmap import create_heatmap
 from src.visualization.pareto import plot_pareto_combined_frequencies, plot_pareto
@@ -140,12 +141,12 @@ def generate_visualizations(datasets, output_dir):
         logger.success(f"Successfully loaded {len(datasets)} datasets.")
 
     for dataset in datasets:
-        # create_boxplot(dataset, output_dir)
-        # create_boxplot(dataset, output_dir,True)
+        create_boxplot(dataset, output_dir)
+        create_boxplot(dataset, output_dir,True)
         create_heatmap(dataset, output_dir)
-        # plot_pareto(dataset, output_dir,"occurrence")
-        # plot_pareto(dataset, output_dir, "group")
-        # plot_pareto_combined_frequencies(dataset, output_dir)
+        plot_pareto(dataset, output_dir,"occurrence")
+        plot_pareto(dataset, output_dir, "group")
+        plot_pareto_combined_frequencies(dataset, output_dir)
 
 if __name__ == "__main__":
     # UNCOMMENT TO LOAD MODELS
@@ -155,14 +156,14 @@ if __name__ == "__main__":
     # query_data(all_models)
 
     # UNCOMMENT TO GENERATE STATISTICS
-    # all_models = load_models_data()
-    # datasets = create_specific_datasets_instances(all_models)
-    # calculate_and_save_datasets_statistics(datasets)
-    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
-    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
-    # save_datasets(all_datasets, OUTPUT_DIR_02)
+    all_models = load_models_data()
+    datasets = create_specific_datasets_instances(all_models)
+    calculate_and_save_datasets_statistics(datasets)
+    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
+    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    save_datasets(all_datasets, OUTPUT_DIR_02)
 
-    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+    generate_visualizations(all_datasets, OUTPUT_DIR_03)
 
 # coverage_vs_construct_percentage (for filtered and clean)
 
