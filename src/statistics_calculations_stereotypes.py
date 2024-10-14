@@ -1,9 +1,11 @@
-import os
+from itertools import combinations
+
 import numpy as np
 import pandas as pd
-from itertools import combinations
+from loguru import logger
 from sklearn.metrics import mutual_info_score
 from sklearn.metrics.cluster import entropy
+
 
 # Unified function to calculate statistics for both class and relation stereotypes
 def calculate_stereotype_metrics(models, stereotype_type: str, filter_type: bool) -> dict:
@@ -40,23 +42,21 @@ def calculate_stereotype_metrics(models, stereotype_type: str, filter_type: bool
     similarity_measures_df = calculate_similarity_measures(data)
 
     # Step 9: Calculate correlation and dependency (Spearman, Mutual Information)
-    spearman_correlation_df = calculate_spearman_correlation(data)
+    # Example of calling the Spearman correlation calculation for both cases (a) and (b)
+    spearman_correlation_o_df = calculate_spearman_correlation(data, threshold=0.01, case='occurrence')
+    spearman_correlation_m_df = calculate_spearman_correlation(data, threshold=0.1, case='model')
     mutual_info_df = calculate_mutual_information(data)
 
     # Combine all statistics into a dictionary
-    statistics = {
-        'frequency_analysis': frequency_analysis_df,
-        'rank_frequency_distribution': rank_frequency_df,
+    statistics = {'frequency_analysis': frequency_analysis_df, 'rank_frequency_distribution': rank_frequency_df,
         'rank_groupwise_frequency_distribution': rank_groupwise_frequency_df,
-        'diversity_measures': diversity_measures_df,
-        'central_tendency_dispersion': central_tendency_df,
-        'coverage_metrics': coverage_df,
-        'similarity_measures': similarity_measures_df,
-        'spearman_correlation': spearman_correlation_df,
-        'mutual_information': mutual_info_df,
-    }
+        'diversity_measures': diversity_measures_df, 'central_tendency_dispersion': central_tendency_df,
+        'coverage_metrics': coverage_df, 'similarity_measures': similarity_measures_df,
+        'spearman_correlation_o': spearman_correlation_o_df, 'spearman_correlation_m': spearman_correlation_m_df,
+        'mutual_information': mutual_info_df, }
 
     return statistics
+
 
 # Function to calculate frequency analysis
 def calculate_frequency_analysis(data: pd.DataFrame) -> pd.DataFrame:
@@ -72,15 +72,12 @@ def calculate_frequency_analysis(data: pd.DataFrame) -> pd.DataFrame:
     global_relative_frequency_groupwise = group_frequency / total_groups
 
     # Combine into a single DataFrame
-    frequency_analysis_df = pd.DataFrame({
-        'Stereotype': total_frequency.index,
-        'Total Frequency': total_frequency.values,
-        'Total Frequency per Group': total_frequency_per_group,
-        'Group Frequency': group_frequency.values,
-        'Ubiquity Index': ubiquity_index,
-        'Global Relative Frequency (Occurrence-wise)': global_relative_frequency_occurrence.values,
-        'Global Relative Frequency (Group-wise)': global_relative_frequency_groupwise.values
-    })
+    frequency_analysis_df = pd.DataFrame(
+        {'Stereotype': total_frequency.index, 'Total Frequency': total_frequency.values,
+            'Total Frequency per Group': total_frequency_per_group, 'Group Frequency': group_frequency.values,
+            'Ubiquity Index': ubiquity_index,
+            'Global Relative Frequency (Occurrence-wise)': global_relative_frequency_occurrence.values,
+            'Global Relative Frequency (Group-wise)': global_relative_frequency_groupwise.values})
 
     return frequency_analysis_df
 
@@ -90,13 +87,10 @@ def calculate_rank_frequency_distribution(data: pd.Series) -> pd.DataFrame:
     total_frequency_sorted = data.sort_values(ascending=False)
     total_occurrences = total_frequency_sorted.sum()
 
-    rank_frequency_df = pd.DataFrame({
-        'Stereotype': total_frequency_sorted.index,
-        'Frequency': total_frequency_sorted.values,
-        'Rank': range(1, len(total_frequency_sorted) + 1),
-        'Cumulative Frequency': total_frequency_sorted.cumsum(),
-        'Cumulative Percentage': (total_frequency_sorted.cumsum() / total_occurrences) * 100
-    })
+    rank_frequency_df = pd.DataFrame(
+        {'Stereotype': total_frequency_sorted.index, 'Frequency': total_frequency_sorted.values,
+            'Rank': range(1, len(total_frequency_sorted) + 1), 'Cumulative Frequency': total_frequency_sorted.cumsum(),
+            'Cumulative Percentage': (total_frequency_sorted.cumsum() / total_occurrences) * 100})
 
     return rank_frequency_df
 
@@ -107,13 +101,11 @@ def calculate_groupwise_rank_frequency_distribution(data: pd.DataFrame) -> pd.Da
     group_frequency_sorted = group_frequency.sort_values(ascending=False)
     total_group_occurrences = group_frequency_sorted.sum()
 
-    rank_groupwise_frequency_df = pd.DataFrame({
-        'Stereotype': group_frequency_sorted.index,
-        'Group-wise Frequency': group_frequency_sorted.values,
-        'Group-wise Rank': range(1, len(group_frequency_sorted) + 1),
-        'Cumulative Group-wise Frequency': group_frequency_sorted.cumsum(),
-        'Group-wise Cumulative Percentage': (group_frequency_sorted.cumsum() / total_group_occurrences) * 100
-    })
+    rank_groupwise_frequency_df = pd.DataFrame(
+        {'Stereotype': group_frequency_sorted.index, 'Group-wise Frequency': group_frequency_sorted.values,
+            'Group-wise Rank': range(1, len(group_frequency_sorted) + 1),
+            'Cumulative Group-wise Frequency': group_frequency_sorted.cumsum(),
+            'Group-wise Cumulative Percentage': (group_frequency_sorted.cumsum() / total_group_occurrences) * 100})
 
     return rank_groupwise_frequency_df
 
@@ -121,19 +113,14 @@ def calculate_groupwise_rank_frequency_distribution(data: pd.DataFrame) -> pd.Da
 # Function to calculate diversity measures (Shannon, Gini, Simpson)
 def calculate_diversity_measures(data: pd.DataFrame) -> pd.DataFrame:
     shannon_entropy = data.apply(
-        lambda x: max(0, -np.sum((x / x.sum()) * np.log2(x / x.sum() + 1e-9)) if x.sum() > 0 else 0)
-    )
+        lambda x: max(0, -np.sum((x / x.sum()) * np.log2(x / x.sum() + 1e-9)) if x.sum() > 0 else 0))
     gini_coefficient = data.apply(
-        lambda x: (2.0 * np.sum(np.arange(1, len(x) + 1) * np.sort(x)) - (len(x) + 1) * x.sum()) / (len(x) * x.sum()) if x.sum() != 0 else 0
-    )
+        lambda x: (2.0 * np.sum(np.arange(1, len(x) + 1) * np.sort(x)) - (len(x) + 1) * x.sum()) / (
+                    len(x) * x.sum()) if x.sum() != 0 else 0)
     simpson_index = data.apply(lambda x: np.sum((x / x.sum()) ** 2) if x.sum() > 0 else 0)
 
-    diversity_measures_df = pd.DataFrame({
-        'Stereotype': data.columns,
-        'Shannon Entropy': shannon_entropy.values,
-        'Gini Coefficient': gini_coefficient.values,
-        'Simpson Index': simpson_index.values
-    })
+    diversity_measures_df = pd.DataFrame({'Stereotype': data.columns, 'Shannon Entropy': shannon_entropy.values,
+        'Gini Coefficient': gini_coefficient.values, 'Simpson Index': simpson_index.values})
 
     return diversity_measures_df
 
@@ -160,28 +147,14 @@ def calculate_central_tendency(data: pd.DataFrame) -> pd.DataFrame:
     range_non_zero = max_value - min_non_zero
     total = data.sum(axis=0)
 
-    central_tendency_df = pd.DataFrame({
-        'Stereotype': data.columns,
-        'Total': total.values,
-        'Mean': mean.values,
-        'Median': median.values,
-        'Mode': mode.values,
-        'Standard Deviation': std.values,
-        'Variance': variance.values,
-        'Skewness': skewness.values,
-        'Kurtosis': kurtosis.values,
-        'Q1': q1.values,
-        'Q3': q3.values,
-        'IQR': iqr.values,
-        'Min': min_value.values,
-        'Max': max_value.values,
-        'Range': range_value.values,
-        'Min Non-Zero': min_non_zero.values,
-        'Range Non-Zero': range_non_zero.values
-    })
+    central_tendency_df = pd.DataFrame(
+        {'Stereotype': data.columns, 'Total': total.values, 'Mean': mean.values, 'Median': median.values,
+            'Mode': mode.values, 'Standard Deviation': std.values, 'Variance': variance.values,
+            'Skewness': skewness.values, 'Kurtosis': kurtosis.values, 'Q1': q1.values, 'Q3': q3.values,
+            'IQR': iqr.values, 'Min': min_value.values, 'Max': max_value.values, 'Range': range_value.values,
+            'Min Non-Zero': min_non_zero.values, 'Range Non-Zero': range_non_zero.values})
 
     return central_tendency_df
-
 
 
 # Function to calculate coverage metrics (occurrence-wise and group-wise)
@@ -210,13 +183,10 @@ def calculate_coverage(data: pd.DataFrame) -> pd.DataFrame:
         coverage_groupwise = top_k_groupwise.sum() / total_groupwise_occurrences
 
         # Append combined result for each percentage
-        combined_coverage_list.append({
-            'Percentage': pct * 100,
-            'Top k Stereotypes (Occurrence-wise)': len(top_k_occurrence),
-            'Coverage (Occurrence-wise)': coverage_occurrence,
-            'Top k Stereotypes (Group-wise)': len(top_k_groupwise),
-            'Coverage (Group-wise)': coverage_groupwise
-        })
+        combined_coverage_list.append(
+            {'Percentage': pct * 100, 'Top k Stereotypes (Occurrence-wise)': len(top_k_occurrence),
+                'Coverage (Occurrence-wise)': coverage_occurrence,
+                'Top k Stereotypes (Group-wise)': len(top_k_groupwise), 'Coverage (Group-wise)': coverage_groupwise})
 
     # Convert the list to a DataFrame
     combined_coverage_df = pd.DataFrame(combined_coverage_list)
@@ -239,20 +209,63 @@ def calculate_similarity_measures(data: pd.DataFrame) -> pd.DataFrame:
         union = len(set1.union(set2))
 
         jaccard_similarity[(stereotype1, stereotype2)] = intersection / union if union != 0 else 0
-        dice_similarity[(stereotype1, stereotype2)] = (2 * intersection) / (len(set1) + len(set2)) if (len(set1) + len(set2)) != 0 else 0
+        dice_similarity[(stereotype1, stereotype2)] = (2 * intersection) / (len(set1) + len(set2)) if (len(set1) + len(
+            set2)) != 0 else 0
 
-    similarity_measures_df = pd.DataFrame({
-        'Stereotype Pair': list(jaccard_similarity.keys()),
-        'Jaccard Similarity': list(jaccard_similarity.values()),
-        'Dice Coefficient': list(dice_similarity.values())
-    })
+    similarity_measures_df = pd.DataFrame(
+        {'Stereotype Pair': list(jaccard_similarity.keys()), 'Jaccard Similarity': list(jaccard_similarity.values()),
+            'Dice Coefficient': list(dice_similarity.values())})
 
     return similarity_measures_df
 
 
-# Function to calculate Spearman Correlation
-def calculate_spearman_correlation(data: pd.DataFrame, extra_calculation:bool=True) -> pd.DataFrame:
-    spearman_correlation = data.corr(method='spearman')
+# Function to calculate Spearman Correlation with filter and log dropped elements
+def calculate_spearman_correlation(data: pd.DataFrame, threshold: float, case: str = 'occurrence') -> pd.DataFrame:
+    """
+    Calculate Spearman correlation with filtering based on occurrence or model-wise presence.
+    Also print the elements dropped due to the filtering threshold.
+
+    :param data: DataFrame of stereotype counts.
+    :param threshold: Minimum percentage of occurrences to retain (e.g., 0.1 means 10% threshold).
+    :param case: 'occurrence' for occurrence-wise, 'model' for model-wise presence.
+    :return: Spearman correlation DataFrame.
+    """
+
+    if case == 'occurrence':
+        # Case (a): Filter based on total occurrences
+        total_occurrences = data.sum(axis=0)
+        threshold_value = total_occurrences.sum() * threshold  # Filtering based on percentage of total occurrences
+
+        # Determine which stereotypes will be dropped
+        dropped_elements = total_occurrences[total_occurrences < threshold_value].index.tolist()
+
+        # Filter data
+        filtered_data = data.loc[:, total_occurrences >= threshold_value]
+
+    elif case == 'model':
+        # Case (b): Filter based on number of models in which each stereotype appears
+        model_occurrences = (data > 0).sum(axis=0)
+        threshold_value = len(data) * threshold  # Filtering based on percentage of models
+
+        # Determine which stereotypes will be dropped
+        dropped_elements = model_occurrences[model_occurrences < threshold_value].index.tolist()
+
+        # Filter data
+        filtered_data = data.loc[:, model_occurrences >= threshold_value]
+
+    else:
+        raise ValueError(f"Case argument '{case}' not identified. "
+                         f"Options are 'occurrence' for occurrence-wise, or 'model' for model-wise presence.")
+
+    # Formatting the dropped elements for logging
+    formatted_dropped_elements = [f" - {element}" for element in dropped_elements]
+
+    # Logging the dropped elements using logger.info
+    logger.info(
+        f"Spearman Correlation dropped stereotypes due to {case}-wise filtering (threshold = {threshold * 100}%):\n{', '.join(formatted_dropped_elements)}")
+
+    # Calculate Spearman correlation on the filtered data
+    spearman_correlation = filtered_data.corr(method='spearman')
     spearman_correlation.index.name = 'Stereotype'
     spearman_correlation.reset_index(inplace=True)
 
@@ -293,4 +306,3 @@ def extract_stereotype_data(models, stereotype_type: str, filter_type: bool) -> 
         df = df.drop(columns=["other", "none"], errors='ignore')
 
     return df
-

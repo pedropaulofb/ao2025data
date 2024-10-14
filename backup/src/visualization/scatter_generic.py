@@ -108,12 +108,6 @@ def execute_visualization_scatter(in_file_path, out_dir_path, plot_medians: bool
         formatted_x_metric = format_metric_name(x_metric)  # Apply formatting to x_metric
         formatted_y_metric = format_metric_name(y_metric)  # Apply formatting to y_metric
 
-        # Call the quadrant calculation and save the results
-        calculate_quadrants_and_save(df, x_metric, y_metric, out_dir_path, index_col)
-
-        # Call the 'distance from center' calculation and save the results
-        calculate_distance_from_origin_and_save(df, x_metric, y_metric, out_dir_path, index_col)
-
         plt.tight_layout()
         fig_name = f'scatter_plot_{formatted_x_metric}_vs_{formatted_y_metric}.png'
         fig.savefig(os.path.join(out_dir_path, fig_name), dpi=300)

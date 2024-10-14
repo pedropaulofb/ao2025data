@@ -2,6 +2,7 @@ import gzip
 import os
 import pickle
 
+from icecream import ic
 from loguru import logger
 
 from src.Dataset import Dataset
@@ -11,7 +12,9 @@ from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
 from src.utils import save_datasets
 from src.visualization.boxplot import create_boxplot
 from src.visualization.heatmap import create_heatmap
+from src.visualization.new_boxplot import new_create_boxplot
 from src.visualization.pareto import plot_pareto_combined_frequencies, plot_pareto
+from src.visualization.scatter import execute_visualization_scatter
 
 CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
 BASE_OUTPUT_DIR = "./outputs"
@@ -141,12 +144,14 @@ def generate_visualizations(datasets, output_dir):
         logger.success(f"Successfully loaded {len(datasets)} datasets.")
 
     for dataset in datasets:
-        create_boxplot(dataset, output_dir)
-        create_boxplot(dataset, output_dir,True)
-        create_heatmap(dataset, output_dir)
-        plot_pareto(dataset, output_dir,"occurrence")
-        plot_pareto(dataset, output_dir, "group")
-        plot_pareto_combined_frequencies(dataset, output_dir)
+        # new_create_boxplot(dataset, OUTPUT_DIR_02, output_dir)
+        # new_create_boxplot(dataset, OUTPUT_DIR_02, output_dir,True)
+        # create_heatmap(dataset, output_dir)
+        # plot_pareto(dataset, output_dir,"occurrence")
+        # plot_pareto(dataset, output_dir, "group")
+        # plot_pareto_combined_frequencies(dataset, output_dir)
+        if dataset.name == "ontouml_non_classroom_filtered":
+            execute_visualization_scatter(dataset, output_dir)
 
 if __name__ == "__main__":
     # UNCOMMENT TO LOAD MODELS
@@ -163,7 +168,7 @@ if __name__ == "__main__":
     calculate_and_save_datasets_stereotypes_statistics(all_datasets)
     save_datasets(all_datasets, OUTPUT_DIR_02)
 
-    generate_visualizations(all_datasets, OUTPUT_DIR_03)
+    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
 
 # coverage_vs_construct_percentage (for filtered and clean)
 
