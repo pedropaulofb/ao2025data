@@ -11,7 +11,8 @@ from loguru import logger
 from src import ModelData
 from src.statistics_calculations_datasets import calculate_class_and_relation_metrics, calculate_stats, calculate_ratios
 from src.statistics_calculations_stereotypes import calculate_stereotype_metrics
-from src.statistics_calculations_stereotypes_extra import classify_and_save_spearman_correlations
+from src.statistics_calculations_stereotypes_extra import classify_and_save_spearman_correlations, \
+    calculate_quadrants_and_save
 from src.utils import append_unique_preserving_order, save_to_csv
 
 
@@ -560,5 +561,37 @@ class Dataset():
             # Call the classification function
             classify_and_save_spearman_correlations(geometric_mean_matrix_reset, classified_filepath)
 
+    def calculate_and_save_quadrants(self, output_dir: str, stats_access: str, x_metric: str, y_metric: str) -> None:
+        """
+        Calls the calculate_quadrants_and_save function for class and relation raw/clean cases.
 
+        :param output_dir: Directory where the results will be saved.
+        :param x_metric: The metric for the x-axis.
+        :param y_metric: The metric for the y-axis.
+        """
+        # Define the four cases: class raw, relation raw, class clean, relation clean
+        subdirs = {
+            'class_raw': self.class_statistics_raw[stats_access],
+            'relation_raw': self.relation_statistics_raw[stats_access],
+            'class_clean': self.class_statistics_clean[stats_access],
+            'relation_clean': self.relation_statistics_clean[stats_access]
+        }
 
+        for case, statistics in subdirs.items():
+            # Check if the statistics for the current case contain the required metrics
+            if x_metric in statistics and y_metric in statistics:
+                # Create a DataFrame from the two columns (x_metric and y_metric)
+                df = pd.DataFrame({
+                    x_metric: statistics[x_metric],
+                    y_metric: statistics[y_metric]
+                })
+
+                # Define the subdirectory for this case
+                case_output_dir = os.path.join(output_dir, self.name, case)
+                if not os.path.exists(case_output_dir):
+                    os.makedirs(case_output_dir)
+
+                # Call the calculate_quadrants_and_save function for this case without index_col
+                calculate_quadrants_and_save(df, x_metric, y_metric, case_output_dir)
+
+                logger.success(f"Quadrants calculated and saved for '{case}' case in '{case_output_dir}'.")

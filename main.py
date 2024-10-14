@@ -131,10 +131,13 @@ def calculate_and_save_datasets_stereotypes_statistics(datasets):
     for dataset in datasets:
         dataset.calculate_stereotype_statistics()
         dataset.save_stereotype_statistics(OUTPUT_DIR_02)
-        dataset.classify_and_save_spearman_correlation(OUTPUT_DIR_02)
-        dataset.classify_and_save_total_correlation(OUTPUT_DIR_02)
-        dataset.classify_and_save_geometric_mean_correlation(OUTPUT_DIR_02)
-        dataset.classify_and_save_geometric_mean_pairwise_correlation(OUTPUT_DIR_02)
+        dataset.calculate_and_save_average_model(OUTPUT_DIR_02)
+        # dataset.classify_and_save_spearman_correlation(OUTPUT_DIR_02)
+        # dataset.classify_and_save_total_correlation(OUTPUT_DIR_02)
+        # dataset.classify_and_save_geometric_mean_correlation(OUTPUT_DIR_02)
+        # dataset.classify_and_save_geometric_mean_pairwise_correlation(OUTPUT_DIR_02)
+        # dataset.calculate_and_save_quadrants(OUTPUT_DIR_02, 'frequency_analysis', 'Global Relative Frequency (Occurrence-wise)', 'Ubiquity Index')
+
 
 
 def generate_visualizations(datasets, output_dir):
@@ -147,7 +150,6 @@ def generate_visualizations(datasets, output_dir):
         logger.success(f"Successfully loaded {len(datasets)} datasets.")
 
     for dataset in datasets:
-
         plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
         plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
         plot_heatmap(dataset, output_dir)
@@ -174,8 +176,7 @@ if __name__ == "__main__":
 
     # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
 
-# learning_tree_spearman_correlation (ontouml_non_classroom and ontouml_classroom) (for filtered and clean)
+# automatically calculate 'average model' for each dataset
+# calculate integrated correlation (all types)
+# learning_tree_spearman_correlation
 
-# temporal_overall_stats_combined_visualization (for filtered and non-clean)
-# movement_analysis_global_relative_frequency_vs_global_relative_frequency (until 2018 and after 2019) (for filtered and non-clean)
-# quadrant movement_analysis_global_relative_frequency_vs_global_relative_frequency (until 2018 and after 2019) (for filtered and non-clean)
