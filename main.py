@@ -132,6 +132,9 @@ def calculate_and_save_datasets_stereotypes_statistics(datasets):
         dataset.calculate_stereotype_statistics()
         dataset.save_stereotype_statistics(OUTPUT_DIR_02)
         dataset.classify_and_save_spearman_correlation(OUTPUT_DIR_02)
+        dataset.classify_and_save_total_correlation(OUTPUT_DIR_02)
+        dataset.classify_and_save_geometric_mean_correlation(OUTPUT_DIR_02)
+        dataset.classify_and_save_geometric_mean_pairwise_correlation(OUTPUT_DIR_02)
 
 
 def generate_visualizations(datasets, output_dir):
@@ -144,6 +147,7 @@ def generate_visualizations(datasets, output_dir):
         logger.success(f"Successfully loaded {len(datasets)} datasets.")
 
     for dataset in datasets:
+
         plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
         plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
         plot_heatmap(dataset, output_dir)
@@ -151,6 +155,7 @@ def generate_visualizations(datasets, output_dir):
         plot_pareto(dataset, output_dir, "group")
         plot_pareto_combined(dataset, output_dir)
         plot_scatter(dataset, output_dir)
+
 
 if __name__ == "__main__":
     # UNCOMMENT TO LOAD MODELS
@@ -160,15 +165,14 @@ if __name__ == "__main__":
     # query_data(all_models)
 
     # UNCOMMENT TO GENERATE STATISTICS
-    # all_models = load_models_data()
-    # datasets = create_specific_datasets_instances(all_models)
-    # calculate_and_save_datasets_statistics(datasets)
-    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
-    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
-    # save_datasets(all_datasets, OUTPUT_DIR_02)
+    all_models = load_models_data()
+    datasets = create_specific_datasets_instances(all_models)
+    calculate_and_save_datasets_statistics(datasets)
+    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
+    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    save_datasets(all_datasets, OUTPUT_DIR_02)
 
-    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
-
+    # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
 
 # learning_tree_spearman_correlation (ontouml_non_classroom and ontouml_classroom) (for filtered and clean)
 

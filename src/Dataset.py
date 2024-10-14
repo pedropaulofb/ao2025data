@@ -367,6 +367,198 @@ class Dataset():
                 # Generate file path for saving
                 filepath = os.path.join(output_subdir, f'{correlation}_classified.csv')
 
-                # Call the classification and save function (you already have this defined)
+                # Call the classification and save function
                 classify_and_save_spearman_correlations(spearman_correlation, filepath)
                 logger.success(f"Dataset {self.name}, case '{subdir}', {correlation} classified and saved successfully in '{filepath}'.")
+
+    def classify_and_save_total_correlation(self, output_dir: str) -> None:
+        """
+        Classifies and saves the total correlations for class/relation (raw/clean)
+        stereotypes into two separate CSV files: one for occurrence-wise and one for model-wise.
+
+        :param output_dir: Directory where the CSV files will be saved.
+        """
+        # Define subdirectories for class/relation and raw/clean data
+        subdirs = {
+            'class_raw': self.class_statistics_raw,
+            'relation_raw': self.relation_statistics_raw,
+            'class_clean': self.class_statistics_clean,
+            'relation_clean': self.relation_statistics_clean
+        }
+
+        for subdir, statistics in subdirs.items():
+            # Extract the Spearman correlation data for occurrence-wise and model-wise
+            spearman_occurrence = statistics['spearman_correlation_occurrence_wise'].set_index('Stereotype')
+            spearman_model = statistics['spearman_correlation_model_wise'].set_index('Stereotype')
+
+            # Step 1: Calculate total correlations and ranks for occurrence-wise
+            total_corr_occurrence = spearman_occurrence.abs().sum(axis=1) - 1  # Subtract 1 to exclude self-correlation
+            total_corr_occurrence_rank = total_corr_occurrence.rank(ascending=False, method='min')
+
+            # Step 2: Create a DataFrame for occurrence-wise results
+            total_corr_occurrence_df = pd.DataFrame({
+                'stereotype': total_corr_occurrence.index,
+                'total_correlation_occurrence_wise': total_corr_occurrence.values,
+                'rank_total_correlation_occurrence_wise': total_corr_occurrence_rank.astype(int).values
+            })
+
+            # Step 3: Calculate total correlations and ranks for model-wise
+            total_corr_model = spearman_model.abs().sum(axis=1) - 1  # Subtract 1 to exclude self-correlation
+            total_corr_model_rank = total_corr_model.rank(ascending=False, method='min')
+
+            # Step 4: Create a DataFrame for model-wise results
+            total_corr_model_df = pd.DataFrame({
+                'stereotype': total_corr_model.index,
+                'total_correlation_model_wise': total_corr_model.values,
+                'rank_total_correlation_model_wise': total_corr_model_rank.astype(int).values
+            })
+
+            # Step 5: Define the output directories and file paths
+            output_subdir = os.path.join(output_dir, self.name, subdir)
+            if not os.path.exists(output_subdir):
+                os.makedirs(output_subdir)
+
+            occurrence_filepath = os.path.join(output_subdir, 'spearman_correlation_total_occurrence_wise.csv')
+            model_filepath = os.path.join(output_subdir, 'spearman_correlation_total_model_wise.csv')
+
+            # Step 6: Save the occurrence-wise and model-wise DataFrames to separate CSV files
+            total_corr_occurrence_df.to_csv(occurrence_filepath, index=False)
+            logger.success(
+                f"Total occurrence-wise correlation data for dataset '{self.name}', case '{subdir}' saved successfully in '{occurrence_filepath}'.")
+
+            total_corr_model_df.to_csv(model_filepath, index=False)
+            logger.success(
+                f"Total model-wise correlation data for dataset '{self.name}', case '{subdir}' saved successfully in '{model_filepath}'.")
+
+    def classify_and_save_geometric_mean_correlation(self, output_dir: str) -> None:
+        """
+        Classifies and saves the geometric mean of the total correlations (occurrence-wise and model-wise)
+        for class/relation (raw/clean) stereotypes to a CSV file, with a rank column.
+
+        :param output_dir: Directory where the CSV file will be saved.
+        """
+        # Define subdirectories for class/relation and raw/clean data
+        subdirs = {
+            'class_raw': self.class_statistics_raw,
+            'relation_raw': self.relation_statistics_raw,
+            'class_clean': self.class_statistics_clean,
+            'relation_clean': self.relation_statistics_clean
+        }
+
+        for subdir, statistics in subdirs.items():
+            # Extract the Spearman correlation data for occurrence-wise and model-wise
+            spearman_occurrence = statistics['spearman_correlation_occurrence_wise'].set_index('Stereotype')
+            spearman_model = statistics['spearman_correlation_model_wise'].set_index('Stereotype')
+
+            # Step 1: Find common stereotypes between occurrence-wise and model-wise correlations
+            common_stereotypes = spearman_occurrence.index.intersection(spearman_model.index)
+
+            # Step 2: Filter both correlation data to keep only the common stereotypes
+            spearman_occurrence_common = spearman_occurrence.loc[common_stereotypes]
+            spearman_model_common = spearman_model.loc[common_stereotypes]
+
+            # Step 3: Calculate geometric mean for each stereotype (row-wise)
+            geometric_mean_values = []
+            for stereotype in common_stereotypes:
+                occurrence_sum = spearman_occurrence_common.loc[
+                                     stereotype].abs().sum() - 1  # Subtract 1 to exclude self-correlation
+                model_sum = spearman_model_common.loc[
+                                stereotype].abs().sum() - 1  # Subtract 1 to exclude self-correlation
+
+                # Calculate geometric mean for the current stereotype
+                geometric_mean = math.sqrt(occurrence_sum * model_sum)
+                geometric_mean_values.append(geometric_mean)
+
+            # Step 4: Create a DataFrame for the geometric mean results
+            geometric_mean_df = pd.DataFrame({
+                'stereotype': common_stereotypes,
+                'geometric_mean_correlation': geometric_mean_values
+            })
+
+            # Step 5: Calculate rank based on geometric mean (descending order)
+            geometric_mean_df['rank'] = geometric_mean_df['geometric_mean_correlation'].rank(ascending=False,
+                                                                                             method='min').astype(int)
+
+            # Step 6: Define the output directory and file path
+            output_subdir = os.path.join(output_dir, self.name, subdir)
+            if not os.path.exists(output_subdir):
+                os.makedirs(output_subdir)
+
+            filepath = os.path.join(output_subdir, 'spearman_correlation_total_geometric_mean.csv')
+
+            # Step 7: Save the DataFrame to a CSV file
+            geometric_mean_df.to_csv(filepath, index=False)
+            logger.success(
+                f"Geometric mean correlation data for dataset '{self.name}', case '{subdir}' saved successfully in '{filepath}'.")
+
+    def classify_and_save_geometric_mean_pairwise_correlation(self, output_dir: str) -> None:
+        """
+        Calculates and saves the geometric mean of the correlation values for each pair of stereotypes.
+        This is done for stereotypes that appear in both occurrence-wise and model-wise correlations.
+        Saves the result as a matrix where rows and columns are the stereotypes.
+
+        :param output_dir: Directory where the CSV file will be saved.
+        """
+        # Define subdirectories for class/relation and raw/clean data
+        subdirs = {
+            'class_raw': self.class_statistics_raw,
+            'relation_raw': self.relation_statistics_raw,
+            'class_clean': self.class_statistics_clean,
+            'relation_clean': self.relation_statistics_clean
+        }
+
+        for subdir, statistics in subdirs.items():
+            # Extract the Spearman correlation data for occurrence-wise and model-wise
+            spearman_occurrence = statistics['spearman_correlation_occurrence_wise'].set_index('Stereotype')
+            spearman_model = statistics['spearman_correlation_model_wise'].set_index('Stereotype')
+
+            # Step 1: Find common stereotypes between occurrence-wise and model-wise correlations
+            common_stereotypes = spearman_occurrence.columns.intersection(spearman_model.columns)
+
+            # Step 2: Filter both correlation data to keep only the common stereotypes (rows and columns)
+            spearman_occurrence_common = spearman_occurrence.loc[common_stereotypes, common_stereotypes]
+            spearman_model_common = spearman_model.loc[common_stereotypes, common_stereotypes]
+
+            # Step 3: Initialize a DataFrame for storing the geometric mean correlations
+            geometric_mean_matrix = pd.DataFrame(index=common_stereotypes, columns=common_stereotypes)
+
+            # Step 4: Calculate the geometric mean for each pair of stereotypes and fill the matrix
+            for i, stereotype1 in enumerate(common_stereotypes):
+                for j, stereotype2 in enumerate(common_stereotypes):
+                    if i > j:
+                        # Calculate the geometric mean for the upper triangle (i > j)
+                        occ_corr = spearman_occurrence_common.loc[stereotype1, stereotype2]
+                        model_corr = spearman_model_common.loc[stereotype1, stereotype2]
+                        geometric_mean = math.sqrt(abs(occ_corr) * abs(model_corr))
+
+                        # Set both (i, j) and (j, i) to the geometric mean value in the symmetric matrix
+                        geometric_mean_matrix.loc[stereotype1, stereotype2] = geometric_mean
+                        geometric_mean_matrix.loc[stereotype2, stereotype1] = geometric_mean
+                    elif i == j:
+                        # Set diagonal elements to 1 (since they represent self-correlation)
+                        geometric_mean_matrix.loc[stereotype1, stereotype2] = 1.0
+
+            # Step 5: Define the output directory and file path
+            output_subdir = os.path.join(output_dir, self.name, subdir)
+            if not os.path.exists(output_subdir):
+                os.makedirs(output_subdir)
+
+            filepath = os.path.join(output_subdir, 'spearman_correlation_geometric_mean.csv')
+
+            # Step 6: Save the matrix DataFrame to a CSV file
+            geometric_mean_matrix.to_csv(filepath, index_label='Stereotype')
+            logger.success(
+                f"Geometric mean pairwise correlation matrix for dataset '{self.name}', case '{subdir}' saved successfully in '{filepath}'.")
+
+            # Step 7: Generating classified results
+            classified_filepath = os.path.join(output_subdir,
+                                               'spearman_correlation_geometric_mean_classified.csv')
+
+            # Reset index and rename the first column to 'Stereotype'
+            geometric_mean_matrix_reset = geometric_mean_matrix.reset_index().rename(columns={'index': 'Stereotype'})
+
+            # Call the classification function
+            classify_and_save_spearman_correlations(geometric_mean_matrix_reset, classified_filepath)
+
+
+
