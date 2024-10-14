@@ -7,7 +7,7 @@ from loguru import logger
 from src.utils import create_visualizations_out_dirs, color_text
 
 
-def new_create_boxplot(dataset, input_dir, output_dir: str, log_scale: bool = False) -> None:
+def plot_boxplot(dataset, input_dir, output_dir: str, log_scale: bool = False) -> None:
     """
     Create separate boxplots for class and relation stereotype statistics (both raw and clean)
     and save them as separate images.

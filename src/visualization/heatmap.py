@@ -8,7 +8,7 @@ from loguru import logger
 from src.utils import color_text, create_visualizations_out_dirs
 
 
-def create_heatmap(dataset, output_dir: str) -> None:
+def plot_heatmap(dataset, output_dir: str) -> None:
     """
     Create heatmaps for the Spearman correlation of class and relation stereotype statistics (both raw and clean)
     and save them as separate images.
@@ -51,24 +51,26 @@ def create_heatmap(dataset, output_dir: str) -> None:
         logger.success(f"Figure {fig_name} successfully saved in {specific_output_dir}.")
         plt.close(fig)
 
-    # Convert the necessary 'spearman_correlation' data into DataFrames, setting the first column as index
-    class_raw_corr_df = pd.DataFrame(dataset.class_statistics_raw["spearman_correlation"]).set_index('Stereotype')
-    relation_raw_corr_df = pd.DataFrame(dataset.relation_statistics_raw["spearman_correlation"]).set_index('Stereotype')
-    class_clean_corr_df = pd.DataFrame(dataset.class_statistics_clean["spearman_correlation"]).set_index('Stereotype')
-    relation_clean_corr_df = pd.DataFrame(dataset.relation_statistics_clean["spearman_correlation"]).set_index('Stereotype')
-
-    # Plot heatmap for class raw statistics
-    plot_custom_heatmap(class_raw_corr_df, 'Spearman Correlation Heatmap of Class Raw Stereotype Statistics',
-                        'spearman_correlation_heatmap.png', class_raw_out)
-
-    # Plot heatmap for relation raw statistics
-    plot_custom_heatmap(relation_raw_corr_df, 'Spearman Correlation Heatmap of Relation Raw Stereotype Statistics',
-                        'spearman_correlation_heatmap.png', relation_raw_out)
-
-    # Plot heatmap for class clean statistics
-    plot_custom_heatmap(class_clean_corr_df, 'Spearman Correlation Heatmap of Class Clean Stereotype Statistics',
-                        'spearman_correlation_heatmap.png', class_clean_out)
-
-    # Plot heatmap for relation clean statistics
-    plot_custom_heatmap(relation_clean_corr_df, 'Spearman Correlation Heatmap of Relation Clean Stereotype Statistics',
-                        'spearman_correlation_heatmap.png', relation_clean_out)
+    correlations = ['spearman_correlation_occurrence_wise', 'spearman_correlation_model_wise']
+    for correlation in correlations:
+        # Convert the necessary 'spearman_correlation' data into DataFrames, setting the first column as index
+        class_raw_corr_df = pd.DataFrame(dataset.class_statistics_raw[correlation]).set_index('Stereotype')
+        relation_raw_corr_df = pd.DataFrame(dataset.relation_statistics_raw[correlation]).set_index('Stereotype')
+        class_clean_corr_df = pd.DataFrame(dataset.class_statistics_clean[correlation]).set_index('Stereotype')
+        relation_clean_corr_df = pd.DataFrame(dataset.relation_statistics_clean[correlation]).set_index('Stereotype')
+    
+        # Plot heatmap for class raw statistics
+        plot_custom_heatmap(class_raw_corr_df, 'Spearman Correlation Heatmap of Class Raw Stereotype Statistics',
+                            f'{correlation}_heatmap.png', class_raw_out)
+    
+        # Plot heatmap for relation raw statistics
+        plot_custom_heatmap(relation_raw_corr_df, 'Spearman Correlation Heatmap of Relation Raw Stereotype Statistics',
+                            f'{correlation}_heatmap.png', relation_raw_out)
+    
+        # Plot heatmap for class clean statistics
+        plot_custom_heatmap(class_clean_corr_df, 'Spearman Correlation Heatmap of Class Clean Stereotype Statistics',
+                            f'{correlation}_heatmap.png', class_clean_out)
+    
+        # Plot heatmap for relation clean statistics
+        plot_custom_heatmap(relation_clean_corr_df, 'Spearman Correlation Heatmap of Relation Clean Stereotype Statistics',
+                            f'{correlation}_heatmap.png', relation_clean_out)

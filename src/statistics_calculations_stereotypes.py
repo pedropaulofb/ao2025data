@@ -52,7 +52,7 @@ def calculate_stereotype_metrics(models, stereotype_type: str, filter_type: bool
         'rank_groupwise_frequency_distribution': rank_groupwise_frequency_df,
         'diversity_measures': diversity_measures_df, 'central_tendency_dispersion': central_tendency_df,
         'coverage_metrics': coverage_df, 'similarity_measures': similarity_measures_df,
-        'spearman_correlation_o': spearman_correlation_o_df, 'spearman_correlation_m': spearman_correlation_m_df,
+        'spearman_correlation_occurrence_wise': spearman_correlation_o_df, 'spearman_correlation_model_wise': spearman_correlation_m_df,
         'mutual_information': mutual_info_df, }
 
     return statistics

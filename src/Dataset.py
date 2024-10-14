@@ -5,6 +5,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from icecream import ic
 from loguru import logger
 
 from src import ModelData
@@ -358,13 +359,14 @@ class Dataset():
             if not os.path.exists(output_subdir):
                 os.makedirs(output_subdir)
 
+            correlations = ['spearman_correlation_occurrence_wise', 'spearman_correlation_model_wise']
             # Access the Spearman correlation result
-            if 'spearman_correlation' in statistics:
-                spearman_correlation = statistics['spearman_correlation']
+            for correlation in correlations:
+                spearman_correlation = statistics[correlation]
 
                 # Generate file path for saving
-                filepath = os.path.join(output_subdir, 'spearman_correlation_classified.csv')
+                filepath = os.path.join(output_subdir, f'{correlation}_classified.csv')
 
                 # Call the classification and save function (you already have this defined)
                 classify_and_save_spearman_correlations(spearman_correlation, filepath)
-                logger.success(f"Dataset {self.name}, case '{subdir}', Spearman correlations classified and saved successfully in '{filepath}'.")
+                logger.success(f"Dataset {self.name}, case '{subdir}', {correlation} classified and saved successfully in '{filepath}'.")

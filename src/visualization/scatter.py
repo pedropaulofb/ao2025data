@@ -2,6 +2,7 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 from adjustText import adjust_text
+from icecream import ic
 from loguru import logger
 import pandas as pd
 
@@ -21,6 +22,7 @@ def plot_scatter_plot(df, index_col, x_metric, y_metric, stat_label, output_dir,
     :param output_dir: Directory to save the plot.
     :param plot_medians: Boolean flag to indicate if medians should be plotted.
     """
+
     # Ensure that Stereotype is categorical and ordered
     df[index_col] = pd.Categorical(df[index_col], categories=df[index_col].unique(), ordered=True)
 
@@ -94,14 +96,14 @@ def plot_scatter_plot(df, index_col, x_metric, y_metric, stat_label, output_dir,
     formatted_y_metric = format_metric_name(y_metric)  # Apply formatting to y_metric
 
     plt.tight_layout()
-    fig_name = f'scatter_plot_{formatted_x_metric}_vs_{formatted_y_metric}_{stat_label}.png'
+    fig_name = f'scatter_plot_{formatted_x_metric}_vs_{formatted_y_metric}.png'
     fig.savefig(os.path.join(output_dir, fig_name), dpi=300)
     logger.success(f"Figure {fig_name} successfully saved in {output_dir}.")
     plt.close(fig)
 
 
 # Main function to create scatter plots for class/relation, raw/clean statistics
-def execute_visualization_scatter(dataset, output_dir, plot_medians: bool = True):
+def plot_scatter(dataset, output_dir, plot_medians: bool = True):
     """
     Create scatter plots for Global Relative Frequency (Occurrence-wise) vs Global Relative Frequency (Group-wise)
     for both class and relation statistics, in raw and clean forms.
@@ -113,30 +115,31 @@ def execute_visualization_scatter(dataset, output_dir, plot_medians: bool = True
 
     # Define the statistics types and corresponding dataset attributes to loop through
     stat_types = [
-        ('class_statistics_raw', 'Class Raw'),
-        ('class_statistics_clean', 'Class Clean'),
-        ('relation_statistics_raw', 'Relation Raw'),
-        ('relation_statistics_clean', 'Relation Clean')
+        ('class_statistics_raw', 'class_raw', 'Class Raw'),
+        ('class_statistics_clean', 'class_clean', 'Class Clean'),
+        ('relation_statistics_raw', 'relation_raw', 'Relation Raw'),
+        ('relation_statistics_clean', 'relation_clean', 'Relation Clean')
     ]
 
     # Define the x and y metrics to be plotted
     x_metric = 'Global Relative Frequency (Occurrence-wise)'
-    y_metric = 'Global Relative Frequency (Group-wise)'
+    y_metrics = ['Global Relative Frequency (Group-wise)', 'Ubiquity Index']
 
     # Iterate through each statistics type and plot the scatter plot
-    for stat_attr, stat_label in stat_types:
-        stats = getattr(dataset, stat_attr)
-        if "frequency_analysis" not in stats:
-            logger.warning(f"No frequency analysis data for {stat_label}. Skipping.")
-            continue
+    for stat_attr, stat_label_short, stat_label in stat_types:
+        for y_metric in y_metrics:
+            stats = getattr(dataset, stat_attr)
+            if "frequency_analysis" not in stats:
+                logger.warning(f"No frequency analysis data for {stat_label}. Skipping.")
+                continue
 
-        # Convert the frequency analysis data into a DataFrame
-        df = pd.DataFrame(stats["frequency_analysis"])
+            # Convert the frequency analysis data into a DataFrame
+            df = pd.DataFrame(stats["frequency_analysis"])
 
-        # Check if the necessary metrics exist in the DataFrame
-        if x_metric not in df.columns or y_metric not in df.columns:
-            logger.warning(f"Missing metrics in {stat_label}: {x_metric}, {y_metric}. Skipping.")
-            continue
+            # Check if the necessary metrics exist in the DataFrame
+            if x_metric not in df.columns or y_metric not in df.columns:
+                logger.warning(f"Missing metrics in {stat_label}: {x_metric}, {y_metric}. Skipping.")
+                continue
 
-        # Plot the scatter plot for the current statistics type
-        plot_scatter_plot(df, 'Stereotype', x_metric, y_metric, stat_label, output_dir, plot_medians)
+            # Plot the scatter plot for the current statistics type
+            plot_scatter_plot(df, 'Stereotype', x_metric, y_metric, stat_label, os.path.join(output_dir,dataset.name, stat_label_short), plot_medians)

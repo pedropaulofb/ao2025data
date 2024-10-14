@@ -110,7 +110,7 @@ def plot_pareto(dataset, output_dir: str, plot_type: str) -> None:
 
 
 
-def plot_pareto_combined_frequencies(dataset, output_dir: str) -> None:
+def plot_pareto_combined(dataset, output_dir: str) -> None:
     """
     Plot combined Pareto chart for occurrence-wise and group-wise stereotype frequencies from class and relation data
     (both raw and clean).

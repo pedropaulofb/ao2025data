@@ -11,10 +11,10 @@ from src.load_models_data import instantiate_models_from_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
 from src.utils import save_datasets
 from src.visualization.boxplot import create_boxplot
-from src.visualization.heatmap import create_heatmap
-from src.visualization.new_boxplot import new_create_boxplot
-from src.visualization.pareto import plot_pareto_combined_frequencies, plot_pareto
-from src.visualization.scatter import execute_visualization_scatter
+from src.visualization.heatmap import plot_heatmap
+from src.visualization.new_boxplot import plot_boxplot
+from src.visualization.pareto import plot_pareto_combined, plot_pareto
+from src.visualization.scatter import plot_scatter
 
 CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
 BASE_OUTPUT_DIR = "./outputs"
@@ -144,14 +144,13 @@ def generate_visualizations(datasets, output_dir):
         logger.success(f"Successfully loaded {len(datasets)} datasets.")
 
     for dataset in datasets:
-        # new_create_boxplot(dataset, OUTPUT_DIR_02, output_dir)
-        # new_create_boxplot(dataset, OUTPUT_DIR_02, output_dir,True)
-        # create_heatmap(dataset, output_dir)
-        # plot_pareto(dataset, output_dir,"occurrence")
-        # plot_pareto(dataset, output_dir, "group")
-        # plot_pareto_combined_frequencies(dataset, output_dir)
-        if dataset.name == "ontouml_non_classroom_filtered":
-            execute_visualization_scatter(dataset, output_dir)
+        plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
+        plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
+        plot_heatmap(dataset, output_dir)
+        plot_pareto(dataset, output_dir,"occurrence")
+        plot_pareto(dataset, output_dir, "group")
+        plot_pareto_combined(dataset, output_dir)
+        plot_scatter(dataset, output_dir)
 
 if __name__ == "__main__":
     # UNCOMMENT TO LOAD MODELS
@@ -161,23 +160,16 @@ if __name__ == "__main__":
     # query_data(all_models)
 
     # UNCOMMENT TO GENERATE STATISTICS
-    all_models = load_models_data()
-    datasets = create_specific_datasets_instances(all_models)
-    calculate_and_save_datasets_statistics(datasets)
-    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
-    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
-    save_datasets(all_datasets, OUTPUT_DIR_02)
+    # all_models = load_models_data()
+    # datasets = create_specific_datasets_instances(all_models)
+    # calculate_and_save_datasets_statistics(datasets)
+    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
+    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    # save_datasets(all_datasets, OUTPUT_DIR_02)
 
     generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
 
-# coverage_vs_construct_percentage (for filtered and clean)
 
-# scatter_plot_global_relative_frequency_vs_global_relative_frequency (for filtered and non-clean)
-# distance_from_origin_global_relative_frequency_vs_global_relative_frequency (for filtered and not-clean)
-# distance_from_origin_total_frequency_vs_group_frequency (for filtered and not-clean)
-
-# construct_ranking_mutual_information (for filtered and clean)
-# learning_tree_mutual_information (ontouml_non_classroom and ontouml_classroom) (for filtered and clean)
 # learning_tree_spearman_correlation (ontouml_non_classroom and ontouml_classroom) (for filtered and clean)
 
 # temporal_overall_stats_combined_visualization (for filtered and non-clean)
