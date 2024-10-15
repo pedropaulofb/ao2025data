@@ -721,14 +721,23 @@ class Dataset():
             self._normalize_stereotypes_overall(analysis)
             self._normalize_stereotypes_yearly(analysis)
 
-        # Create folder if it does not exist
-        output_dir_final = os.path.join(output_dir, self.name)
-        if not os.path.exists(output_dir_final):
-            os.makedirs(output_dir_final)
+
 
         keys = ['class','relation','class_overall','relation_overall','class_yearly','relation_yearly']
 
         for key in keys:
+
+            # Create folder if it does not exist
+            if 'class' in key:
+                output_dir_final = os.path.join(output_dir, self.name, "class_raw")
+            elif 'relation' in key:
+                output_dir_final = os.path.join(output_dir, self.name, "relation_raw")
+            else:
+                raise ValueError
+
+            if not os.path.exists(output_dir_final):
+                os.makedirs(output_dir_final)
+
             csv_path = os.path.join(output_dir_final,f'years_stereotypes_{key}.csv')
             self.years_stereotypes_data[key].to_csv(csv_path)
             logger.success(f"Class stereotypes data saved to {csv_path}.")

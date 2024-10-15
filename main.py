@@ -57,7 +57,7 @@ def create_specific_datasets_instances(models_list, suffix: str = ""):
     return datasets
 
 
-def calculate_and_save_datasets_statistics(datasets,output_dir):
+def calculate_and_save_datasets_statistics(datasets, output_dir):
     for dataset in datasets:
         save_dataset_info(dataset)
 
@@ -189,6 +189,38 @@ def execute_learning_tree(dataset, in_dir_path, out_dir_path):
                     tree = build_tree(df, root_element, tolerance)
                     generate_dot(tree, final_out_dir, tolerance)
 
+
+def execute_non_ontouml_analysis(dataset, in_dir_path, out_dir_path):
+    st_types = ['class', 'relation']
+    st_normalizations = ['yearly', 'overall']
+
+    for st_type in st_types:
+        for st_normalization in st_normalizations:
+
+            in_file_dir = os.path.join(in_dir_path, dataset.name, st_type, "_raw")
+            final_out_dir = os.path.join(out_dir_path, dataset.name, st_type, "_raw")
+
+            # Create folder if it does not exist
+            if not os.path.exists(final_out_dir):
+                os.makedirs(final_out_dir)
+
+            # generate_non_ontouml_visualization()
+
+        #
+        # # Using CORRELATION (mutual information can also be used)
+        # for analysis in analyses:
+        #
+        #     in_data_file_path = os.path.join(in_file_dir, f"spearman_correlation_{analysis}.csv")
+        #     in_root_file_path = os.path.join(in_file_dir, f"spearman_correlation_total_{analysis}.csv")
+        #
+        #     df = pd.read_csv(in_data_file_path, index_col=0)
+        #
+        #     tolerances = [0.05, 0.1, 0.2, 0.25]
+        #     for tolerance in tolerances:
+        #         root_element = select_root_element(in_root_file_path)
+        #         tree = build_tree(df, root_element, tolerance)
+        #         generate_dot(tree, final_out_dir, tolerance)
+
 def generate_visualizations(datasets, output_dir):
     if isinstance(datasets, str):
         # Deserialize (unpickle) the object
@@ -198,14 +230,15 @@ def generate_visualizations(datasets, output_dir):
         logger.success(f"Successfully loaded {len(datasets)} datasets.")
 
     for dataset in datasets:
-        plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
-        plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
-        plot_heatmap(dataset, output_dir)
-        plot_pareto(dataset, output_dir,"occurrence")
-        plot_pareto(dataset, output_dir, "group")
-        plot_pareto_combined(dataset, output_dir)
-        plot_scatter(dataset, output_dir)
-        execute_learning_tree(dataset, OUTPUT_DIR_02, output_dir)
+        # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
+        # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
+        # plot_heatmap(dataset, output_dir)
+        # plot_pareto(dataset, output_dir,"occurrence")
+        # plot_pareto(dataset, output_dir, "group")
+        # plot_pareto_combined(dataset, output_dir)
+        # plot_scatter(dataset, output_dir)
+        # execute_learning_tree(dataset, OUTPUT_DIR_02, output_dir)
+        execute_non_ontouml_analysis(dataset, OUTPUT_DIR_02, output_dir)
 
 
 if __name__ == "__main__":
