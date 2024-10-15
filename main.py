@@ -3,19 +3,13 @@ import os
 import pickle
 
 import pandas as pd
-from icecream import ic
 from loguru import logger
 
 from src.Dataset import Dataset
 from src.collect_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
 from src.load_models_data import instantiate_models_from_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
-from src.utils import save_datasets
-from src.visualization.heatmap import plot_heatmap
 from src.visualization.learning_tree import build_tree, generate_dot
-from src.visualization.new_boxplot import plot_boxplot
-from src.visualization.pareto import plot_pareto_combined, plot_pareto
-from src.visualization.scatter import plot_scatter
 
 CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
 BASE_OUTPUT_DIR = "./outputs"
@@ -91,7 +85,6 @@ def save_dataset_info(dataset):
 
 
 def calculate_and_save_datasets_statistics_outliers(datasets):
-
     # Initialize outlier lists to avoid UnboundLocalError if no outliers are found
     ontouml_all_outliers = []
     ontouml_non_classroom_outliers = []
@@ -137,7 +130,8 @@ def calculate_and_save_datasets_stereotypes_statistics(datasets):
         dataset.classify_and_save_total_correlation(OUTPUT_DIR_02)
         dataset.classify_and_save_geometric_mean_correlation(OUTPUT_DIR_02)
         dataset.classify_and_save_geometric_mean_pairwise_correlation(OUTPUT_DIR_02)
-        dataset.calculate_and_save_quadrants(OUTPUT_DIR_02, 'frequency_analysis', 'Global Relative Frequency (Occurrence-wise)', 'Ubiquity Index')
+        dataset.calculate_and_save_quadrants(OUTPUT_DIR_02, 'frequency_analysis',
+                                             'Global Relative Frequency (Occurrence-wise)', 'Ubiquity Index')
 
 
 # def select_root_element(in_root_file_path: str) -> str:
@@ -172,29 +166,35 @@ def select_root_element(in_root_file_path: str) -> str:
 
 
 def execute_learning_tree(dataset, in_dir_path, out_dir_path):
-
-    st_types = ['class','relation','combined']
-    st_cases = ['raw','clean']
+    st_types = ['class', 'relation', 'combined']
+    st_cases = ['raw', 'clean']
     analyses = ['geometric_mean', 'model_wise', 'occurrence_wise']
 
     for st_type in st_types:
         for st_case in st_cases:
+
+            in_file_dir = os.path.join(in_dir_path, dataset.name, f"{st_type}_{st_case}")
+            final_out_dir = os.path.join(out_dir_path, dataset.name, f"{st_type}_{st_case}")
+
+            # Create folder if it does not exist
+            if not os.path.exists(final_out_dir):
+                os.makedirs(final_out_dir)
+
+            # Using CORRELATION (mutual information can also be used)
             for analysis in analyses:
 
-                in_file_dir = os.path.join(in_dir_path, dataset.name, f"{st_type}_{st_case}")
                 in_data_file_path = os.path.join(in_file_dir, f"spearman_correlation_{analysis}.csv")
                 in_root_file_path = os.path.join(in_file_dir, f"spearman_correlation_total_{analysis}.csv")
 
                 df = pd.read_csv(in_data_file_path, index_col=0)
-                tolerance = 0.1  # Modify this to change the tolerance value dynamically
-                root_element = select_root_element(in_root_file_path)
-                tree = build_tree(df, root_element, tolerance)
-                generate_dot(tree, out_dir_path)
 
-
+                tolerances = [0.05, 0.1, 0.2, 0.25]
+                for tolerance in tolerances:
+                    root_element = select_root_element(in_root_file_path)
+                    tree = build_tree(df, root_element, tolerance)
+                    generate_dot(tree, final_out_dir, tolerance)
 
 def generate_visualizations(datasets, output_dir):
-
     if isinstance(datasets, str):
         # Deserialize (unpickle) the object
         logger.info(f"Loading datasets from {datasets}.")
@@ -210,7 +210,8 @@ def generate_visualizations(datasets, output_dir):
         # plot_pareto(dataset, output_dir, "group")
         # plot_pareto_combined(dataset, output_dir)
         # plot_scatter(dataset, output_dir)
-        execute_learning_tree(dataset,OUTPUT_DIR_02,output_dir)
+        execute_learning_tree(dataset, OUTPUT_DIR_02, output_dir)
+
 
 if __name__ == "__main__":
     # UNCOMMENT TO LOAD MODELS
@@ -229,6 +230,4 @@ if __name__ == "__main__":
 
     generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
 
-# learning_tree_spearman_correlation
 # temporal evolution of 'none' and 'other'
-

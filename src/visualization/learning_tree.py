@@ -4,6 +4,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import pydot
+from icecream import ic
 from loguru import logger
 
 
@@ -56,24 +57,25 @@ def build_branches(df, current, selected, tree, tolerance):
     return df
 
 
-def generate_dot(tree, output_file_path):
-    output_file = os.path.join(output_file_path, f"learning_tree")
-    output_file = output_file.replace(".csv", ".dot")
+def generate_dot(tree, output_dir, tolerance):
+
+    dot_output_file_path = os.path.join(output_dir, f"learning_tree_{tolerance}.dot")
+    png_output_file_path = os.path.join(output_dir, f"learning_tree_{tolerance}.png")
 
     # Set the title of the graph using graph attributes
     pydot_graph = nx.drawing.nx_pydot.to_pydot(tree)
-    pydot_graph.set_label("Learning Tree")
-    pydot_graph.set_labelloc("t")  # Place the title at the top
-    pydot_graph.set_labeljust("c")  # Center the title
+    # pydot_graph.set_label("Learning Tree")
+    # pydot_graph.set_labelloc("t")  # Place the title at the top
+    # pydot_graph.set_labeljust("c")  # Center the title
 
     # Write the graph to a DOT file
-    pydot_graph.write(output_file)
-    logger.success(f"Learning tree DOT file generated: {output_file}")
+    pydot_graph.write(dot_output_file_path)
+    logger.success(f"Learning tree DOT file generated: {dot_output_file_path}")
 
     # Generate PNG from the DOT file
-    (graph,) = pydot.graph_from_dot_file(output_file)
-    graph.write_png(output_file.replace(".dot", ".png"))
-    logger.success(f"Learning tree PNG file generated: {output_file.replace('.dot', '.png')}")
+    (graph,) = pydot.graph_from_dot_file(dot_output_file_path)
+    graph.write_png(png_output_file_path)
+    logger.success(f"Learning tree PNG file generated: {png_output_file_path}")
 
 
 def select_root_node(df):
