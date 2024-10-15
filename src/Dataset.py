@@ -325,23 +325,6 @@ class Dataset():
         self.class_statistics_clean = calculate_stereotype_metrics(self.models, 'class', filter_type=True)
         self.relation_statistics_clean = calculate_stereotype_metrics(self.models, 'relation', filter_type=True)
 
-        for stat_name in self.class_statistics_raw:
-            # Ensure numeric values for both class and relation statistics
-            class_data_raw = self.class_statistics_raw[stat_name].apply(pd.to_numeric, errors='coerce').fillna(0)
-            relation_data_raw = self.relation_statistics_raw[stat_name].apply(pd.to_numeric, errors='coerce').fillna(0)
-
-            class_data_clean = self.class_statistics_clean[stat_name].apply(pd.to_numeric, errors='coerce').fillna(0)
-            relation_data_clean = self.relation_statistics_clean[stat_name].apply(pd.to_numeric,
-                                                                                  errors='coerce').fillna(0)
-
-            # Combine the data
-            combined_raw = class_data_raw.add(relation_data_raw, fill_value=0)
-            combined_clean = class_data_clean.add(relation_data_clean, fill_value=0)
-
-            # Store the combined results in the new dictionaries
-            self.combined_statistics_raw[stat_name] = combined_raw
-            self.combined_statistics_clean[stat_name] = combined_clean
-
         logger.success(f"Stereotype statistics calculated for dataset '{self.name}'.")
 
     def save_stereotype_statistics(self, output_dir: str) -> None:
@@ -379,8 +362,8 @@ class Dataset():
             'relation_raw': self.relation_statistics_raw,
             'class_clean': self.class_statistics_clean,
             'relation_clean': self.relation_statistics_clean,
-            'combined_raw': self.combined_statistics_raw,
-            'combined_clean': self.combined_statistics_clean
+            # 'combined_raw': self.combined_statistics_raw,
+            # 'combined_clean': self.combined_statistics_clean
         }
 
         # Iterate through the statistics to classify and save the Spearman correlation
@@ -415,8 +398,8 @@ class Dataset():
             'relation_raw': self.relation_statistics_raw,
             'class_clean': self.class_statistics_clean,
             'relation_clean': self.relation_statistics_clean,
-            'combined_raw': self.combined_statistics_raw,
-            'combined_clean': self.combined_statistics_clean
+            # 'combined_raw': self.combined_statistics_raw,
+            # 'combined_clean': self.combined_statistics_clean
         }
 
         for subdir, statistics in subdirs.items():
@@ -473,8 +456,8 @@ class Dataset():
             'relation_raw': self.relation_statistics_raw,
             'class_clean': self.class_statistics_clean,
             'relation_clean': self.relation_statistics_clean,
-            'combined_raw': self.combined_statistics_raw,
-            'combined_clean': self.combined_statistics_clean
+            # 'combined_raw': self.combined_statistics_raw,
+            # 'combined_clean': self.combined_statistics_clean
         }
 
         for subdir, statistics in subdirs.items():
@@ -633,8 +616,6 @@ class Dataset():
         # Define subdirectories for class/relation and raw/clean data
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
                    'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean}
-
-        ic(self.name)
 
         # Iterate through each case (class/relation and raw/clean)
         for case, statistics in subdirs.items():
