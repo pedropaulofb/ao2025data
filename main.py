@@ -132,6 +132,7 @@ def calculate_and_save_datasets_stereotypes_statistics(datasets):
         dataset.calculate_stereotype_statistics()
         dataset.save_stereotype_statistics(OUTPUT_DIR_02)
         dataset.calculate_and_save_average_model(OUTPUT_DIR_02)
+
         # dataset.classify_and_save_spearman_correlation(OUTPUT_DIR_02)
         # dataset.classify_and_save_total_correlation(OUTPUT_DIR_02)
         # dataset.classify_and_save_geometric_mean_correlation(OUTPUT_DIR_02)
@@ -176,7 +177,7 @@ if __name__ == "__main__":
 
     # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
 
-# automatically calculate 'average model' for each dataset
 # calculate integrated correlation (all types)
 # learning_tree_spearman_correlation
+# temporal evolution of 'none' and 'other'
 

@@ -22,13 +22,20 @@ class Dataset():
         self.name: str = name
         self.models: list[ModelData] = models
         self.num_models: int = len(models)
+        self.num_classes: int = -1
+        self.num_relations: int = -1
 
         self.statistics = {}
 
         self.class_statistics_raw = {}
-        self.relation_statistics_raw = {}
         self.class_statistics_clean = {}
+
+        self.relation_statistics_raw = {}
         self.relation_statistics_clean = {}
+
+        self.combined_statistics_raw = {}
+        self.combined_statistics_clean = {}
+
 
     def save_dataset_general_data_csv(self, output_dir: str) -> None:
         output_dir = os.path.join(output_dir, self.name)
@@ -123,6 +130,11 @@ class Dataset():
         for key, stat_dict in metrics.items():
             for stat_name, value in stat_dict.items():
                 self.statistics[f'{key}_{stat_name}'] = value
+
+        self.num_classes = self.statistics["total_classes"]
+        self.num_relations = self.statistics["total_relations"]
+        assert self.num_classes != -1  # value attributed
+        assert self.num_relations != -1  # value attributed
 
         logger.success(f"Statistics calculated for dataset '{self.name}'.")
 
@@ -243,10 +255,10 @@ class Dataset():
         outliers = {}
 
         for index, model in df.iterrows():
-            class_outlier = (model['total_classes'] < lower_bound_classes or
-                             model['total_classes'] > upper_bound_classes)
-            relation_outlier = (model['total_relations'] < lower_bound_relations or
-                                model['total_relations'] > upper_bound_relations)
+            class_outlier = (
+                    model['total_classes'] < lower_bound_classes or model['total_classes'] > upper_bound_classes)
+            relation_outlier = (model['total_relations'] < lower_bound_relations or model[
+                'total_relations'] > upper_bound_relations)
             # ratio_outlier = (model['class_relation_ratio'] < lower_bound_ratio or
             #                  model['class_relation_ratio'] > upper_bound_ratio)
 
@@ -262,9 +274,7 @@ class Dataset():
             elif class_outlier:
                 outliers[model['model']] = 'class;'
             elif relation_outlier:
-                outliers[model['model']] = 'relation;'
-            # elif ratio_outlier:
-            #     outliers[model['model']] = 'ratio;'
+                outliers[model['model']] = 'relation;'  # elif ratio_outlier:  #     outliers[model['model']] = 'ratio;'
 
         # Step 4: Log the results
         if not outliers:
@@ -315,6 +325,23 @@ class Dataset():
         self.class_statistics_clean = calculate_stereotype_metrics(self.models, 'class', filter_type=True)
         self.relation_statistics_clean = calculate_stereotype_metrics(self.models, 'relation', filter_type=True)
 
+        for stat_name in self.class_statistics_raw:
+            # Ensure numeric values for both class and relation statistics
+            class_data_raw = self.class_statistics_raw[stat_name].apply(pd.to_numeric, errors='coerce').fillna(0)
+            relation_data_raw = self.relation_statistics_raw[stat_name].apply(pd.to_numeric, errors='coerce').fillna(0)
+
+            class_data_clean = self.class_statistics_clean[stat_name].apply(pd.to_numeric, errors='coerce').fillna(0)
+            relation_data_clean = self.relation_statistics_clean[stat_name].apply(pd.to_numeric,
+                                                                                  errors='coerce').fillna(0)
+
+            # Combine the data
+            combined_raw = class_data_raw.add(relation_data_raw, fill_value=0)
+            combined_clean = class_data_clean.add(relation_data_clean, fill_value=0)
+
+            # Store the combined results in the new dictionaries
+            self.combined_statistics_raw[stat_name] = combined_raw
+            self.combined_statistics_clean[stat_name] = combined_clean
+
         logger.success(f"Stereotype statistics calculated for dataset '{self.name}'.")
 
     def save_stereotype_statistics(self, output_dir: str) -> None:
@@ -324,7 +351,7 @@ class Dataset():
         """
         # Define subdirectories for class/relation and raw/clean data
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean}
+                   'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean}
 
         # Create the output directories and save the statistics
         for subdir, statistics in subdirs.items():
@@ -338,8 +365,8 @@ class Dataset():
             for stat_name, dataframe in statistics.items():
                 stat_name_cleaned = stat_name.lower().replace(" ", "_")
                 filepath = os.path.join(output_subdir, f"{stat_name_cleaned}.csv")
-                save_to_csv(dataframe, filepath, f"Dataset {self.name}, case '{subdir}', statistic '{stat_name}' saved successfully in '{filepath}'.")
-
+                save_to_csv(dataframe, filepath,
+                            f"Dataset {self.name}, case '{subdir}', statistic '{stat_name}' saved successfully in '{filepath}'.")
 
     def classify_and_save_spearman_correlation(self, output_dir: str) -> None:
         """
@@ -351,7 +378,9 @@ class Dataset():
             'class_raw': self.class_statistics_raw,
             'relation_raw': self.relation_statistics_raw,
             'class_clean': self.class_statistics_clean,
-            'relation_clean': self.relation_statistics_clean
+            'relation_clean': self.relation_statistics_clean,
+            'combined_raw': self.combined_statistics_raw,
+            'combined_clean': self.combined_statistics_clean
         }
 
         # Iterate through the statistics to classify and save the Spearman correlation
@@ -370,7 +399,8 @@ class Dataset():
 
                 # Call the classification and save function
                 classify_and_save_spearman_correlations(spearman_correlation, filepath)
-                logger.success(f"Dataset {self.name}, case '{subdir}', {correlation} classified and saved successfully in '{filepath}'.")
+                logger.success(
+                    f"Dataset {self.name}, case '{subdir}', {correlation} classified and saved successfully in '{filepath}'.")
 
     def classify_and_save_total_correlation(self, output_dir: str) -> None:
         """
@@ -384,7 +414,9 @@ class Dataset():
             'class_raw': self.class_statistics_raw,
             'relation_raw': self.relation_statistics_raw,
             'class_clean': self.class_statistics_clean,
-            'relation_clean': self.relation_statistics_clean
+            'relation_clean': self.relation_statistics_clean,
+            'combined_raw': self.combined_statistics_raw,
+            'combined_clean': self.combined_statistics_clean
         }
 
         for subdir, statistics in subdirs.items():
@@ -397,22 +429,19 @@ class Dataset():
             total_corr_occurrence_rank = total_corr_occurrence.rank(ascending=False, method='min')
 
             # Step 2: Create a DataFrame for occurrence-wise results
-            total_corr_occurrence_df = pd.DataFrame({
-                'stereotype': total_corr_occurrence.index,
-                'total_correlation_occurrence_wise': total_corr_occurrence.values,
-                'rank_total_correlation_occurrence_wise': total_corr_occurrence_rank.astype(int).values
-            })
+            total_corr_occurrence_df = pd.DataFrame({'stereotype': total_corr_occurrence.index,
+                                                     'total_correlation_occurrence_wise': total_corr_occurrence.values,
+                                                     'rank_total_correlation_occurrence_wise': total_corr_occurrence_rank.astype(
+                                                         int).values})
 
             # Step 3: Calculate total correlations and ranks for model-wise
             total_corr_model = spearman_model.abs().sum(axis=1) - 1  # Subtract 1 to exclude self-correlation
             total_corr_model_rank = total_corr_model.rank(ascending=False, method='min')
 
             # Step 4: Create a DataFrame for model-wise results
-            total_corr_model_df = pd.DataFrame({
-                'stereotype': total_corr_model.index,
-                'total_correlation_model_wise': total_corr_model.values,
-                'rank_total_correlation_model_wise': total_corr_model_rank.astype(int).values
-            })
+            total_corr_model_df = pd.DataFrame(
+                {'stereotype': total_corr_model.index, 'total_correlation_model_wise': total_corr_model.values,
+                 'rank_total_correlation_model_wise': total_corr_model_rank.astype(int).values})
 
             # Step 5: Define the output directories and file paths
             output_subdir = os.path.join(output_dir, self.name, subdir)
@@ -443,7 +472,9 @@ class Dataset():
             'class_raw': self.class_statistics_raw,
             'relation_raw': self.relation_statistics_raw,
             'class_clean': self.class_statistics_clean,
-            'relation_clean': self.relation_statistics_clean
+            'relation_clean': self.relation_statistics_clean,
+            'combined_raw': self.combined_statistics_raw,
+            'combined_clean': self.combined_statistics_clean
         }
 
         for subdir, statistics in subdirs.items():
@@ -471,10 +502,8 @@ class Dataset():
                 geometric_mean_values.append(geometric_mean)
 
             # Step 4: Create a DataFrame for the geometric mean results
-            geometric_mean_df = pd.DataFrame({
-                'stereotype': common_stereotypes,
-                'geometric_mean_correlation': geometric_mean_values
-            })
+            geometric_mean_df = pd.DataFrame(
+                {'stereotype': common_stereotypes, 'geometric_mean_correlation': geometric_mean_values})
 
             # Step 5: Calculate rank based on geometric mean (descending order)
             geometric_mean_df['rank'] = geometric_mean_df['geometric_mean_correlation'].rank(ascending=False,
@@ -505,7 +534,9 @@ class Dataset():
             'class_raw': self.class_statistics_raw,
             'relation_raw': self.relation_statistics_raw,
             'class_clean': self.class_statistics_clean,
-            'relation_clean': self.relation_statistics_clean
+            'relation_clean': self.relation_statistics_clean,
+            'combined_raw': self.combined_statistics_raw,
+            'combined_clean': self.combined_statistics_clean
         }
 
         for subdir, statistics in subdirs.items():
@@ -552,8 +583,7 @@ class Dataset():
                 f"Geometric mean pairwise correlation matrix for dataset '{self.name}', case '{subdir}' saved successfully in '{filepath}'.")
 
             # Step 7: Generating classified results
-            classified_filepath = os.path.join(output_subdir,
-                                               'spearman_correlation_geometric_mean_classified.csv')
+            classified_filepath = os.path.join(output_subdir, 'spearman_correlation_geometric_mean_classified.csv')
 
             # Reset index and rename the first column to 'Stereotype'
             geometric_mean_matrix_reset = geometric_mean_matrix.reset_index().rename(columns={'index': 'Stereotype'})
@@ -570,21 +600,16 @@ class Dataset():
         :param y_metric: The metric for the y-axis.
         """
         # Define the four cases: class raw, relation raw, class clean, relation clean
-        subdirs = {
-            'class_raw': self.class_statistics_raw[stats_access],
-            'relation_raw': self.relation_statistics_raw[stats_access],
-            'class_clean': self.class_statistics_clean[stats_access],
-            'relation_clean': self.relation_statistics_clean[stats_access]
-        }
+        subdirs = {'class_raw': self.class_statistics_raw[stats_access],
+                   'relation_raw': self.relation_statistics_raw[stats_access],
+                   'class_clean': self.class_statistics_clean[stats_access],
+                   'relation_clean': self.relation_statistics_clean[stats_access]}
 
         for case, statistics in subdirs.items():
             # Check if the statistics for the current case contain the required metrics
             if x_metric in statistics and y_metric in statistics:
                 # Create a DataFrame from the two columns (x_metric and y_metric)
-                df = pd.DataFrame({
-                    x_metric: statistics[x_metric],
-                    y_metric: statistics[y_metric]
-                })
+                df = pd.DataFrame({x_metric: statistics[x_metric], y_metric: statistics[y_metric]})
 
                 # Define the subdirectory for this case
                 case_output_dir = os.path.join(output_dir, self.name, case)
@@ -595,3 +620,89 @@ class Dataset():
                 calculate_quadrants_and_save(df, x_metric, y_metric, case_output_dir)
 
                 logger.success(f"Quadrants calculated and saved for '{case}' case in '{case_output_dir}'.")
+
+    def calculate_and_save_average_model(self, output_dir: str) -> None:
+        """
+        Calculate the 'average' model for the dataset in terms of its stereotypes.
+        The average model will have an average number of classes and relations, with the class and relation stereotypes
+        allocated proportionally based on the dataset's statistics.
+        The result is saved to a CSV file for each case (class/relation raw/clean).
+
+        :param output_dir: Directory where the CSV file will be saved.
+        """
+        # Define subdirectories for class/relation and raw/clean data
+        subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
+                   'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean}
+
+        ic(self.name)
+
+        # Iterate through each case (class/relation and raw/clean)
+        for case, statistics in subdirs.items():
+            # Step 1: Gather the stereotype data for classes and relations
+            if "class_" in case:
+                stereotypes = [model.class_stereotypes for model in self.models]
+            else:
+                stereotypes = [model.relation_stereotypes for model in self.models]
+
+            # Convert to DataFrame for easy manipulation
+            df = pd.DataFrame(stereotypes)
+
+            if "_clean" in case:
+                df = df.drop(columns=["other", "none"])
+
+            # Step 2: Calculate average total number of classes or relations per model
+            if "_clean" in case:
+                avg_total = int(round(df.sum(axis=1).mean()))
+            else:
+                avg_total = round(self.num_classes / self.num_models) if "class_" in case else round(
+                    self.num_relations / self.num_models)
+
+            # Step 3: Calculate the average number of each stereotype per model
+            avg_stereotypes = df.mean().values
+
+            # Step 4: Normalize the stereotype counts to ensure they sum up to the total average number of classes/relations
+            avg_stereotypes = np.floor(avg_stereotypes / avg_stereotypes.sum() * avg_total).astype(int)
+
+            # Step 5: Adjust for rounding issues
+            difference = avg_total - avg_stereotypes.sum()
+
+            if difference > 0:
+                # Increase the count of the most common stereotype by the difference
+                for _ in range(difference):
+                    avg_stereotypes[np.argmax(avg_stereotypes)] += 1
+            elif difference < 0:
+                # Decrease the count of the most common stereotype by the difference
+                for _ in range(-difference):
+                    avg_stereotypes[np.argmax(avg_stereotypes)] -= 1
+
+            # Step 6: Prepare the data for saving to CSV
+            stereotype_labels = df.columns
+            avg_model_data = {'Stereotype': stereotype_labels, 'average_quantity': avg_stereotypes}
+
+            # Create DataFrame
+            avg_model_df = pd.DataFrame(avg_model_data)
+
+            # Add a rank column, with the highest quantity receiving the lowest rank
+            avg_model_df['rank'] = avg_model_df['average_quantity'].rank(ascending=False, method='min').astype(int)
+
+            # Add a percentage column showing the proportion relative to the average number of classes or relations
+            avg_model_df['proportion'] = avg_model_df['average_quantity'] / avg_total
+
+            # Step 7: Define output directory, including the case name
+            case_output_dir = os.path.join(output_dir, self.name, case)
+
+            # Create folder if it does not exist
+            if not os.path.exists(case_output_dir):
+                os.makedirs(case_output_dir)
+
+            # Step 8: Save the average model data to a CSV file
+            avg_model_filepath = os.path.join(case_output_dir, f'average_model.csv')
+            avg_model_df.to_csv(avg_model_filepath, index=False)
+            logger.success(
+                f"Average model for dataset '{self.name}', case '{case}' successfully saved to {avg_model_filepath}.")
+
+            # Step 9: Assert to check that the sum of the stereotypes' rounded average matches the expected value
+            expected_avg_total = avg_total
+
+            # Check if the sum of avg_stereotypes matches the expected average
+            assert avg_stereotypes.sum() == expected_avg_total, f"Sum of rounded average stereotypes {avg_stereotypes.sum()} does not match expected average {expected_avg_total} for case {case}."

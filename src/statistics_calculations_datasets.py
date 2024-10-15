@@ -21,6 +21,7 @@ def calculate_stats(data):
     stats['range'] = stats['max'] - stats['min']
     stats['range_non_zero'] = stats['max'] - stats['min_non_zero']
     stats['mean'] = np.mean(data)
+    stats['mean_round'] = round(np.mean(data))
     stats['median'] = np.median(data)
     stats['mode'] = pd.Series(data).mode().iloc[0] if not pd.Series(data).mode().empty else np.nan
     stats['std_dev'] = np.std(data)
