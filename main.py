@@ -6,6 +6,7 @@ import pandas as pd
 from icecream import ic
 from loguru import logger
 
+
 from src.Dataset import Dataset
 from src.collect_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
 from src.load_models_data import instantiate_models_from_csv
@@ -14,7 +15,8 @@ from src.utils import save_datasets
 from src.visualization.heatmap import plot_heatmap
 from src.visualization.learning_tree import build_tree, generate_dot
 from src.visualization.new_boxplot import plot_boxplot
-from src.visualization.non_ontouml_analysis import generate_non_ontouml_visualization
+from src.visualization.non_ontouml_analysis import generate_non_ontouml_visualization, \
+    generate_non_ontouml_combined_visualization
 from src.visualization.pareto import plot_pareto, plot_pareto_combined
 from src.visualization.scatter import plot_scatter
 
@@ -192,11 +194,11 @@ def execute_learning_tree(dataset, in_dir_path, out_dir_path):
 
 
 def execute_non_ontouml_analysis(dataset, out_dir_path):
+    st_types = ['class', 'relation']
+    st_norms = ['yearly', 'overall']
+    st_wises = ['ow', 'mw']
 
-    st_types = ['class','relation']
-    st_norms = ['yearly','overall']
-    st_wises = ['ow','mw']
-
+    year_start = 2017  # Example inferior limit
 
     for st_type in st_types:
 
@@ -206,9 +208,28 @@ def execute_non_ontouml_analysis(dataset, out_dir_path):
             os.makedirs(final_out_dir)
 
         for st_norm in st_norms:
-            for st_wise in st_wises:
-                analysis = f'{st_type}_{st_wise}_{st_norm}'
-                generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis],final_out_dir, analysis)
+            df_occurrence = dataset.years_stereotypes_data[f'{st_type}_ow_{st_norm}']
+            df_modelwise = dataset.years_stereotypes_data[f'{st_type}_mw_{st_norm}']
+
+            # 1. Call generate_non_ontouml_combined_visualization without year_start (plot everything)
+            generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,
+                                                        f'{st_type}_{st_norm}')
+
+            # 2. Call generate_non_ontouml_combined_visualization with year_start (plot from 2017 onwards)
+            generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,
+                                                        f'{st_type}_{st_norm}_{year_start}', year_start=year_start)
+
+            # for st_wise in st_wises:
+            #     analysis = f'{st_type}_{st_wise}_{st_norm}'
+            #
+            #     # 3. Call generate_non_ontouml_visualization without year_start (plot everything)
+            #     generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir, analysis)
+            #
+            #     # 4. Call generate_non_ontouml_visualization with year_start (plot from 2017 onwards)
+            #     generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir,
+            #                                        f"{analysis}_{year_start}", year_start=year_start)
+
+
 
 def generate_visualizations(datasets, output_dir):
     if isinstance(datasets, str):
@@ -238,11 +259,11 @@ if __name__ == "__main__":
     # query_data(all_models)
 
     # UNCOMMENT TO GENERATE STATISTICS
-    all_models = load_models_data()
-    datasets = create_specific_datasets_instances(all_models)
-    calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
-    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
-    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
-    save_datasets(all_datasets, OUTPUT_DIR_02)
+    # all_models = load_models_data()
+    # datasets = create_specific_datasets_instances(all_models)
+    # calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
+    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
+    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    # save_datasets(all_datasets, OUTPUT_DIR_02)
 
     generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
