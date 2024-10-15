@@ -2,12 +2,13 @@ import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from icecream import ic
 from loguru import logger
 
 
-def generate_non_ontouml_visualization(in_table_path, window_size=5):
+def generate_non_ontouml_visualization(in_table_path, out_dir_path, file_name, window_size=5):
     # Load your data
-    df = in_table_path
+    df = in_table_path.reset_index()
 
     # Filter the data for the columns you want ('year', 'none', 'other') and make a deep copy to avoid SettingWithCopyWarning
     if 'year' not in df.columns or 'none' not in df.columns or 'other' not in df.columns:
@@ -26,9 +27,13 @@ def generate_non_ontouml_visualization(in_table_path, window_size=5):
     # Sort by year just in case it's not sorted
     df_filtered = df_filtered.sort_values('year')
 
+    ic(4)
+
     # Calculate the moving average with the specified window size
     df_filtered['none_moving_avg'] = df_filtered['none'].rolling(window=window_size, min_periods=1).mean()
     df_filtered['other_moving_avg'] = df_filtered['other'].rolling(window=window_size, min_periods=1).mean()
+
+    ic(5)
 
     # Reshape the DataFrame for Seaborn plotting
     df_filtered.melt(id_vars='year', value_vars=['none', 'other'], var_name='Element', value_name='Frequency')
@@ -65,22 +70,22 @@ def generate_non_ontouml_visualization(in_table_path, window_size=5):
     # Improve readability by rotating x-axis labels and reducing the number of ticks
     plt.xticks(rotation=45, ha='right')
 
-    # Determine if the file is model-wise or occurrence-wise and yearly or overall normalized
-    if 'modelwise' in file_path:
-        frequency_type = 'Model-wise'
-    else:
-        frequency_type = 'Occurrence-wise'
-
-    if 'yearly' in file_path:
-        normalization_type = 'Yearly-normalized'
-    else:
-        normalization_type = 'Overall-normalized'
+    # # Determine if the file is model-wise or occurrence-wise and yearly or overall normalized
+    # if 'modelwise' in file_path:
+    #     frequency_type = 'Model-wise'
+    # else:
+    #     frequency_type = 'Occurrence-wise'
+    #
+    # if 'yearly' in file_path:
+    #     normalization_type = 'Yearly-normalized'
+    # else:
+    #     normalization_type = 'Overall-normalized'
 
     # Build the title with window size for moving average
-    title = f"{frequency_type} {normalization_type} Data of 'none' and 'other' ({window_size}-year avg)"
+    title = f"{file_name} Data of 'none' and 'other' ({window_size}-year avg)"
 
     # Generate a figure name from the file_path (remove extension and append .png)
-    fig_name = os.path.splitext(file_path)[0] + f"_visualization_{window_size}_year_avg.png"
+    fig_name = f"non_ontouml_analysis_{file_name}_{window_size}_year_avg.png"
 
     # Add labels and title
     plt.xlabel('Year')
@@ -91,10 +96,6 @@ def generate_non_ontouml_visualization(in_table_path, window_size=5):
     ax1.grid(True, which='both', axis='both')  # Ensure both x and y gridlines are shown
     # Move gridlines behind the bars
     ax1.set_axisbelow(True)
-
-    # Ensure output directory exists
-    if not os.path.exists(out_dir_path):
-        os.makedirs(out_dir_path)
 
     # Save the figure
     plt.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
