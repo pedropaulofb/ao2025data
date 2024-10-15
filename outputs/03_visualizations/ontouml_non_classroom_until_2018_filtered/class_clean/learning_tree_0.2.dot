@@ -1,0 +1,31 @@
+strict digraph  {
+kind;
+subkind;
+role;
+roleMixin;
+situation;
+quality;
+category;
+event;
+phase;
+mode;
+type;
+enumeration;
+quantity;
+collective;
+relator;
+kind -> subkind;
+kind -> role;
+kind -> roleMixin;
+kind -> situation;
+kind -> quality;
+kind -> category;
+kind -> event;
+situation -> collective;
+category -> phase;
+category -> mode;
+category -> type;
+category -> enumeration;
+event -> relator;
+phase -> quantity;
+}

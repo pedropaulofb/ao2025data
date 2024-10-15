@@ -1,0 +1,20 @@
+Stereotype,Group-wise Frequency,Group-wise Rank,Cumulative Group-wise Frequency,Group-wise Cumulative Percentage
+mediation,15,1,15,21.12676056338028
+material,13,2,28,39.436619718309856
+characterization,10,3,38,53.52112676056338
+componentOf,10,4,48,67.6056338028169
+derivation,6,5,54,76.05633802816901
+memberOf,6,6,60,84.50704225352112
+participation,2,7,62,87.32394366197182
+subCollectionOf,2,8,64,90.14084507042254
+externalDependence,2,9,66,92.95774647887323
+triggers,1,10,67,94.36619718309859
+bringsAbout,1,11,68,95.77464788732394
+historicalDependence,1,12,69,97.1830985915493
+manifestation,1,13,70,98.59154929577466
+instantiation,1,14,71,100.0
+comparative,0,15,71,100.0
+creation,0,16,71,100.0
+participational,0,17,71,100.0
+subQuantityOf,0,18,71,100.0
+termination,0,19,71,100.0
