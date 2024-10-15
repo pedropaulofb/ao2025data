@@ -195,6 +195,8 @@ def execute_non_ontouml_analysis(dataset, out_dir_path):
 
     st_types = ['class','relation']
     st_norms = ['yearly','overall']
+    st_wises = ['ow','mw']
+
 
     for st_type in st_types:
 
@@ -204,8 +206,9 @@ def execute_non_ontouml_analysis(dataset, out_dir_path):
             os.makedirs(final_out_dir)
 
         for st_norm in st_norms:
-            analysis = f'{st_type}_{st_norm}'
-            generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis],final_out_dir, analysis)
+            for st_wise in st_wises:
+                analysis = f'{st_type}_{st_wise}_{st_norm}'
+                generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis],final_out_dir, analysis)
 
 def generate_visualizations(datasets, output_dir):
     if isinstance(datasets, str):
@@ -242,4 +245,4 @@ if __name__ == "__main__":
     calculate_and_save_datasets_stereotypes_statistics(all_datasets)
     save_datasets(all_datasets, OUTPUT_DIR_02)
 
-    # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)

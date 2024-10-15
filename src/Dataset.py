@@ -677,70 +677,90 @@ class Dataset():
             # Check if the sum of avg_stereotypes matches the expected average
             assert avg_stereotypes.sum() == expected_avg_total, f"Sum of rounded average stereotypes {avg_stereotypes.sum()} does not match expected average {expected_avg_total} for case {case}."
 
-    def calculate_and_save_stereotypes_by_year(self,output_dir:str) -> pd.DataFrame:
-        # Create dictionaries to hold the sum of stereotypes per year for class and relation
-        yearly_data_class = {}
-        yearly_data_relation = {}
+    def calculate_and_save_stereotypes_by_year(self, output_dir: str) -> pd.DataFrame:
+        # Create dictionaries to hold the sum of stereotypes per year for class and relation (occurrence-wise and model-wise)
+        yearly_data_class_ow = {}
+        yearly_data_relation_ow = {}
+        yearly_data_class_mw = {}
+        yearly_data_relation_mw = {}
 
         cases = {
-            'class': (self.data_class, yearly_data_class),
-            'relation': (self.data_relation, yearly_data_relation)
+            'class': (self.data_class, yearly_data_class_ow, yearly_data_class_mw),
+            'relation': (self.data_relation, yearly_data_relation_ow, yearly_data_relation_mw)
         }
 
         # Loop through each model and accumulate the stereotype counts by year
-        for analysis, (content, yearly_data) in cases.items():
+        for analysis, (content, yearly_data_ow, yearly_data_mw) in cases.items():
             for model in self.models:
                 model_year = model.year
 
-                if model_year not in yearly_data:
-                    yearly_data[model_year] = np.zeros(len(content.columns) - 1,
-                                                       dtype=int)  # Initialize with zeros for each stereotype, ensure dtype=int
+                if model_year not in yearly_data_ow:
+                    yearly_data_ow[model_year] = np.zeros(len(content.columns) - 1,
+                                                          dtype=int)  # Initialize with zeros for occurrence-wise calculation
+                if model_year not in yearly_data_mw:
+                    yearly_data_mw[model_year] = np.zeros(len(content.columns) - 1,
+                                                          dtype=int)  # Initialize with zeros for model-wise calculation
 
                 # Fetch the row for the current model and ensure it matches the expected length
                 model_data = content.loc[content['model'] == model.name].iloc[0, 1:].astype(int).values
 
-                if len(model_data) == len(yearly_data[model_year]):
-                    # Sum the stereotype counts for each year (excluding the 'model' column)
-                    yearly_data[model_year] += model_data
+                if len(model_data) == len(yearly_data_ow[model_year]):
+                    # Occurrence-wise: Sum the stereotype counts for each year
+                    yearly_data_ow[model_year] += model_data
+
+                    # Model-wise: Check where a stereotype occurs (binary approach)
+                    yearly_data_mw[model_year] += (model_data > 0).astype(int)
                 else:
                     raise ValueError(f"Mismatch in number of columns for model {model.name} in {analysis} analysis.")
 
-            # Convert the dictionary to a DataFrame
+            # Convert the dictionaries to DataFrames (both occurrence-wise and model-wise)
             stereotypes = content.columns[1:]  # Get the stereotype names
-            df_yearly = pd.DataFrame.from_dict(yearly_data, orient='index', columns=stereotypes)
+            df_yearly_ow = pd.DataFrame.from_dict(yearly_data_ow, orient='index', columns=stereotypes)
+            df_yearly_mw = pd.DataFrame.from_dict(yearly_data_mw, orient='index', columns=stereotypes)
 
-            # Add the 'year' as the index
-            df_yearly.index.name = 'year'
+            # Set the 'year' as the index
+            df_yearly_ow.index.name = 'year'
+            df_yearly_mw.index.name = 'year'
 
-            # Sort the DataFrame by the 'year' index in ascending order
-            df_yearly = df_yearly.sort_index(ascending=True)
+            # Sort the DataFrames by the 'year' index in ascending order
+            df_yearly_ow = df_yearly_ow.sort_index(ascending=True)
+            df_yearly_mw = df_yearly_mw.sort_index(ascending=True)
 
-            # Store the result in years_stereotypes_data
-            self.years_stereotypes_data[analysis] = df_yearly
+            # Store the occurrence-wise and model-wise results in years_stereotypes_data
+            self.years_stereotypes_data[f'{analysis}_ow'] = df_yearly_ow
+            self.years_stereotypes_data[f'{analysis}_mw'] = df_yearly_mw
 
-            self._normalize_stereotypes_overall(analysis)
-            self._normalize_stereotypes_yearly(analysis)
+            # Normalize both occurrence-wise and model-wise results
+            self._normalize_stereotypes_overall(f'{analysis}_ow')
+            self._normalize_stereotypes_yearly(f'{analysis}_ow')
+            self._normalize_stereotypes_overall(f'{analysis}_mw')
+            self._normalize_stereotypes_yearly(f'{analysis}_mw')
 
+        # Define the keys for saving the data
+        keys = [
+            'class_ow', 'relation_ow', 'class_mw', 'relation_mw',
+            'class_ow_overall', 'relation_ow_overall', 'class_ow_yearly', 'relation_ow_yearly',
+            'class_mw_overall', 'relation_mw_overall', 'class_mw_yearly', 'relation_mw_yearly'
+        ]
 
-
-        keys = ['class','relation','class_overall','relation_overall','class_yearly','relation_yearly']
-
+        # Save each of the DataFrames to CSV files
         for key in keys:
-
-            # Create folder if it does not exist
+            # Create the correct folder structure for class and relation
             if 'class' in key:
                 output_dir_final = os.path.join(output_dir, self.name, "class_raw")
             elif 'relation' in key:
                 output_dir_final = os.path.join(output_dir, self.name, "relation_raw")
             else:
-                raise ValueError
+                raise ValueError("Unexpected key in years_stereotypes_data.")
 
+            # Create the directory if it does not exist
             if not os.path.exists(output_dir_final):
                 os.makedirs(output_dir_final)
 
-            csv_path = os.path.join(output_dir_final,f'years_stereotypes_{key}.csv')
+            # Save the DataFrame to a CSV file
+            csv_path = os.path.join(output_dir_final, f'years_stereotypes_{key}.csv')
             self.years_stereotypes_data[key].to_csv(csv_path)
-            logger.success(f"Class stereotypes data saved to {csv_path}.")
+            logger.success(f"{key} stereotypes data saved to {csv_path}.")
 
     def calculate_and_save_models_by_year(self,output_dir:str):
         # Initialize dictionaries to count the number of models per year
