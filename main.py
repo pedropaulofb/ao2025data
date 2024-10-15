@@ -10,7 +10,6 @@ from src.collect_data import load_and_save_catalog_models, generate_list_models_
 from src.load_models_data import instantiate_models_from_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
 from src.utils import save_datasets
-from src.visualization.boxplot import create_boxplot
 from src.visualization.heatmap import plot_heatmap
 from src.visualization.new_boxplot import plot_boxplot
 from src.visualization.pareto import plot_pareto_combined, plot_pareto

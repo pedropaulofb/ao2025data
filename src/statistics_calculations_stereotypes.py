@@ -2,6 +2,7 @@ from itertools import combinations
 
 import numpy as np
 import pandas as pd
+from icecream import ic
 from loguru import logger
 from sklearn.metrics import mutual_info_score
 from sklearn.metrics.cluster import entropy
@@ -13,7 +14,7 @@ def calculate_stereotype_metrics(models, stereotype_type: str, filter_type: bool
     Calculate statistics for class or relation stereotypes based on the provided type and filter.
 
     :param models: List of models.
-    :param stereotype_type: 'class' or 'relation', which type of stereotype to calculate for.
+    :param stereotype_type: 'class', 'relation', or 'combined' which type of stereotype to calculate for.
     :param filter_type: boolean that, when true, remove 'other' and 'none' columns.
     :return: Dictionary of calculated statistics.
     """
@@ -300,13 +301,30 @@ def calculate_mutual_information(data: pd.DataFrame) -> pd.DataFrame:
 def extract_stereotype_data(models, stereotype_type: str, filter_type: bool) -> pd.DataFrame:
     if stereotype_type == 'class':
         data = [model.class_stereotypes for model in models]
+        df = pd.DataFrame(data)
     elif stereotype_type == 'relation':
         data = [model.relation_stereotypes for model in models]
+        df = pd.DataFrame(data)
+    elif stereotype_type == 'combined':
+        data_c = [model.class_stereotypes for model in models]
+        data_r = [model.relation_stereotypes for model in models]
 
-    df = pd.DataFrame(data)
+        # Convert to DataFrames for renaming
+        df_c = pd.DataFrame(data_c)
+        df_r = pd.DataFrame(data_r)
+
+        # Rename 'other' and 'none' columns in df_c to 'other_c' and 'none_c'
+        df_c = df_c.rename(columns={'other': 'other_c', 'none': 'none_c'}, errors='ignore')
+
+        # Rename 'other' and 'none' columns in df_r to 'other_r' and 'none_r'
+        df_r = df_r.rename(columns={'other': 'other_r', 'none': 'none_r'}, errors='ignore')
+
+        # Concatenate the two dataframes along the column axis
+        df = pd.concat([df_c, df_r], axis=1)
 
     # Remove 'other' and 'none' columns if filter_type is True
     if filter_type:
-        df = df.drop(columns=["other", "none"], errors='ignore')
+        df = df.drop(columns=["other", "none", "other_c", "none_c", "other_r", "none_r"], errors='ignore')
+
 
     return df

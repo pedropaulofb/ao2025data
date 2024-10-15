@@ -5,7 +5,6 @@ import os
 
 import numpy as np
 import pandas as pd
-from icecream import ic
 from loguru import logger
 
 from src import ModelData
@@ -35,7 +34,6 @@ class Dataset():
 
         self.combined_statistics_raw = {}
         self.combined_statistics_clean = {}
-
 
     def save_dataset_general_data_csv(self, output_dir: str) -> None:
         output_dir = os.path.join(output_dir, self.name)
@@ -320,10 +318,12 @@ class Dataset():
         # Step 1: Calculate raw statistics (without cleaning 'none' and 'other') for class and relation stereotypes
         self.class_statistics_raw = calculate_stereotype_metrics(self.models, 'class', filter_type=False)
         self.relation_statistics_raw = calculate_stereotype_metrics(self.models, 'relation', filter_type=False)
+        self.combined_statistics_raw = calculate_stereotype_metrics(self.models, 'combined', filter_type=False)
 
         # Step 2: Calculate clean statistics (with filtering 'none' and 'other') for class and relation stereotypes
         self.class_statistics_clean = calculate_stereotype_metrics(self.models, 'class', filter_type=True)
         self.relation_statistics_clean = calculate_stereotype_metrics(self.models, 'relation', filter_type=True)
+        self.combined_statistics_clean = calculate_stereotype_metrics(self.models, 'combined', filter_type=True)
 
         logger.success(f"Stereotype statistics calculated for dataset '{self.name}'.")
 
@@ -334,7 +334,8 @@ class Dataset():
         """
         # Define subdirectories for class/relation and raw/clean data
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
-                   'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean}
+            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         # Create the output directories and save the statistics
         for subdir, statistics in subdirs.items():
@@ -357,14 +358,9 @@ class Dataset():
         and save the results in a CSV file.
         """
         # Define subdirectories for class/relation and raw/clean data
-        subdirs = {
-            'class_raw': self.class_statistics_raw,
-            'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean,
-            'relation_clean': self.relation_statistics_clean,
-            # 'combined_raw': self.combined_statistics_raw,
-            # 'combined_clean': self.combined_statistics_clean
-        }
+        subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
+            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         # Iterate through the statistics to classify and save the Spearman correlation
         for subdir, statistics in subdirs.items():
@@ -393,14 +389,9 @@ class Dataset():
         :param output_dir: Directory where the CSV files will be saved.
         """
         # Define subdirectories for class/relation and raw/clean data
-        subdirs = {
-            'class_raw': self.class_statistics_raw,
-            'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean,
-            'relation_clean': self.relation_statistics_clean,
-            # 'combined_raw': self.combined_statistics_raw,
-            # 'combined_clean': self.combined_statistics_clean
-        }
+        subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
+            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         for subdir, statistics in subdirs.items():
             # Extract the Spearman correlation data for occurrence-wise and model-wise
@@ -437,11 +428,11 @@ class Dataset():
             # Step 6: Save the occurrence-wise and model-wise DataFrames to separate CSV files
             total_corr_occurrence_df.to_csv(occurrence_filepath, index=False)
             logger.success(
-                f"Total occurrence-wise correlation data for dataset '{self.name}', case '{subdir}' saved successfully in '{occurrence_filepath}'.")
+                f"Dataset '{self.name}', case '{subdir}': total occurrence-wise correlation saved successfully in '{occurrence_filepath}'.")
 
             total_corr_model_df.to_csv(model_filepath, index=False)
             logger.success(
-                f"Total model-wise correlation data for dataset '{self.name}', case '{subdir}' saved successfully in '{model_filepath}'.")
+                f"Dataset '{self.name}', case '{subdir}': total model-wise correlation saved successfully in '{model_filepath}'.")
 
     def classify_and_save_geometric_mean_correlation(self, output_dir: str) -> None:
         """
@@ -451,14 +442,9 @@ class Dataset():
         :param output_dir: Directory where the CSV file will be saved.
         """
         # Define subdirectories for class/relation and raw/clean data
-        subdirs = {
-            'class_raw': self.class_statistics_raw,
-            'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean,
-            'relation_clean': self.relation_statistics_clean,
-            # 'combined_raw': self.combined_statistics_raw,
-            # 'combined_clean': self.combined_statistics_clean
-        }
+        subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
+            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         for subdir, statistics in subdirs.items():
             # Extract the Spearman correlation data for occurrence-wise and model-wise
@@ -513,14 +499,9 @@ class Dataset():
         :param output_dir: Directory where the CSV file will be saved.
         """
         # Define subdirectories for class/relation and raw/clean data
-        subdirs = {
-            'class_raw': self.class_statistics_raw,
-            'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean,
-            'relation_clean': self.relation_statistics_clean,
-            'combined_raw': self.combined_statistics_raw,
-            'combined_clean': self.combined_statistics_clean
-        }
+        subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
+            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         for subdir, statistics in subdirs.items():
             # Extract the Spearman correlation data for occurrence-wise and model-wise
@@ -583,10 +564,9 @@ class Dataset():
         :param y_metric: The metric for the y-axis.
         """
         # Define the four cases: class raw, relation raw, class clean, relation clean
-        subdirs = {'class_raw': self.class_statistics_raw[stats_access],
-                   'relation_raw': self.relation_statistics_raw[stats_access],
-                   'class_clean': self.class_statistics_clean[stats_access],
-                   'relation_clean': self.relation_statistics_clean[stats_access]}
+        subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
+            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         for case, statistics in subdirs.items():
             # Check if the statistics for the current case contain the required metrics
@@ -615,7 +595,8 @@ class Dataset():
         """
         # Define subdirectories for class/relation and raw/clean data
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
-                   'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean}
+            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         # Iterate through each case (class/relation and raw/clean)
         for case, statistics in subdirs.items():
