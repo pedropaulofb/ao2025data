@@ -2,6 +2,7 @@ import gzip
 import os
 import pickle
 
+import pandas as pd
 from icecream import ic
 from loguru import logger
 
@@ -11,6 +12,7 @@ from src.load_models_data import instantiate_models_from_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
 from src.utils import save_datasets
 from src.visualization.heatmap import plot_heatmap
+from src.visualization.learning_tree import build_tree, generate_dot
 from src.visualization.new_boxplot import plot_boxplot
 from src.visualization.pareto import plot_pareto_combined, plot_pareto
 from src.visualization.scatter import plot_scatter
@@ -131,12 +133,63 @@ def calculate_and_save_datasets_stereotypes_statistics(datasets):
         dataset.calculate_stereotype_statistics()
         dataset.save_stereotype_statistics(OUTPUT_DIR_02)
         dataset.calculate_and_save_average_model(OUTPUT_DIR_02)
+        dataset.classify_and_save_spearman_correlation(OUTPUT_DIR_02)
+        dataset.classify_and_save_total_correlation(OUTPUT_DIR_02)
+        dataset.classify_and_save_geometric_mean_correlation(OUTPUT_DIR_02)
+        dataset.classify_and_save_geometric_mean_pairwise_correlation(OUTPUT_DIR_02)
+        dataset.calculate_and_save_quadrants(OUTPUT_DIR_02, 'frequency_analysis', 'Global Relative Frequency (Occurrence-wise)', 'Ubiquity Index')
 
-        # dataset.classify_and_save_spearman_correlation(OUTPUT_DIR_02)
-        # dataset.classify_and_save_total_correlation(OUTPUT_DIR_02)
-        # dataset.classify_and_save_geometric_mean_correlation(OUTPUT_DIR_02)
-        # dataset.classify_and_save_geometric_mean_pairwise_correlation(OUTPUT_DIR_02)
-        # dataset.calculate_and_save_quadrants(OUTPUT_DIR_02, 'frequency_analysis', 'Global Relative Frequency (Occurrence-wise)', 'Ubiquity Index')
+
+# def select_root_element(in_root_file_path: str) -> str:
+#     # Read the CSV file into a pandas DataFrame
+#     df = pd.read_csv(in_root_file_path)
+#
+#     # Filter the DataFrame to get the row where 'rank' is 1
+#     root_row = df[df['rank'] == 1]
+#
+#     # Extract and return the 'stereotype' value from the filtered row
+#     if not root_row.empty:
+#         return root_row.iloc[0]['stereotype']
+#     else:
+#         return None  # Return None if no rank equals 1
+
+def select_root_element(in_root_file_path: str) -> str:
+    # Read the CSV file into a pandas DataFrame
+    df = pd.read_csv(in_root_file_path)
+
+    # Ensure 'rank' column exists before proceeding
+    if 'rank' not in df.columns:
+        raise KeyError("'rank' column not found in the file.")
+
+    # Filter the DataFrame to get the row where 'rank' is 1
+    root_row = df[df['rank'] == 1]
+
+    # Extract and return the 'stereotype' value from the filtered row
+    if not root_row.empty:
+        return root_row.iloc[0]['stereotype']
+    else:
+        return None  # Return None if no rank equals 1
+
+
+def execute_learning_tree(dataset, in_dir_path, out_dir_path):
+
+    st_types = ['class','relation','combined']
+    st_cases = ['raw','clean']
+    analyses = ['geometric_mean', 'model_wise', 'occurrence_wise']
+
+    for st_type in st_types:
+        for st_case in st_cases:
+            for analysis in analyses:
+
+                in_file_dir = os.path.join(in_dir_path, dataset.name, f"{st_type}_{st_case}")
+                in_data_file_path = os.path.join(in_file_dir, f"spearman_correlation_{analysis}.csv")
+                in_root_file_path = os.path.join(in_file_dir, f"spearman_correlation_total_{analysis}.csv")
+
+                df = pd.read_csv(in_data_file_path, index_col=0)
+                tolerance = 0.1  # Modify this to change the tolerance value dynamically
+                root_element = select_root_element(in_root_file_path)
+                tree = build_tree(df, root_element, tolerance)
+                generate_dot(tree, out_dir_path)
 
 
 
@@ -150,14 +203,14 @@ def generate_visualizations(datasets, output_dir):
         logger.success(f"Successfully loaded {len(datasets)} datasets.")
 
     for dataset in datasets:
-        plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
-        plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
-        plot_heatmap(dataset, output_dir)
-        plot_pareto(dataset, output_dir,"occurrence")
-        plot_pareto(dataset, output_dir, "group")
-        plot_pareto_combined(dataset, output_dir)
-        plot_scatter(dataset, output_dir)
-
+        # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
+        # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
+        # plot_heatmap(dataset, output_dir)
+        # plot_pareto(dataset, output_dir,"occurrence")
+        # plot_pareto(dataset, output_dir, "group")
+        # plot_pareto_combined(dataset, output_dir)
+        # plot_scatter(dataset, output_dir)
+        execute_learning_tree(dataset,OUTPUT_DIR_02,output_dir)
 
 if __name__ == "__main__":
     # UNCOMMENT TO LOAD MODELS
@@ -167,12 +220,12 @@ if __name__ == "__main__":
     # query_data(all_models)
 
     # UNCOMMENT TO GENERATE STATISTICS
-    all_models = load_models_data()
-    datasets = create_specific_datasets_instances(all_models)
-    calculate_and_save_datasets_statistics(datasets)
-    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
-    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
-    save_datasets(all_datasets, OUTPUT_DIR_02)
+    # all_models = load_models_data()
+    # datasets = create_specific_datasets_instances(all_models)
+    # calculate_and_save_datasets_statistics(datasets)
+    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
+    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    # save_datasets(all_datasets, OUTPUT_DIR_02)
 
     generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
 

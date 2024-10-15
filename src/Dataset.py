@@ -404,8 +404,8 @@ class Dataset():
 
             # Step 2: Create a DataFrame for occurrence-wise results
             total_corr_occurrence_df = pd.DataFrame({'stereotype': total_corr_occurrence.index,
-                                                     'total_correlation_occurrence_wise': total_corr_occurrence.values,
-                                                     'rank_total_correlation_occurrence_wise': total_corr_occurrence_rank.astype(
+                                                     'total_correlation': total_corr_occurrence.values,
+                                                     'rank': total_corr_occurrence_rank.astype(
                                                          int).values})
 
             # Step 3: Calculate total correlations and ranks for model-wise
@@ -414,8 +414,8 @@ class Dataset():
 
             # Step 4: Create a DataFrame for model-wise results
             total_corr_model_df = pd.DataFrame(
-                {'stereotype': total_corr_model.index, 'total_correlation_model_wise': total_corr_model.values,
-                 'rank_total_correlation_model_wise': total_corr_model_rank.astype(int).values})
+                {'stereotype': total_corr_model.index, 'total_correlation': total_corr_model.values,
+                 'rank': total_corr_model_rank.astype(int).values})
 
             # Step 5: Define the output directories and file paths
             output_subdir = os.path.join(output_dir, self.name, subdir)
@@ -472,10 +472,10 @@ class Dataset():
 
             # Step 4: Create a DataFrame for the geometric mean results
             geometric_mean_df = pd.DataFrame(
-                {'stereotype': common_stereotypes, 'geometric_mean_correlation': geometric_mean_values})
+                {'stereotype': common_stereotypes, 'total_correlation': geometric_mean_values})
 
             # Step 5: Calculate rank based on geometric mean (descending order)
-            geometric_mean_df['rank'] = geometric_mean_df['geometric_mean_correlation'].rank(ascending=False,
+            geometric_mean_df['rank'] = geometric_mean_df['total_correlation'].rank(ascending=False,
                                                                                              method='min').astype(int)
 
             # Step 6: Define the output directory and file path
