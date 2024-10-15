@@ -174,9 +174,8 @@ if __name__ == "__main__":
     calculate_and_save_datasets_stereotypes_statistics(all_datasets)
     save_datasets(all_datasets, OUTPUT_DIR_02)
 
-    # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
 
-# calculate integrated correlation (all types)
 # learning_tree_spearman_correlation
 # temporal evolution of 'none' and 'other'
 
