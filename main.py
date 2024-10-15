@@ -3,13 +3,19 @@ import os
 import pickle
 
 import pandas as pd
+from icecream import ic
 from loguru import logger
 
 from src.Dataset import Dataset
 from src.collect_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
 from src.load_models_data import instantiate_models_from_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
+from src.utils import save_datasets
+from src.visualization.heatmap import plot_heatmap
 from src.visualization.learning_tree import build_tree, generate_dot
+from src.visualization.new_boxplot import plot_boxplot
+from src.visualization.pareto import plot_pareto, plot_pareto_combined
+from src.visualization.scatter import plot_scatter
 
 CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
 BASE_OUTPUT_DIR = "./outputs"
@@ -51,13 +57,15 @@ def create_specific_datasets_instances(models_list, suffix: str = ""):
     return datasets
 
 
-def calculate_and_save_datasets_statistics(datasets):
+def calculate_and_save_datasets_statistics(datasets,output_dir):
     for dataset in datasets:
         save_dataset_info(dataset)
 
         dataset.calculate_dataset_statistics()
         dataset.calculate_models_statistics()
-        dataset.save_models_statistics_to_csv(OUTPUT_DIR_02)
+        dataset.save_models_statistics_to_csv(output_dir)
+        dataset.calculate_and_save_stereotypes_by_year(output_dir)
+        dataset.calculate_and_save_models_by_year(output_dir)
 
 
 def load_models_data():
@@ -112,7 +120,7 @@ def calculate_and_save_datasets_statistics_outliers(datasets):
             logger.warning(f"Dataset {dataset.name} had no outliers cleaned.")
 
     # Calculate and save statistics for the datasets without outliers
-    calculate_and_save_datasets_statistics(no_outliers_datasets)
+    calculate_and_save_datasets_statistics(no_outliers_datasets, OUTPUT_DIR_02)
 
     # Combine original datasets with filtered ones and save combined statistics
     all_datasets = datasets + no_outliers_datasets
@@ -133,19 +141,6 @@ def calculate_and_save_datasets_stereotypes_statistics(datasets):
         dataset.calculate_and_save_quadrants(OUTPUT_DIR_02, 'frequency_analysis',
                                              'Global Relative Frequency (Occurrence-wise)', 'Ubiquity Index')
 
-
-# def select_root_element(in_root_file_path: str) -> str:
-#     # Read the CSV file into a pandas DataFrame
-#     df = pd.read_csv(in_root_file_path)
-#
-#     # Filter the DataFrame to get the row where 'rank' is 1
-#     root_row = df[df['rank'] == 1]
-#
-#     # Extract and return the 'stereotype' value from the filtered row
-#     if not root_row.empty:
-#         return root_row.iloc[0]['stereotype']
-#     else:
-#         return None  # Return None if no rank equals 1
 
 def select_root_element(in_root_file_path: str) -> str:
     # Read the CSV file into a pandas DataFrame
@@ -203,13 +198,13 @@ def generate_visualizations(datasets, output_dir):
         logger.success(f"Successfully loaded {len(datasets)} datasets.")
 
     for dataset in datasets:
-        # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
-        # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
-        # plot_heatmap(dataset, output_dir)
-        # plot_pareto(dataset, output_dir,"occurrence")
-        # plot_pareto(dataset, output_dir, "group")
-        # plot_pareto_combined(dataset, output_dir)
-        # plot_scatter(dataset, output_dir)
+        plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
+        plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
+        plot_heatmap(dataset, output_dir)
+        plot_pareto(dataset, output_dir,"occurrence")
+        plot_pareto(dataset, output_dir, "group")
+        plot_pareto_combined(dataset, output_dir)
+        plot_scatter(dataset, output_dir)
         execute_learning_tree(dataset, OUTPUT_DIR_02, output_dir)
 
 
@@ -221,13 +216,13 @@ if __name__ == "__main__":
     # query_data(all_models)
 
     # UNCOMMENT TO GENERATE STATISTICS
-    # all_models = load_models_data()
-    # datasets = create_specific_datasets_instances(all_models)
-    # calculate_and_save_datasets_statistics(datasets)
-    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
-    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
-    # save_datasets(all_datasets, OUTPUT_DIR_02)
+    all_models = load_models_data()
+    datasets = create_specific_datasets_instances(all_models)
+    calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
+    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
+    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    save_datasets(all_datasets, OUTPUT_DIR_02)
 
-    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+    # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
 
 # temporal evolution of 'none' and 'other'

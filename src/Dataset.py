@@ -2,9 +2,11 @@ import copy
 import csv
 import math
 import os
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
+from icecream import ic
 from loguru import logger
 
 from src import ModelData
@@ -20,11 +22,15 @@ class Dataset():
 
         self.name: str = name
         self.models: list[ModelData] = models
+
         self.num_models: int = len(models)
         self.num_classes: int = -1
         self.num_relations: int = -1
 
+
         self.statistics = {}
+
+        self.years_stereotypes_data = {}
 
         self.class_statistics_raw = {}
         self.class_statistics_clean = {}
@@ -64,6 +70,7 @@ class Dataset():
         # Create a DataFrame for class data
         data = [[model.name] + [model.class_stereotypes[st] for st in stereotypes] for model in self.models]
         df = pd.DataFrame(data, columns=["model"] + stereotypes)
+        self.data_class = df
 
         # Save to CSV using the common utility function
         filepath = os.path.join(output_dir, f'{self.name}_class_data.csv')
@@ -82,6 +89,7 @@ class Dataset():
         # Create a DataFrame for relation data
         data = [[model.name] + [model.relation_stereotypes[st] for st in stereotypes] for model in self.models]
         df = pd.DataFrame(data, columns=["model"] + stereotypes)
+        self.data_relation = df
 
         # Save to CSV using the common utility function
         filepath = os.path.join(output_dir, f'{self.name}_relation_data.csv')
@@ -668,3 +676,98 @@ class Dataset():
 
             # Check if the sum of avg_stereotypes matches the expected average
             assert avg_stereotypes.sum() == expected_avg_total, f"Sum of rounded average stereotypes {avg_stereotypes.sum()} does not match expected average {expected_avg_total} for case {case}."
+
+    def calculate_and_save_stereotypes_by_year(self,output_dir:str) -> pd.DataFrame:
+        # Create dictionaries to hold the sum of stereotypes per year for class and relation
+        yearly_data_class = {}
+        yearly_data_relation = {}
+
+        cases = {
+            'class': (self.data_class, yearly_data_class),
+            'relation': (self.data_relation, yearly_data_relation)
+        }
+
+        # Loop through each model and accumulate the stereotype counts by year
+        for analysis, (content, yearly_data) in cases.items():
+            for model in self.models:
+                model_year = model.year
+
+                if model_year not in yearly_data:
+                    yearly_data[model_year] = np.zeros(len(content.columns) - 1,
+                                                       dtype=int)  # Initialize with zeros for each stereotype, ensure dtype=int
+
+                # Fetch the row for the current model and ensure it matches the expected length
+                model_data = content.loc[content['model'] == model.name].iloc[0, 1:].astype(int).values
+
+                if len(model_data) == len(yearly_data[model_year]):
+                    # Sum the stereotype counts for each year (excluding the 'model' column)
+                    yearly_data[model_year] += model_data
+                else:
+                    raise ValueError(f"Mismatch in number of columns for model {model.name} in {analysis} analysis.")
+
+            # Convert the dictionary to a DataFrame
+            stereotypes = content.columns[1:]  # Get the stereotype names
+            df_yearly = pd.DataFrame.from_dict(yearly_data, orient='index', columns=stereotypes)
+
+            # Add the 'year' as the index
+            df_yearly.index.name = 'year'
+
+            # Sort the DataFrame by the 'year' index in ascending order
+            df_yearly = df_yearly.sort_index(ascending=True)
+
+            # Store the result in years_stereotypes_data
+            self.years_stereotypes_data[analysis] = df_yearly
+
+        # Create folder if it does not exist
+        output_dir_final = os.path.join(output_dir, self.name)
+        if not os.path.exists(output_dir_final):
+            os.makedirs(output_dir_final)
+
+        # Save class stereotype data
+        class_csv_path = os.path.join(output_dir_final,'years_stereotypes_class.csv')
+        self.years_stereotypes_data['class'].to_csv(class_csv_path)
+        logger.success(f"Class stereotypes data saved to {class_csv_path}.")
+
+        # Save relation stereotype data
+        relation_csv_path = os.path.join(output_dir_final, 'years_stereotypes_relation.csv')
+        self.years_stereotypes_data['relation'].to_csv(relation_csv_path)
+        logger.success(f"Relation stereotypes data saved to {relation_csv_path}.")
+
+    def calculate_and_save_models_by_year(self,output_dir:str):
+        # Initialize dictionaries to count the number of models per year
+        model_count = {}
+
+        # Loop through self.models to count models for each year based on whether they have class or relation data
+        for model in self.models:
+            model_year = model.year
+
+            if model_year not in model_count:
+                model_count[model_year] = 0
+            model_count[model_year] += 1  # Assuming all models have at least one stereotype of any type
+
+        # Convert the dictionaries into DataFrames
+        df_model_count = pd.DataFrame(list(model_count.items()), columns=['year', 'num_models'])
+
+        # Calculate the total number of models
+        total_models = df_model_count['num_models'].sum()
+
+        # Calculate the ratio
+        df_model_count['ratio'] = df_model_count['num_models'] / total_models
+
+        # Sort by year to ensure chronological order
+        df_model_count = df_model_count.sort_values(by='year').reset_index(drop=True)
+
+        # Store the results in self.years_models_number
+        self.years_models_number = df_model_count
+
+        # Create folder if it does not exist
+        output_dir_final = os.path.join(output_dir, self.name)
+        if not os.path.exists(output_dir_final):
+            os.makedirs(output_dir_final)
+
+        # Save models per year data
+        models_csv_path = os.path.join(output_dir_final, 'years_models_number.csv')
+        self.years_models_number.to_csv(models_csv_path, index=False)
+        logger.success(f"Models per year data saved to {models_csv_path}.")
+
+
