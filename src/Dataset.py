@@ -718,20 +718,20 @@ class Dataset():
             # Store the result in years_stereotypes_data
             self.years_stereotypes_data[analysis] = df_yearly
 
+            self._normalize_stereotypes_overall(analysis)
+            self._normalize_stereotypes_yearly(analysis)
+
         # Create folder if it does not exist
         output_dir_final = os.path.join(output_dir, self.name)
         if not os.path.exists(output_dir_final):
             os.makedirs(output_dir_final)
 
-        # Save class stereotype data
-        class_csv_path = os.path.join(output_dir_final,'years_stereotypes_class.csv')
-        self.years_stereotypes_data['class'].to_csv(class_csv_path)
-        logger.success(f"Class stereotypes data saved to {class_csv_path}.")
+        keys = ['class','relation','class_overall','relation_overall','class_yearly','relation_yearly']
 
-        # Save relation stereotype data
-        relation_csv_path = os.path.join(output_dir_final, 'years_stereotypes_relation.csv')
-        self.years_stereotypes_data['relation'].to_csv(relation_csv_path)
-        logger.success(f"Relation stereotypes data saved to {relation_csv_path}.")
+        for key in keys:
+            csv_path = os.path.join(output_dir_final,f'years_stereotypes_{key}.csv')
+            self.years_stereotypes_data[key].to_csv(csv_path)
+            logger.success(f"Class stereotypes data saved to {csv_path}.")
 
     def calculate_and_save_models_by_year(self,output_dir:str):
         # Initialize dictionaries to count the number of models per year
@@ -770,4 +770,24 @@ class Dataset():
         self.years_models_number.to_csv(models_csv_path, index=False)
         logger.success(f"Models per year data saved to {models_csv_path}.")
 
+    def _normalize_stereotypes_overall(self, case) -> None:
+        df = self.years_stereotypes_data[case]
 
+        # Sum of all values in the DataFrame (excluding the 'year' index)
+        total_sum = df.to_numpy().sum()
+
+        # Normalize the DataFrame so that the sum of all values is 1
+        df_normalized = df / total_sum
+
+        # Store the result in years_stereotypes_data for overall normalization
+        self.years_stereotypes_data[f'{case}_overall'] = df_normalized
+
+    def _normalize_stereotypes_yearly(self,case) -> None:
+        # Normalize for both 'class' and 'relation'
+        df = self.years_stereotypes_data[case]
+
+        # Normalize each row so that the sum of values in each row is 1
+        df_normalized = df.div(df.sum(axis=1), axis=0)
+
+        # Store the result in years_stereotypes_data for yearly normalization
+        self.years_stereotypes_data[f'{case}_yearly'] = df_normalized
