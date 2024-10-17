@@ -101,8 +101,8 @@ def generate_non_ontouml_visualization(df, out_dir_path, file_name, year_start=N
     ax1.set_axisbelow(True)
 
     # Ensure output directory exists
-    if not os.path.exists(out_dir_path):
-        os.makedirs(out_dir_path)
+    os.makedirs(out_dir_path, exist_ok=True)
+
 
     # Save the figure
     plt.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
@@ -329,8 +329,8 @@ def generate_temporal_visualization(df, out_dir_path, file_name, stereotypes, ye
     ax1.set_axisbelow(True)
 
     # Ensure output directory exists
-    if not os.path.exists(out_dir_path):
-        os.makedirs(out_dir_path)
+    os.makedirs(out_dir_path, exist_ok=True)
+
 
     # Save the figure
     plt.savefig(os.path.join(out_dir_path, fig_name), dpi=300)

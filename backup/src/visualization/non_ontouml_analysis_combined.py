@@ -101,8 +101,8 @@ def generate_non_ontouml_combined_visualization(in_dir_path, out_dir_path, file_
     ax1.legend(handles1 + handles2, labels1 + ['none (model-wise)', 'other (model-wise)'], loc='upper left')
 
     # Ensure output directory exists
-    if not os.path.exists(out_dir_path):
-        os.makedirs(out_dir_path)
+    os.makedirs(out_dir_path, exist_ok=True)
+
 
     # Save the figure
     plt.savefig(os.path.join(out_dir_path, fig_name), dpi=300)

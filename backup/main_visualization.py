@@ -24,8 +24,7 @@ if __name__ == "__main__":
         out_dir = os.path.join(base_out_dir,analysis,"aggregated")
 
         # Create folder if it does not exist
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
+        os.makedirs(out_dir, exist_ok=True)
 
         logger.info(f"Generating distance plots to {analysis}.")
         plot_distance_from_origin(input_file_path, out_dir)

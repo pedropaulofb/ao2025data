@@ -18,8 +18,7 @@ if __name__ == "__main__":
         out_dir = os.path.join(base_out_dir, analysis, "aggregated")
 
         # Create the 'aggregated' folder if it does not exist
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
+        os.makedirs(out_dir, exist_ok=True)
 
         logger.info(f"Generating scatter plots to {analysis}.")
         execute_visualization_scatter(input_file_path, out_dir, False)

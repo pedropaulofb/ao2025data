@@ -45,8 +45,8 @@ class Dataset():
         output_dir = os.path.join(output_dir, self.name)
 
         # Create folder if it does not exist
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
+
 
         # Prepare the data for the CSV
         data = [[model.name, model.year, model.total_class_number, model.total_relation_number] for model in
@@ -61,8 +61,7 @@ class Dataset():
         output_dir = os.path.join(output_dir, self.name)
 
         # Create folder if it does not exist
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
 
         # Extract all the stereotypes from the first model
         stereotypes = list(self.models[0].class_stereotypes.keys())
@@ -80,8 +79,7 @@ class Dataset():
         output_dir = os.path.join(output_dir, self.name)
 
         # Create folder if it does not exist
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
 
         # Extract all the relation stereotypes from the first model
         stereotypes = list(self.models[0].relation_stereotypes.keys())
@@ -188,8 +186,7 @@ class Dataset():
         output_dir = os.path.join(output_csv_dir, self.name)
 
         # Create the folder if it does not exist
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
 
         output_path = os.path.join(output_dir, f"{self.name}_models_statistics.csv")
 
@@ -219,7 +216,7 @@ class Dataset():
 
         logger.success(f"Statistics for models in dataset '{self.name}' successfully saved in {output_path}.")
 
-    def identify_outliers(self) -> dict:
+    def identify_outliers(self, output_dir) -> list:
         """
         Identify outliers in the dataset based on IQR for 'total_classes', 'total_relations', and the class-to-relation ratio.
 
@@ -250,12 +247,6 @@ class Dataset():
         upper_bound_relations = Q3_relations + 1.5 * IQR_relations
 
         # # Step 2: Calculate IQR for the class-to-relation ratio - DISCARDED
-        # Q1_ratio = df['class_relation_ratio'].quantile(0.25)
-        # Q3_ratio = df['class_relation_ratio'].quantile(0.75)
-        # IQR_ratio = Q3_ratio - Q1_ratio
-        #
-        # lower_bound_ratio = Q1_ratio - 1.5 * IQR_ratio
-        # upper_bound_ratio = Q3_ratio + 1.5 * IQR_ratio
 
         # Step 3: Identify outliers
         outliers = {}
@@ -265,32 +256,34 @@ class Dataset():
                     model['total_classes'] < lower_bound_classes or model['total_classes'] > upper_bound_classes)
             relation_outlier = (model['total_relations'] < lower_bound_relations or model[
                 'total_relations'] > upper_bound_relations)
-            # ratio_outlier = (model['class_relation_ratio'] < lower_bound_ratio or
-            #                  model['class_relation_ratio'] > upper_bound_ratio)
 
-            # Determine if it's a class outlier, relation outlier, ratio outlier, or a combination
-            # if class_outlier and relation_outlier and ratio_outlier:
-            #     outliers[model['model']] = 'class, relation, ratio;'
+            # Determine if it's a class outlier, a relation outlier, or a combination
             if class_outlier and relation_outlier:
-                outliers[model['model']] = 'class, relation;'
-            # elif class_outlier and ratio_outlier:
-            #     outliers[model['model']] = 'class, ratio;'
-            # elif relation_outlier and ratio_outlier:
-            #     outliers[model['model']] = 'relation, ratio;'
+                outliers[model['model']] = 'class, relation'
             elif class_outlier:
-                outliers[model['model']] = 'class;'
+                outliers[model['model']] = 'class'
             elif relation_outlier:
-                outliers[model['model']] = 'relation;'  # elif ratio_outlier:  #     outliers[model['model']] = 'ratio;'
+                outliers[model['model']] = 'relation'
 
         # Step 4: Log the results
         if not outliers:
-            logger.success(f"No outliers found in dataset '{self.name}'. All models are within the normal range.")
+            logger.info(f"No outliers found in dataset '{self.name}'. All models are within the normal range.")
         else:
-            logger.warning(f"Outliers found in dataset '{self.name}': {outliers}")
+            # Convert outliers dictionary to a DataFrame
+            outliers_df = pd.DataFrame(list(outliers.items()), columns=['model', 'reason'])
+
+            # Ensure the output directory exists
+            outliers_path = os.path.join(output_dir, self.name, "outliers.csv")
+            os.makedirs(os.path.dirname(outliers_path), exist_ok=True)
+
+            # Save the DataFrame to CSV
+            outliers_df.to_csv(outliers_path, index=False)
+
+            logger.info(f"Outliers found in dataset '{self.name}' and saved to {outliers_path}")
 
         return list(outliers.keys())
 
-    def fork_without_outliers(self, outliers: list[str]) -> 'Dataset':
+    def fork_without_outliers(self, outliers: list[str], suffix:str) -> 'Dataset':
         """
         Create a new Dataset instance by removing models that are in the outliers list.
 
@@ -300,10 +293,11 @@ class Dataset():
         # Create a deep copy of the current dataset
         new_dataset = copy.deepcopy(self)
 
-        new_dataset.name = self.name + "_filtered"
+        new_dataset.name = self.name + suffix
 
         # Remove models whose names are in the outliers list
         new_dataset.models = [model for model in new_dataset.models if model.name not in outliers]
+        new_dataset.num_models: int = len(new_dataset.models)
 
         new_dataset.reset_statistics()
 
@@ -350,8 +344,8 @@ class Dataset():
             # Create the specific folder (e.g., class_raw, relation_raw, etc.)
             output_subdir = os.path.join(output_dir, self.name, subdir)
 
-            if not os.path.exists(output_subdir):
-                os.makedirs(output_subdir)
+            os.makedirs(output_subdir, exist_ok=True)
+
 
             # Save the statistics to CSV files
             for stat_name, dataframe in statistics.items():
@@ -373,8 +367,7 @@ class Dataset():
         # Iterate through the statistics to classify and save the Spearman correlation
         for subdir, statistics in subdirs.items():
             output_subdir = os.path.join(output_dir, self.name, subdir)
-            if not os.path.exists(output_subdir):
-                os.makedirs(output_subdir)
+            os.makedirs(output_dir, exist_ok=True)
 
             correlations = ['spearman_correlation_occurrence_wise', 'spearman_correlation_model_wise']
             # Access the Spearman correlation result
@@ -427,8 +420,7 @@ class Dataset():
 
             # Step 5: Define the output directories and file paths
             output_subdir = os.path.join(output_dir, self.name, subdir)
-            if not os.path.exists(output_subdir):
-                os.makedirs(output_subdir)
+            os.makedirs(output_dir, exist_ok=True)
 
             occurrence_filepath = os.path.join(output_subdir, 'spearman_correlation_total_occurrence_wise.csv')
             model_filepath = os.path.join(output_subdir, 'spearman_correlation_total_model_wise.csv')
@@ -488,8 +480,7 @@ class Dataset():
 
             # Step 6: Define the output directory and file path
             output_subdir = os.path.join(output_dir, self.name, subdir)
-            if not os.path.exists(output_subdir):
-                os.makedirs(output_subdir)
+            os.makedirs(output_dir, exist_ok=True)
 
             filepath = os.path.join(output_subdir, 'spearman_correlation_total_geometric_mean.csv')
 
@@ -544,8 +535,8 @@ class Dataset():
 
             # Step 5: Define the output directory and file path
             output_subdir = os.path.join(output_dir, self.name, subdir)
-            if not os.path.exists(output_subdir):
-                os.makedirs(output_subdir)
+            os.makedirs(output_subdir, exist_ok=True)
+
 
             filepath = os.path.join(output_subdir, 'spearman_correlation_geometric_mean.csv')
 
@@ -583,8 +574,8 @@ class Dataset():
                 df = pd.DataFrame({x_metric: statistics[stats_access][x_metric], y_metric: statistics[stats_access][y_metric]})
                 # Define the subdirectory for this case
                 case_output_dir = os.path.join(output_dir, self.name, case)
-                if not os.path.exists(case_output_dir):
-                    os.makedirs(case_output_dir)
+                os.makedirs(case_output_dir, exist_ok=True)
+
                 # Call the calculate_quadrants_and_save function for this case without index_col
                 calculate_quadrants_and_save(df, x_metric, y_metric, case_output_dir)
                 logger.success(f"Quadrants calculated and saved for '{case}' case in '{case_output_dir}'.")
@@ -661,8 +652,8 @@ class Dataset():
             case_output_dir = os.path.join(output_dir, self.name, case)
 
             # Create folder if it does not exist
-            if not os.path.exists(case_output_dir):
-                os.makedirs(case_output_dir)
+            os.makedirs(case_output_dir, exist_ok=True)
+
 
             # Step 8: Save the average model data to a CSV file
             avg_model_filepath = os.path.join(case_output_dir, f'average_model.csv')
@@ -753,8 +744,8 @@ class Dataset():
                 raise ValueError("Unexpected key in years_stereotypes_data.")
 
             # Create the directory if it does not exist
-            if not os.path.exists(output_dir_final):
-                os.makedirs(output_dir_final)
+            os.makedirs(output_dir_final, exist_ok=True)
+
 
             # Save the DataFrame to a CSV file
             csv_path = os.path.join(output_dir_final, f'years_stereotypes_{key}.csv')
@@ -790,8 +781,8 @@ class Dataset():
 
         # Create folder if it does not exist
         output_dir_final = os.path.join(output_dir, self.name)
-        if not os.path.exists(output_dir_final):
-            os.makedirs(output_dir_final)
+        os.makedirs(output_dir_final, exist_ok=True)
+
 
         # Save models per year data
         models_csv_path = os.path.join(output_dir_final, 'years_models_number.csv')

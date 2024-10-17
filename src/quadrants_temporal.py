@@ -1,9 +1,11 @@
 import pandas as pd
+from icecream import ic
 from loguru import logger
 
 
 def compare_and_generate_quadrant_csv(output_file_path, q_before, q_after, q_general=None):
     # Read the input CSV files
+
     df_before = pd.read_csv(q_before)
     df_after = pd.read_csv(q_after)
     df_general = pd.read_csv(q_general) if q_general is not None else None

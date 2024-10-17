@@ -191,9 +191,7 @@ def calculate_quadrants(df_A, df_B, x_metric, y_metric, out_dir_path, first_colu
 
 def execute_visualization_movement(path_file_A, path_file_B, out_dir_path, plot_medians=True):
     # Create the directory to save if it does not exist
-    if not os.path.exists(out_dir_path):
-        os.makedirs(out_dir_path)
-        logger.success(f"Output path created: {out_dir_path}.")
+    os.makedirs(out_dir_path, exist_ok=True)
 
     # Load data from moment A and moment B using the provided file paths
     df_A = pd.read_csv(path_file_A)

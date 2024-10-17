@@ -20,10 +20,6 @@ def create_figure_subdir(file_path):
     figures_dir = os.path.normpath(figures_dir)
 
     # Create the 'figures' subdirectory if it does not exist
-    if not os.path.exists(figures_dir):
-        os.makedirs(figures_dir)
-        logger.success(f"Created directory: {figures_dir}")
-    else:
-        logger.info(f"Directory already exists: {figures_dir}")
+    os.makedirs(figures_dir, exist_ok=True)
 
     return figures_dir

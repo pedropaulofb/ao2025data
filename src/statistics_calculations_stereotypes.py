@@ -238,7 +238,7 @@ def calculate_spearman_correlation(data: pd.DataFrame, threshold: float, case: s
         threshold_value = total_occurrences.sum() * threshold  # Filtering based on percentage of total occurrences
 
         # Determine which stereotypes will be dropped
-        dropped_elements = total_occurrences[total_occurrences < threshold_value].index.tolist()
+        total_occurrences[total_occurrences < threshold_value].index.tolist()
 
         # Filter data
         filtered_data = data.loc[:, total_occurrences >= threshold_value]
@@ -253,7 +253,7 @@ def calculate_spearman_correlation(data: pd.DataFrame, threshold: float, case: s
         threshold_value = len(data) * threshold  # Filtering based on percentage of models
 
         # Determine which stereotypes will be dropped
-        dropped_elements = model_occurrences[model_occurrences < threshold_value].index.tolist()
+        model_occurrences[model_occurrences < threshold_value].index.tolist()
 
         # Filter data
         filtered_data = presence_absence_data.loc[:, model_occurrences >= threshold_value]
@@ -261,13 +261,6 @@ def calculate_spearman_correlation(data: pd.DataFrame, threshold: float, case: s
     else:
         raise ValueError(f"Case argument '{case}' not identified. "
                          f"Options are 'occurrence' for occurrence-wise, or 'model' for model-wise presence.")
-
-    # Formatting the dropped elements for logging
-    formatted_dropped_elements = [element for element in dropped_elements]
-
-    # Logging the dropped elements using logger.info
-    logger.info(
-        f"Spearman Correlation dropped stereotypes due to {case}-wise filtering (threshold = {threshold * 100}%):\n{', '.join(formatted_dropped_elements)}")
 
     # Calculate Spearman correlation on the filtered data
     spearman_correlation = filtered_data.corr(method='spearman')

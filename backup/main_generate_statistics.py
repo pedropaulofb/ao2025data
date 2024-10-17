@@ -27,11 +27,7 @@ def generate_statistics(input_data_file: str, output_folder: str, clean: bool) -
     logger.info(f"Generating statics for {input_data_file}")
 
     # Create the directory to save if it does not exist
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-        logger.success(f"Created directory: {output_folder}")
-    else:
-        logger.info(f"Directory already exists: {output_folder}")
+    os.makedirs(output_folder, exist_ok=True)
 
     # Read the CSV file into a pandas DataFrame
     df = pd.read_csv(input_data_file)

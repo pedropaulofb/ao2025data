@@ -103,8 +103,8 @@ def calculate_quadrants_and_save(df, x_metric, y_metric, out_dir_path) -> pd.Dat
     formatted_y_metric = format_metric_name(y_metric)  # Apply formatting to y_metric
 
     # Ensure the output directory exists
-    if not os.path.exists(out_dir_path):
-        os.makedirs(out_dir_path)
+    os.makedirs(out_dir_path, exist_ok=True)
+
 
     # Save the results to a CSV file with the requested columns
     output_file = os.path.join(out_dir_path, f'quadrant_analysis_{formatted_x_metric}_vs_{formatted_y_metric}.csv')
