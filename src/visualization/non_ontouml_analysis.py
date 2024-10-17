@@ -242,7 +242,7 @@ def generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, out
 
 
 
-
+# TODO: Not tested. Test before using in future papers.
 def generate_temporal_visualization(df, out_dir_path, file_name, stereotypes, year_start=None, year_end=None, window_size=5):
     # Reset index and convert 'year' to int
     df = df.reset_index()
@@ -339,7 +339,7 @@ def generate_temporal_visualization(df, out_dir_path, file_name, stereotypes, ye
     # Close the plot to free memory
     plt.close()
 
-
+# TODO: Not tested. Test before using in future papers.
 def generate_temporal_combined_visualization(df_occurrence, df_modelwise, out_dir_path, file_name, stereotypes,
                                                 year_start=None, year_end=None):
     df_occurrence = df_occurrence.reset_index()

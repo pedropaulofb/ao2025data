@@ -3,11 +3,13 @@ import os
 import pickle
 
 import pandas as pd
+from icecream import ic
 from loguru import logger
 
 from src.Dataset import Dataset
 from src.collect_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
 from src.load_models_data import instantiate_models_from_csv
+from src.quadrants_temporal import compare_and_generate_quadrant_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
 from src.utils import save_datasets
 from src.visualization.heatmap import plot_heatmap
@@ -141,7 +143,6 @@ def calculate_and_save_datasets_stereotypes_statistics(datasets):
         dataset.classify_and_save_geometric_mean_pairwise_correlation(OUTPUT_DIR_02)
         dataset.calculate_and_save_quadrants(OUTPUT_DIR_02, 'frequency_analysis',
                                              'Global Relative Frequency (Occurrence-wise)', 'Ubiquity Index')
-        exit()
 
 
 def select_root_element(in_root_file_path: str) -> str:
@@ -159,7 +160,7 @@ def select_root_element(in_root_file_path: str) -> str:
     if not root_row.empty:
         return root_row.iloc[0]['stereotype']
     else:
-        return None  # Return None if no rank equals 1
+        raise ValueError("No rank 1.")
 
 
 def plot_learning_tree(dataset, in_dir_path, out_dir_path):
@@ -251,6 +252,28 @@ def generate_visualizations(datasets, output_dir):
         execute_non_ontouml_analysis(dataset, output_dir)
 
 
+def quadrants_calculation():
+
+    compared_datasets = [("ontouml_non_classroom_until_2018","ontouml_non_classroom_after_2019","ontouml_non_classroom"),
+                ("ontouml_non_classroom_until_2018_filtered","ontouml_non_classroom_after_2019_filtered","ontouml_non_classroom_filtered")]
+
+    out_file_name = "quadrants_movement_2018_2019"
+
+    st_types = ['class', 'relation', 'combined']
+    st_cases = ['raw', 'clean']
+
+    for d_before, d_after, d_general in compared_datasets:
+
+        for st_type in st_types:
+            for st_case in st_cases:
+                output_file_path = os.path.join(OUTPUT_DIR_02, d_general, f"{st_type}_{st_case}",f"{out_file_name}.csv")
+
+                q_before_path = os.path.join(OUTPUT_DIR_02, d_before, f"{st_type}_{st_case}","quadrant_analysis_global_relative_frequency_vs_ubiquity_index.csv")
+                q_after_path = os.path.join(OUTPUT_DIR_02, d_after, f"{st_type}_{st_case}","quadrant_analysis_global_relative_frequency_vs_ubiquity_index.csv")
+                q_general_path = os.path.join(OUTPUT_DIR_02, d_general, f"{st_type}_{st_case}","quadrant_analysis_global_relative_frequency_vs_ubiquity_index.csv")
+
+                compare_and_generate_quadrant_csv(output_file_path, q_before_path, q_after_path, q_general_path)
+
 if __name__ == "__main__":
     # UNCOMMENT TO LOAD MODELS
     # all_models = load_data_from_catalog(CATALOG_PATH)
@@ -259,13 +282,15 @@ if __name__ == "__main__":
     # query_data(all_models)
 
     # UNCOMMENT TO GENERATE STATISTICS
-    all_models = load_models_data()
-    datasets = create_specific_datasets_instances(all_models)
-    calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
-    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
-    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
-    save_datasets(all_datasets, OUTPUT_DIR_02)
+    # all_models = load_models_data()
+    # datasets = create_specific_datasets_instances(all_models)
+    # calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
+    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
+    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    quadrants_calculation()
+    # save_datasets(all_datasets, OUTPUT_DIR_02)
 
     # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+    # generate_visualizations(all_datasets, OUTPUT_DIR_03)
 
 
