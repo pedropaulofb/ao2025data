@@ -3,9 +3,7 @@ import os
 import pickle
 
 import pandas as pd
-from icecream import ic
 from loguru import logger
-
 
 from src.Dataset import Dataset
 from src.collect_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
@@ -163,7 +161,7 @@ def select_root_element(in_root_file_path: str) -> str:
         return None  # Return None if no rank equals 1
 
 
-def execute_learning_tree(dataset, in_dir_path, out_dir_path):
+def plot_learning_tree(dataset, in_dir_path, out_dir_path):
     st_types = ['class', 'relation', 'combined']
     st_cases = ['raw', 'clean']
     analyses = ['geometric_mean', 'model_wise', 'occurrence_wise']
@@ -198,7 +196,7 @@ def execute_non_ontouml_analysis(dataset, out_dir_path):
     st_norms = ['yearly', 'overall']
     st_wises = ['ow', 'mw']
 
-    year_start = 2017  # Example inferior limit
+    years_start = [2015, 2017]
 
     for st_type in st_types:
 
@@ -215,20 +213,21 @@ def execute_non_ontouml_analysis(dataset, out_dir_path):
             generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,
                                                         f'{st_type}_{st_norm}')
 
-            # 2. Call generate_non_ontouml_combined_visualization with year_start (plot from 2017 onwards)
-            generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,
-                                                        f'{st_type}_{st_norm}_{year_start}', year_start=year_start)
+            for year_start in years_start:
+                # 2. Call generate_non_ontouml_combined_visualization with year_start (plot from 'year_start' onwards)
+                generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,
+                                                            f'{st_type}_{st_norm}_{year_start}', year_start=year_start)
 
-            # for st_wise in st_wises:
-            #     analysis = f'{st_type}_{st_wise}_{st_norm}'
-            #
-            #     # 3. Call generate_non_ontouml_visualization without year_start (plot everything)
-            #     generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir, analysis)
-            #
-            #     # 4. Call generate_non_ontouml_visualization with year_start (plot from 2017 onwards)
-            #     generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir,
-            #                                        f"{analysis}_{year_start}", year_start=year_start)
+            for st_wise in st_wises:
+                analysis = f'{st_type}_{st_wise}_{st_norm}'
 
+                # 3. Call generate_non_ontouml_visualization without year_start (plot everything)
+                generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir, analysis)
+
+                for year_start in years_start:
+                    # 4. Call generate_non_ontouml_visualization with year_start (plot from 'year_start' onwards)
+                    generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir,
+                                                       f"{analysis}_{year_start}", year_start=year_start)
 
 
 def generate_visualizations(datasets, output_dir):
@@ -240,14 +239,14 @@ def generate_visualizations(datasets, output_dir):
         logger.success(f"Successfully loaded {len(datasets)} datasets.")
 
     for dataset in datasets:
-        # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
-        # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
-        # plot_heatmap(dataset, output_dir)
-        # plot_pareto(dataset, output_dir,"occurrence")
-        # plot_pareto(dataset, output_dir, "group")
-        # plot_pareto_combined(dataset, output_dir)
-        # plot_scatter(dataset, output_dir)
-        # execute_learning_tree(dataset, OUTPUT_DIR_02, output_dir)
+        plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
+        plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
+        plot_heatmap(dataset, output_dir)
+        plot_pareto(dataset, output_dir, "occurrence")
+        plot_pareto(dataset, output_dir, "group")
+        plot_pareto_combined(dataset, output_dir)
+        plot_scatter(dataset, output_dir)
+        plot_learning_tree(dataset, OUTPUT_DIR_02, output_dir)
         execute_non_ontouml_analysis(dataset, output_dir)
 
 
@@ -259,11 +258,13 @@ if __name__ == "__main__":
     # query_data(all_models)
 
     # UNCOMMENT TO GENERATE STATISTICS
-    # all_models = load_models_data()
-    # datasets = create_specific_datasets_instances(all_models)
-    # calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
-    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
-    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
-    # save_datasets(all_datasets, OUTPUT_DIR_02)
+    all_models = load_models_data()
+    datasets = create_specific_datasets_instances(all_models)
+    calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
+    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets)
+    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    save_datasets(all_datasets, OUTPUT_DIR_02)
 
     generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+
+

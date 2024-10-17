@@ -571,12 +571,14 @@ class Dataset():
         :param x_metric: The metric for the x-axis.
         :param y_metric: The metric for the y-axis.
         """
+        # input("0")
         # Define the four cases: class raw, relation raw, class clean, relation clean
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
             'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
             'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         for case, statistics in subdirs.items():
+            # input("x")
             # Check if the statistics for the current case contain the required metrics
             if x_metric in statistics and y_metric in statistics:
                 # Create a DataFrame from the two columns (x_metric and y_metric)
@@ -586,10 +588,10 @@ class Dataset():
                 case_output_dir = os.path.join(output_dir, self.name, case)
                 if not os.path.exists(case_output_dir):
                     os.makedirs(case_output_dir)
-
+                # input("1")
                 # Call the calculate_quadrants_and_save function for this case without index_col
                 calculate_quadrants_and_save(df, x_metric, y_metric, case_output_dir)
-
+                # input("3")
                 logger.success(f"Quadrants calculated and saved for '{case}' case in '{case_output_dir}'.")
 
     def calculate_and_save_average_model(self, output_dir: str) -> None:
