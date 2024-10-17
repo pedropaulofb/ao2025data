@@ -328,14 +328,14 @@ if __name__ == "__main__":
     # query_data(all_models)
 
     # UNCOMMENT TO GENERATE STATISTICS
-    all_models = load_models_data()
-    datasets = create_specific_datasets_instances(all_models)
-    calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
-    outliers = create_list_outliers(datasets, OUTPUT_DIR_02)
-    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets, outliers,OUTPUT_DIR_02)
-    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
-    quadrants_calculation()
-    save_datasets(all_datasets, OUTPUT_DIR_02)
+    # all_models = load_models_data()
+    # datasets = create_specific_datasets_instances(all_models)
+    # calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
+    # outliers = create_list_outliers(datasets, OUTPUT_DIR_02)
+    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets, outliers,OUTPUT_DIR_02)
+    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    # quadrants_calculation()
+    # save_datasets(all_datasets, OUTPUT_DIR_02)
 
-    # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
     # generate_visualizations(all_datasets, OUTPUT_DIR_03)

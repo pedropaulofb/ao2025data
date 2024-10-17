@@ -1,0 +1,27 @@
+strict digraph  {
+manifestation;
+instantiation;
+historicalDependence;
+participation;
+externalDependence;
+creation;
+memberOf;
+mediation;
+material;
+derivation;
+componentOf;
+characterization;
+bringsAbout;
+manifestation -> instantiation;
+instantiation -> historicalDependence;
+instantiation -> participation;
+instantiation -> externalDependence;
+participation -> creation;
+externalDependence -> bringsAbout;
+creation -> memberOf;
+memberOf -> mediation;
+mediation -> material;
+material -> derivation;
+derivation -> componentOf;
+derivation -> characterization;
+}

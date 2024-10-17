@@ -1,0 +1,21 @@
+strict digraph  {
+mediation;
+memberOf;
+derivation;
+characterization;
+material;
+componentOf;
+other;
+externalDependence;
+participation;
+none;
+mediation -> memberOf;
+mediation -> derivation;
+mediation -> characterization;
+mediation -> material;
+memberOf -> componentOf;
+derivation -> other;
+characterization -> externalDependence;
+externalDependence -> participation;
+participation -> none;
+}

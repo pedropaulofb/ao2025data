@@ -1,0 +1,19 @@
+strict digraph  {
+material;
+derivation;
+mediation;
+characterization;
+none;
+other;
+subCollectionOf;
+componentOf;
+memberOf;
+material -> derivation;
+derivation -> mediation;
+mediation -> characterization;
+characterization -> none;
+characterization -> other;
+characterization -> subCollectionOf;
+subCollectionOf -> componentOf;
+subCollectionOf -> memberOf;
+}

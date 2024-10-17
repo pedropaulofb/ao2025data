@@ -1,0 +1,29 @@
+strict digraph  {
+mediation;
+relator;
+role;
+componentOf;
+kind;
+subkind;
+phase;
+datatype;
+memberOf;
+material;
+derivation;
+category;
+roleMixin;
+collective;
+mediation -> relator;
+relator -> role;
+role -> componentOf;
+componentOf -> kind;
+kind -> subkind;
+subkind -> phase;
+phase -> datatype;
+phase -> memberOf;
+datatype -> material;
+datatype -> derivation;
+memberOf -> collective;
+derivation -> category;
+category -> roleMixin;
+}
