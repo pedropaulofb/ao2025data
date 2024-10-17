@@ -141,6 +141,7 @@ def calculate_and_save_datasets_stereotypes_statistics(datasets):
         dataset.classify_and_save_geometric_mean_pairwise_correlation(OUTPUT_DIR_02)
         dataset.calculate_and_save_quadrants(OUTPUT_DIR_02, 'frequency_analysis',
                                              'Global Relative Frequency (Occurrence-wise)', 'Ubiquity Index')
+        exit()
 
 
 def select_root_element(in_root_file_path: str) -> str:
@@ -265,6 +266,6 @@ if __name__ == "__main__":
     calculate_and_save_datasets_stereotypes_statistics(all_datasets)
     save_datasets(all_datasets, OUTPUT_DIR_02)
 
-    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+    # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
 
 

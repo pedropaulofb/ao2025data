@@ -111,6 +111,5 @@ def calculate_quadrants_and_save(df, x_metric, y_metric, out_dir_path) -> pd.Dat
     results_df.to_csv(output_file, index=False, columns=['Stereotype', 'x_value', 'y_value', 'distance_from_origin', 'rank', 'quadrant'])
 
     logger.success(f"Quadrant analysis saved to {output_file}.")
-    # input("2")
     return results_df
 
