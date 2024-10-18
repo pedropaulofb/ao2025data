@@ -19,6 +19,7 @@ from src.visualization.non_ontouml_analysis import generate_non_ontouml_visualiz
     generate_non_ontouml_combined_visualization
 from src.visualization.pareto import plot_pareto_combined
 from src.visualization.scatter import plot_scatter
+from src.visualization.trend_analysis import generate_trend_visualization
 
 CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
 BASE_OUTPUT_DIR = "./outputs"
@@ -231,6 +232,7 @@ def plot_learning_tree(dataset, in_dir_path, out_dir_path):
 
 
 def execute_non_ontouml_analysis(dataset, out_dir_path):
+
     st_types = ['class', 'relation']
     st_norms = ['yearly', 'overall']
     st_wises = ['ow', 'mw']
@@ -240,6 +242,7 @@ def execute_non_ontouml_analysis(dataset, out_dir_path):
     for st_type in st_types:
 
         final_out_dir = os.path.join(out_dir_path, dataset.name, f"{st_type}_raw")
+
         # Create folder if it does not exist
         os.makedirs(final_out_dir, exist_ok=True)
 
@@ -248,24 +251,26 @@ def execute_non_ontouml_analysis(dataset, out_dir_path):
             df_modelwise = dataset.years_stereotypes_data[f'{st_type}_mw_{st_norm}']
 
             # 1. Call generate_non_ontouml_combined_visualization without year_start (plot everything)
-            generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,
-                                                        f'{st_type}_{st_norm}')
+            # generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,
+            #                                             f'{st_type}_{st_norm}')
+            generate_trend_visualization(df_occurrence, df_modelwise, final_out_dir,f'{st_type}_{st_norm}')
 
-            for year_start in years_start:
+            # for year_start in years_start:
                 # 2. Call generate_non_ontouml_combined_visualization with year_start (plot from 'year_start' onwards)
-                generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,
-                                                            f'{st_type}_{st_norm}_{year_start}', year_start=year_start)
+                # generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,
+                #                                             f'{st_type}_{st_norm}_{year_start}', year_start=year_start)
 
-            for st_wise in st_wises:
-                analysis = f'{st_type}_{st_wise}_{st_norm}'
 
-                # 3. Call generate_non_ontouml_visualization without year_start (plot everything)
-                generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir, analysis)
-
-                for year_start in years_start:
-                    # 4. Call generate_non_ontouml_visualization with year_start (plot from 'year_start' onwards)
-                    generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir,
-                                                       f"{analysis}_{year_start}", year_start=year_start)
+            # for st_wise in st_wises:
+            #     analysis = f'{st_type}_{st_wise}_{st_norm}'
+            #
+            #     # 3. Call generate_non_ontouml_visualization without year_start (plot everything)
+            #     generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir, analysis)
+            #
+            #     for year_start in years_start:
+            #         # 4. Call generate_non_ontouml_visualization with year_start (plot from 'year_start' onwards)
+            #         generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir,
+            #                                            f"{analysis}_{year_start}", year_start=year_start)
 
 
 def generate_visualizations(datasets, output_dir):
@@ -283,11 +288,12 @@ def generate_visualizations(datasets, output_dir):
         # plot_heatmap(dataset, output_dir)
         # plot_pareto(dataset, output_dir, "occurrence")
         # plot_pareto(dataset, output_dir, "group")
-        for coverage in coverages:
-            plot_pareto_combined(dataset, output_dir, coverage)
+        # for coverage in coverages:
+        #     plot_pareto_combined(dataset, output_dir, coverage)
         # plot_scatter(dataset, output_dir)
         # plot_learning_tree(dataset, OUTPUT_DIR_02, output_dir)
-        execute_non_ontouml_analysis(dataset, output_dir)
+        if dataset.name == "ontouml_non_classroom":
+            execute_non_ontouml_analysis(dataset, output_dir)
 
 
 def quadrants_calculation():
@@ -331,14 +337,14 @@ if __name__ == "__main__":
     # query_data(all_models)
 
     # UNCOMMENT TO GENERATE STATISTICS
-    all_models = load_models_data()
-    datasets = create_specific_datasets_instances(all_models)
-    calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
-    outliers = create_list_outliers(datasets, OUTPUT_DIR_02)
-    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets, outliers,OUTPUT_DIR_02)
-    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
-    quadrants_calculation()
-    save_datasets(all_datasets, OUTPUT_DIR_02)
+    # all_models = load_models_data()
+    # datasets = create_specific_datasets_instances(all_models)
+    # calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
+    # outliers = create_list_outliers(datasets, OUTPUT_DIR_02)
+    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets, outliers,OUTPUT_DIR_02)
+    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    # quadrants_calculation()
+    # save_datasets(all_datasets, OUTPUT_DIR_02)
 
-    # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
-    generate_visualizations(all_datasets, OUTPUT_DIR_03)
+    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+    # generate_visualizations(all_datasets, OUTPUT_DIR_03)
