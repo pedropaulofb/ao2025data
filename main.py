@@ -235,7 +235,7 @@ def execute_non_ontouml_analysis(dataset, out_dir_path):
     st_norms = ['yearly', 'overall']
     st_wises = ['ow', 'mw']
 
-    years_start = [2015, 2017]
+    years_start = [2015, 2017, 2019]
 
     for st_type in st_types:
 
@@ -338,7 +338,7 @@ if __name__ == "__main__":
     all_datasets = calculate_and_save_datasets_statistics_outliers(datasets, outliers,OUTPUT_DIR_02)
     calculate_and_save_datasets_stereotypes_statistics(all_datasets)
     quadrants_calculation()
-    # save_datasets(all_datasets, OUTPUT_DIR_02)
+    save_datasets(all_datasets, OUTPUT_DIR_02)
 
     # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
-    # generate_visualizations(all_datasets, OUTPUT_DIR_03)
+    generate_visualizations(all_datasets, OUTPUT_DIR_03)
