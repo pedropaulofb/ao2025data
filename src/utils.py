@@ -18,6 +18,18 @@ def color_text(texts):
             text.set_color('red')
 
 
+def bold_left_labels(texts, red_line_index):
+    """
+    Function to apply bold font to x-axis labels that are on or to the left of the red line.
+
+    :param texts: List of x-axis label texts.
+    :param red_line_index: The index where the red line is drawn.
+    """
+    for i, text in enumerate(texts):
+        if i <= red_line_index:
+            text.set_fontweight('bold')
+
+
 def format_metric_name(metric):
     # Convert to lowercase
     formatted_metric = metric.lower().strip()
