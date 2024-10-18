@@ -2,18 +2,17 @@
 import gzip
 import os
 import pickle
+import re
 
 import pandas as pd
 from loguru import logger
-import re
-
 
 
 def color_text(texts):
     """Function to color specific texts for legends or axis labels."""
     for text in texts:
         if 'none' in text.get_text():
-            text.set_color('blue')
+            text.set_color('#91138d')
         elif 'other' in text.get_text():
             text.set_color('red')
 
@@ -63,7 +62,6 @@ def append_unique_preserving_order(existing_list, new_keys):
 
 
 def save_datasets(datasets, output_dir: str):
-
     # Save datasets to a file
     output_name = os.path.join(output_dir, "datasets.object.gz")
     with gzip.open(output_name, "wb") as file:

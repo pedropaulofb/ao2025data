@@ -1,8 +1,8 @@
 import os
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
-import seaborn as sns
 from loguru import logger
 from matplotlib.ticker import MultipleLocator
 
@@ -19,7 +19,8 @@ def plot_pareto(dataset, output_dir: str, plot_type: str) -> None:
     :param plot_type: Either "occurrence" or "group" to specify which type of data to plot.
     """
     # Create output directories
-    class_raw_out, class_clean_out, relation_raw_out, relation_clean_out = create_visualizations_out_dirs(output_dir, dataset.name)
+    class_raw_out, class_clean_out, relation_raw_out, relation_clean_out = create_visualizations_out_dirs(output_dir,
+                                                                                                          dataset.name)
 
     # Define a helper function to create Pareto charts for the specified data type
     def create_pareto_chart(data, title, output_path, plot_type):
@@ -45,7 +46,8 @@ def plot_pareto(dataset, output_dir: str, plot_type: str) -> None:
 
         # Bar plot for the selected frequency
         bar_width = 0.4
-        ax1.bar(data['Stereotype'], data['Percentage Frequency'], width=bar_width, label=bar_label, color=bar_color, zorder=1)
+        ax1.bar(data['Stereotype'], data['Percentage Frequency'], width=bar_width, label=bar_label, color=bar_color,
+                zorder=1)
 
         # Line plot for the cumulative percentage
         ax2 = ax1.twinx()  # Create a second y-axis
@@ -110,8 +112,6 @@ def plot_pareto(dataset, output_dir: str, plot_type: str) -> None:
                             'Pareto Chart: Relation Clean (Group-wise)', relation_clean_out, plot_type)
 
 
-
-
 def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None) -> None:
     """
     Plot combined Pareto chart for occurrence-wise and group-wise stereotype frequencies from class and relation data
@@ -122,13 +122,16 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
     :param coverage_limit: Optional coverage limit value (between 0 and 1) to draw a vertical line on the plot.
     """
     # Create output directories
-    class_raw_out, class_clean_out, relation_raw_out, relation_clean_out = create_visualizations_out_dirs(output_dir, dataset.name)
+    class_raw_out, class_clean_out, relation_raw_out, relation_clean_out = create_visualizations_out_dirs(output_dir,
+                                                                                                          dataset.name)
 
     # Define a helper function to create Pareto charts for a given dataset
     def create_pareto_chart(data_occurrence, data_groupwise, title, output_path, coverage_limit=None):
         # Calculate the percentage frequency for occurrence-wise and group-wise data
-        data_occurrence['Percentage Frequency'] = (data_occurrence['Frequency'] / data_occurrence['Frequency'].sum()) * 100
-        data_groupwise['Percentage Group-wise Frequency'] = (data_groupwise['Group-wise Frequency'] / data_groupwise['Group-wise Frequency'].sum()) * 100
+        data_occurrence['Percentage Frequency'] = (data_occurrence['Frequency'] / data_occurrence[
+            'Frequency'].sum()) * 100
+        data_groupwise['Percentage Group-wise Frequency'] = (data_groupwise['Group-wise Frequency'] / data_groupwise[
+            'Group-wise Frequency'].sum()) * 100
 
         # Calculate cumulative percentages for occurrence-wise and group-wise data
         data_occurrence['Cumulative Percentage'] = data_occurrence['Percentage Frequency'].cumsum()
@@ -154,8 +157,22 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         ax1.bar(data_groupwise['Stereotype'], data_groupwise['Percentage Group-wise Frequency'], width=bar_width,
                 label='Group-wise Frequency', align='edge', color='lightgreen', zorder=1)
 
+        # Calculate medians
+        median_occurrence = np.median(data_occurrence['Percentage Frequency'])
+        median_groupwise = np.median(data_groupwise['Percentage Group-wise Frequency'])
+
+        # Plot horizontal dashed lines for the medians (keep simple labels for the legend)
+        ax1.axhline(median_occurrence, color='blue', linestyle='--', linewidth=1.5, label='Occurrence-wise Median')
+        ax1.axhline(median_groupwise, color='green', linestyle='--', linewidth=1.5, label='Group-wise Median')
+
+        # Annotate the medians at the rightmost end of the lines
+        ax1.annotate(f'{median_occurrence:.1f}%', xy=(len(data_occurrence) - 1, median_occurrence), xytext=(5, 5),
+                     textcoords='offset points', color='blue', fontsize=10, fontweight='bold')
+
+        ax1.annotate(f'{median_groupwise:.1f}%', xy=(len(data_groupwise) - 1, median_groupwise), xytext=(5, 5),
+                     textcoords='offset points', color='green', fontsize=10, fontweight='bold')
+
         # Set labels and title
-        # ax1.set_xlabel('Stereotype', fontsize=12)
         ax1.set_ylabel('Relative Frequency (%)', fontsize=12)
         ax1.set_title(title, fontweight='bold', fontsize=14)
 
@@ -169,8 +186,8 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
                  label='Occurrence-wise Cumulative', linestyle='-', linewidth=2, zorder=2)
 
         # Line plot for group-wise cumulative percentage
-        ax2.plot(range(len(data_groupwise)), data_groupwise['Group-wise Cumulative Percentage'], color='green', marker='o',
-                 label='Group-wise Cumulative', linestyle='-', linewidth=2, zorder=2)
+        ax2.plot(range(len(data_groupwise)), data_groupwise['Group-wise Cumulative Percentage'], color='green',
+                 marker='o', label='Group-wise Cumulative', linestyle='-', linewidth=2, zorder=2)
 
         if coverage_limit is not None:
             coverage_limit_percent = coverage_limit * 100
@@ -185,17 +202,13 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
 
                     # Annotate the occurrence-wise cumulative percentage, automatically adjusted
                     ax2.annotate(f'{occurrence_cumulative:.1f}%', xy=(i, occurrence_cumulative),
-                                 textcoords='offset points', xytext=(5, -5),
-                                 # Offset 5 points to the right and 5 points down
-                                 ha='left', va='top', fontsize=10,
-                                 color='blue')  # Horizontal alignment to left, vertical to top
+                                 textcoords='offset points', xytext=(5, -5), ha='left', va='top', fontsize=10,
+                                 color='blue')
 
                     # Annotate the group-wise cumulative percentage, automatically adjusted
                     ax2.annotate(f'{groupwise_cumulative:.1f}%', xy=(i, groupwise_cumulative),
-                                 textcoords='offset points', xytext=(5, -5),
-                                 # Offset 5 points to the right and 5 points down
-                                 ha='left', va='top', fontsize=10,
-                                 color='green')  # Horizontal alignment to left, vertical to top
+                                 textcoords='offset points', xytext=(5, -5), ha='left', va='top', fontsize=10,
+                                 color='green')
 
                     # Apply bold font to x-axis labels that are on or to the left of the red line
                     bold_left_labels(ax1.get_xticklabels(), i)
@@ -209,10 +222,8 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         color_text(ax1.get_xticklabels())  # Color specific x-axis labels
 
         ax2.set_axisbelow(True)  # Ensure gridlines are below other plot elements
+        ax1.grid(False)
         ax2.grid(True, axis='y', which='major')
-
-        # Adjust gridline z-order to be lower than legends
-        ax2.grid(zorder=0)
 
         # Extract handles and labels from both axes
         handles1, labels1 = ax1.get_legend_handles_labels()  # Bar plot legend info (ax1)
@@ -222,24 +233,22 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         combined_handles = handles1 + handles2
         combined_labels = labels1 + labels2
 
-        # Create a single combined legend
-        combined_legend = ax1.legend(combined_handles, combined_labels, loc='center right', bbox_to_anchor=(1, 0.5),
-                                     frameon=True, facecolor='#dbdbdb', edgecolor='black', framealpha=1,
-                                     handletextpad=1.5, borderaxespad=2, borderpad=1.5, title="Legend")
+        combined_legend = ax2.legend(combined_handles, combined_labels, loc='center right', bbox_to_anchor=(1, 0.5),
+                                     frameon=True, facecolor='white', edgecolor='black', framealpha=1, shadow=True,
+                                     handletextpad=1.5, borderaxespad=2, borderpad=1.5)
 
         # Set the zorder of the combined legend higher than other elements
-        combined_legend.set_zorder(5)
+        combined_legend.set_zorder(10)
+        plt.draw()  # Force re-rendering of the plot, ensuring legend is drawn last
 
         # Customize the title: left-align and make it bold
-        combined_legend.get_title().set_ha('left')  # Left-align the title
         combined_legend.get_title().set_fontweight('bold')  # Make the title bold
-
-        # Apply color to legend texts
-        color_text(combined_legend.get_texts())
 
         # Save the plot
         fig_name = f"pareto_combined_cov_{coverage_limit}.png"
-        fig.savefig(os.path.join(output_path, fig_name), dpi=300)
+        # Ensure tight layout for the figure before saving
+        plt.tight_layout()
+        fig.savefig(os.path.join(output_path, fig_name), dpi=300, bbox_inches='tight')
         logger.success(f"Figure {fig_name} successfully saved in {output_path}.")
         plt.close(fig)
 
