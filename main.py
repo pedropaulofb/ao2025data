@@ -69,6 +69,7 @@ def calculate_and_save_datasets_statistics(datasets, output_dir):
         dataset.save_models_statistics_to_csv(output_dir)
         dataset.calculate_and_save_stereotypes_by_year(output_dir)
         dataset.calculate_and_save_models_by_year(output_dir)
+        dataset.save_stereotypes_count_by_year(output_dir)
 
 
 def load_models_data():
@@ -330,14 +331,14 @@ if __name__ == "__main__":
     # query_data(all_models)
 
     # UNCOMMENT TO GENERATE STATISTICS
-    # all_models = load_models_data()
-    # datasets = create_specific_datasets_instances(all_models)
-    # calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
-    # outliers = create_list_outliers(datasets, OUTPUT_DIR_02)
-    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets, outliers,OUTPUT_DIR_02)
-    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
-    # quadrants_calculation()
+    all_models = load_models_data()
+    datasets = create_specific_datasets_instances(all_models)
+    calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
+    outliers = create_list_outliers(datasets, OUTPUT_DIR_02)
+    all_datasets = calculate_and_save_datasets_statistics_outliers(datasets, outliers,OUTPUT_DIR_02)
+    calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    quadrants_calculation()
     # save_datasets(all_datasets, OUTPUT_DIR_02)
 
-    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+    # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
     # generate_visualizations(all_datasets, OUTPUT_DIR_03)

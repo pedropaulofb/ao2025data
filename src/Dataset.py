@@ -2,11 +2,9 @@ import copy
 import csv
 import math
 import os
-from copy import deepcopy
 
 import numpy as np
 import pandas as pd
-from icecream import ic
 from loguru import logger
 
 from src import ModelData
@@ -27,7 +25,6 @@ class Dataset():
         self.num_classes: int = -1
         self.num_relations: int = -1
 
-
         self.statistics = {}
 
         self.years_stereotypes_data = {}
@@ -46,7 +43,6 @@ class Dataset():
 
         # Create folder if it does not exist
         os.makedirs(output_dir, exist_ok=True)
-
 
         # Prepare the data for the CSV
         data = [[model.name, model.year, model.total_class_number, model.total_relation_number] for model in
@@ -283,7 +279,7 @@ class Dataset():
 
         return list(outliers.keys())
 
-    def fork_without_outliers(self, outliers: list[str], suffix:str) -> 'Dataset':
+    def fork_without_outliers(self, outliers: list[str], suffix: str) -> 'Dataset':
         """
         Create a new Dataset instance by removing models that are in the outliers list.
 
@@ -336,8 +332,8 @@ class Dataset():
         """
         # Define subdirectories for class/relation and raw/clean data
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
-            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
+                   'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+                   'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         # Create the output directories and save the statistics
         for subdir, statistics in subdirs.items():
@@ -345,7 +341,6 @@ class Dataset():
             output_subdir = os.path.join(output_dir, self.name, subdir)
 
             os.makedirs(output_subdir, exist_ok=True)
-
 
             # Save the statistics to CSV files
             for stat_name, dataframe in statistics.items():
@@ -361,8 +356,8 @@ class Dataset():
         """
         # Define subdirectories for class/relation and raw/clean data
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
-            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
+                   'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+                   'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         # Iterate through the statistics to classify and save the Spearman correlation
         for subdir, statistics in subdirs.items():
@@ -391,8 +386,8 @@ class Dataset():
         """
         # Define subdirectories for class/relation and raw/clean data
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
-            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
+                   'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+                   'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         for subdir, statistics in subdirs.items():
             # Extract the Spearman correlation data for occurrence-wise and model-wise
@@ -404,10 +399,9 @@ class Dataset():
             total_corr_occurrence_rank = total_corr_occurrence.rank(ascending=False, method='min')
 
             # Step 2: Create a DataFrame for occurrence-wise results
-            total_corr_occurrence_df = pd.DataFrame({'stereotype': total_corr_occurrence.index,
-                                                     'total_correlation': total_corr_occurrence.values,
-                                                     'rank': total_corr_occurrence_rank.astype(
-                                                         int).values})
+            total_corr_occurrence_df = pd.DataFrame(
+                {'stereotype': total_corr_occurrence.index, 'total_correlation': total_corr_occurrence.values,
+                 'rank': total_corr_occurrence_rank.astype(int).values})
 
             # Step 3: Calculate total correlations and ranks for model-wise
             total_corr_model = spearman_model.abs().sum(axis=1) - 1  # Subtract 1 to exclude self-correlation
@@ -443,8 +437,8 @@ class Dataset():
         """
         # Define subdirectories for class/relation and raw/clean data
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
-            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
+                   'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+                   'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         for subdir, statistics in subdirs.items():
             # Extract the Spearman correlation data for occurrence-wise and model-wise
@@ -476,7 +470,7 @@ class Dataset():
 
             # Step 5: Calculate rank based on geometric mean (descending order)
             geometric_mean_df['rank'] = geometric_mean_df['total_correlation'].rank(ascending=False,
-                                                                                             method='min').astype(int)
+                                                                                    method='min').astype(int)
 
             # Step 6: Define the output directory and file path
             output_subdir = os.path.join(output_dir, self.name, subdir)
@@ -499,8 +493,8 @@ class Dataset():
         """
         # Define subdirectories for class/relation and raw/clean data
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
-            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
+                   'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+                   'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         for subdir, statistics in subdirs.items():
             # Extract the Spearman correlation data for occurrence-wise and model-wise
@@ -537,7 +531,6 @@ class Dataset():
             output_subdir = os.path.join(output_dir, self.name, subdir)
             os.makedirs(output_subdir, exist_ok=True)
 
-
             filepath = os.path.join(output_subdir, 'spearman_correlation_geometric_mean.csv')
 
             # Step 6: Save the matrix DataFrame to a CSV file
@@ -564,14 +557,15 @@ class Dataset():
         """
         # Define the four cases: class raw, relation raw, class clean, relation clean
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
-            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
+                   'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+                   'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         for case, statistics in subdirs.items():
             # Check if the statistics for the current case contain the required metrics
             if x_metric in statistics[stats_access].columns and y_metric in statistics[stats_access].columns:
                 # Create a DataFrame from the two columns (x_metric and y_metric)
-                df = pd.DataFrame({x_metric: statistics[stats_access][x_metric], y_metric: statistics[stats_access][y_metric]})
+                df = pd.DataFrame(
+                    {x_metric: statistics[stats_access][x_metric], y_metric: statistics[stats_access][y_metric]})
                 # Define the subdirectory for this case
                 case_output_dir = os.path.join(output_dir, self.name, case)
                 os.makedirs(case_output_dir, exist_ok=True)
@@ -593,8 +587,8 @@ class Dataset():
         """
         # Define subdirectories for class/relation and raw/clean data
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
-            'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
-            'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
+                   'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
+                   'combined_raw': self.combined_statistics_raw, 'combined_clean': self.combined_statistics_clean}
 
         # Iterate through each case (class/relation and raw/clean)
         for case, statistics in subdirs.items():
@@ -654,7 +648,6 @@ class Dataset():
             # Create folder if it does not exist
             os.makedirs(case_output_dir, exist_ok=True)
 
-
             # Step 8: Save the average model data to a CSV file
             avg_model_filepath = os.path.join(case_output_dir, f'average_model.csv')
             avg_model_df.to_csv(avg_model_filepath, index=False)
@@ -674,10 +667,8 @@ class Dataset():
         yearly_data_class_mw = {}
         yearly_data_relation_mw = {}
 
-        cases = {
-            'class': (self.data_class, yearly_data_class_ow, yearly_data_class_mw),
-            'relation': (self.data_relation, yearly_data_relation_ow, yearly_data_relation_mw)
-        }
+        cases = {'class': (self.data_class, yearly_data_class_ow, yearly_data_class_mw),
+            'relation': (self.data_relation, yearly_data_relation_ow, yearly_data_relation_mw)}
 
         # Loop through each model and accumulate the stereotype counts by year
         for analysis, (content, yearly_data_ow, yearly_data_mw) in cases.items():
@@ -727,11 +718,9 @@ class Dataset():
             self._normalize_stereotypes_yearly(f'{analysis}_mw')
 
         # Define the keys for saving the data
-        keys = [
-            'class_ow', 'relation_ow', 'class_mw', 'relation_mw',
-            'class_ow_overall', 'relation_ow_overall', 'class_ow_yearly', 'relation_ow_yearly',
-            'class_mw_overall', 'relation_mw_overall', 'class_mw_yearly', 'relation_mw_yearly'
-        ]
+        keys = ['class_ow', 'relation_ow', 'class_mw', 'relation_mw', 'class_ow_overall', 'relation_ow_overall',
+            'class_ow_yearly', 'relation_ow_yearly', 'class_mw_overall', 'relation_mw_overall', 'class_mw_yearly',
+            'relation_mw_yearly']
 
         # Save each of the DataFrames to CSV files
         for key in keys:
@@ -746,13 +735,12 @@ class Dataset():
             # Create the directory if it does not exist
             os.makedirs(output_dir_final, exist_ok=True)
 
-
             # Save the DataFrame to a CSV file
             csv_path = os.path.join(output_dir_final, f'years_stereotypes_{key}.csv')
             self.years_stereotypes_data[key].to_csv(csv_path)
             logger.success(f"{key} stereotypes data saved to {csv_path}.")
 
-    def calculate_and_save_models_by_year(self,output_dir:str):
+    def calculate_and_save_models_by_year(self, output_dir: str):
         # Initialize dictionaries to count the number of models per year
         model_count = {}
 
@@ -800,7 +788,7 @@ class Dataset():
         # Store the result in years_stereotypes_data for overall normalization
         self.years_stereotypes_data[f'{case}_overall'] = df_normalized
 
-    def _normalize_stereotypes_yearly(self,case) -> None:
+    def _normalize_stereotypes_yearly(self, case) -> None:
         # Normalize for both 'class' and 'relation'
         df = self.years_stereotypes_data[case]
 
@@ -809,3 +797,133 @@ class Dataset():
 
         # Store the result in years_stereotypes_data for yearly normalization
         self.years_stereotypes_data[f'{case}_yearly'] = df_normalized
+
+    def save_stereotypes_count_by_year(self, output_dir: str) -> None:
+        """
+        Save a CSV file that reports the number of class and relation stereotypes for each year, including ratio, cumulative,
+        ontouml, none, and other class/relation columns, and their respective ratios and cumulative values.
+        """
+        # Initialize a dictionary to hold the stereotype counts per year
+        year_data = {}
+
+        # Loop through each model and accumulate class and relation stereotypes by year
+        for model in self.models:
+            model_year = model.year
+
+            # Initialize the year entry if not present
+            if model_year not in year_data:
+                year_data[model_year] = {'num_class': 0, 'ontouml_class': 0, 'none_class': 0, 'other_class': 0,
+                                         'num_relation': 0, 'ontouml_relation': 0, 'none_relation': 0,
+                                         'other_relation': 0}
+
+            # Process class stereotypes
+            for stereotype, count in model.class_stereotypes.items():
+                year_data[model_year]['num_class'] += count
+                if stereotype == 'none':
+                    year_data[model_year]['none_class'] += count
+                elif stereotype == 'other':
+                    year_data[model_year]['other_class'] += count
+                else:
+                    year_data[model_year]['ontouml_class'] += count
+
+            # Process relation stereotypes
+            for stereotype, count in model.relation_stereotypes.items():
+                year_data[model_year]['num_relation'] += count
+                if stereotype == 'none':
+                    year_data[model_year]['none_relation'] += count
+                elif stereotype == 'other':
+                    year_data[model_year]['other_relation'] += count
+                else:
+                    year_data[model_year]['ontouml_relation'] += count
+
+        # Convert the dictionary to a DataFrame for easier CSV saving
+        df_year_data = pd.DataFrame.from_dict(year_data, orient='index').reset_index()
+        df_year_data.columns = ['year', 'num_class', 'ontouml_class', 'none_class', 'other_class', 'num_relation',
+                                'ontouml_relation', 'none_relation', 'other_relation']
+
+        # Sort by year to ensure chronological order
+        df_year_data = df_year_data.sort_values(by='year').reset_index(drop=True)
+
+        # Calculate the totals for classes and relations
+        total_classes = df_year_data['num_class'].sum()
+        total_relations = df_year_data['num_relation'].sum()
+
+        total_ontouml_classes = df_year_data['ontouml_class'].sum()
+        total_none_classes = df_year_data['none_class'].sum()
+        total_other_classes = df_year_data['other_class'].sum()
+
+        total_ontouml_relations = df_year_data['ontouml_relation'].sum()
+        total_none_relations = df_year_data['none_relation'].sum()
+        total_other_relations = df_year_data['other_relation'].sum()
+
+        # Ratio and cumulative columns for classes
+        df_year_data['ratio_class'] = df_year_data['num_class'] / total_classes
+        df_year_data['cumulative_class'] = df_year_data['num_class'].cumsum()
+        df_year_data['cumulative_ratio_class'] = df_year_data['cumulative_class'] / total_classes
+
+        # Ratio and cumulative columns for ontouml, none, other classes
+        df_year_data['ratio_ontouml_class'] = df_year_data['ontouml_class'] / total_ontouml_classes
+
+        df_year_data['cumulative_ontouml_class'] = df_year_data['ontouml_class'].cumsum()
+        df_year_data['cumulative_ratio_ontouml_class'] = df_year_data[
+                                                             'cumulative_ontouml_class'] / total_ontouml_classes
+
+        df_year_data['ratio_none_class'] = df_year_data['none_class'] / total_none_classes
+        df_year_data['cumulative_none_class'] = df_year_data['none_class'].cumsum()
+        df_year_data['cumulative_ratio_none_class'] = df_year_data['cumulative_none_class'] / total_none_classes
+
+        df_year_data['ratio_other_class'] = df_year_data['other_class'] / total_other_classes
+        df_year_data['cumulative_other_class'] = df_year_data['other_class'].cumsum()
+        df_year_data['cumulative_ratio_other_class'] = df_year_data['cumulative_other_class'] / total_other_classes
+
+        # Ratio and cumulative columns for relations
+        df_year_data['ratio_relation'] = df_year_data['num_relation'] / total_relations
+        df_year_data['cumulative_relation'] = df_year_data['num_relation'].cumsum()
+        df_year_data['cumulative_ratio_relation'] = df_year_data['cumulative_relation'] / total_relations
+
+        # Ratio and cumulative columns for ontouml, none, other relations
+        df_year_data['ratio_ontouml_relation'] = df_year_data['ontouml_relation'] / total_ontouml_relations
+        df_year_data['cumulative_ontouml_relation'] = df_year_data['ontouml_relation'].cumsum()
+        df_year_data['cumulative_ratio_ontouml_relation'] = df_year_data[
+                                                                'cumulative_ontouml_relation'] / total_ontouml_relations
+
+        df_year_data['ratio_none_relation'] = df_year_data['none_relation'] / total_none_relations
+        df_year_data['cumulative_none_relation'] = df_year_data['none_relation'].cumsum()
+        df_year_data['cumulative_ratio_none_relation'] = df_year_data['cumulative_none_relation'] / total_none_relations
+
+        df_year_data['ratio_other_relation'] = df_year_data['other_relation'] / total_other_relations
+        df_year_data['cumulative_other_relation'] = df_year_data['other_relation'].cumsum()
+        df_year_data['cumulative_ratio_other_relation'] = df_year_data[
+                                                              'cumulative_other_relation'] / total_other_relations
+
+        # Ratios related to general category
+
+        df_year_data['ratio_ontouml_to_total_class'] = df_year_data['ontouml_class'] / total_classes
+        df_year_data['ratio_none_to_total_class'] = df_year_data['none_class'] / total_classes
+        df_year_data['ratio_other_to_total_class'] = df_year_data['other_class'] / total_classes
+
+        df_year_data['ratio_ontouml_to_total_relation'] = df_year_data['ontouml_relation'] / total_relations
+        df_year_data['ratio_none_to_total_relation'] = df_year_data['none_relation'] / total_relations
+        df_year_data['ratio_other_to_total_relation'] = df_year_data['other_relation'] / total_relations
+
+        df_year_data['cumulative_ratio_ontouml_to_total_class'] = df_year_data[
+                                                                      'cumulative_ontouml_class'] / total_classes
+        df_year_data['cumulative_ratio_none_to_total_class'] = df_year_data['cumulative_none_class'] / total_classes
+        df_year_data['cumulative_ratio_other_to_total_class'] = df_year_data['cumulative_other_class'] / total_classes
+
+        df_year_data['cumulative_ratio_ontouml_to_total_relation'] = df_year_data[
+                                                                         'cumulative_ontouml_relation'] / total_relations
+        df_year_data['cumulative_ratio_none_to_total_relation'] = df_year_data[
+                                                                      'cumulative_none_relation'] / total_relations
+        df_year_data['cumulative_ratio_other_to_total_relation'] = df_year_data[
+                                                                       'cumulative_other_relation'] / total_relations
+
+        # Define output directory and create it if necessary
+        output_dir_final = os.path.join(output_dir, self.name)
+        os.makedirs(output_dir_final, exist_ok=True)
+
+        # Save the DataFrame to a CSV file
+        csv_path = os.path.join(output_dir_final, 'stereotypes_count_by_year.csv')
+        df_year_data.to_csv(csv_path, index=False)
+
+        logger.success(f"Stereotypes count by year data saved to {csv_path}.")
