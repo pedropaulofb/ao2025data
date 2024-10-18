@@ -783,7 +783,6 @@ class Dataset():
         output_dir_final = os.path.join(output_dir, self.name)
         os.makedirs(output_dir_final, exist_ok=True)
 
-
         # Save models per year data
         models_csv_path = os.path.join(output_dir_final, 'years_models_number.csv')
         self.years_models_number.to_csv(models_csv_path, index=False)

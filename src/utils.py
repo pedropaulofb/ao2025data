@@ -9,10 +9,10 @@ from loguru import logger
 
 
 def color_text(texts):
-    """Function to color specific texts for legends or axis labels."""
+    """Function to color specific original_labels for legends or axis labels."""
     for text in texts:
         if 'none' in text.get_text():
-            text.set_color('#91138d')
+            text.set_color('#d943d6')
         elif 'other' in text.get_text():
             text.set_color('red')
 
@@ -21,12 +21,46 @@ def bold_left_labels(texts, red_line_index):
     """
     Function to apply bold font to x-axis labels that are on or to the left of the red line.
 
-    :param texts: List of x-axis label texts.
+    :param texts: List of x-axis label original_labels.
     :param red_line_index: The index where the red line is drawn.
     """
     for i, text in enumerate(texts):
         if i <= red_line_index:
             text.set_fontweight('bold')
+
+
+def append_chars_to_labels(texts, data_occurrence, data_groupwise, median_occurrence, median_groupwise):
+    """
+    Function to append characters to x-axis labels based on occurrence-wise and group-wise frequencies.
+
+    :param data_occurrence: DataFrame containing occurrence-wise frequency data.
+    :param data_groupwise: DataFrame containing group-wise frequency data.
+    :param median_occurrence: Median of occurrence-wise frequency.
+    :param median_groupwise: Median of group-wise frequency.
+    """
+
+    for i, text in enumerate(texts):
+        label = text.get_text()  # Get the current label text
+        occurrence_value = data_occurrence.loc[i, 'Percentage Frequency']
+        groupwise_value = data_groupwise.loc[i, 'Percentage Group-wise Frequency']
+
+        # Reset the label by removing any previous chars if necessary
+        clean_label = label.split()[0]  # Get the original label without any appended chars
+
+        # Append characters based on the conditions
+        if occurrence_value >= median_occurrence and groupwise_value >= median_groupwise:
+            label = f'{clean_label} +*'  # Both conditions met
+        elif occurrence_value >= median_occurrence:
+            label = f'{clean_label} +'  # Only occurrence-wise above the median
+        elif groupwise_value >= median_groupwise:
+            label = f'{clean_label} *'  # Only group-wise above the median
+        else:
+            label = clean_label  # Neither condition met, keep the original label
+
+        text.set_text(label)  # Update the label
+        text.set_color('black')  # Ensure the color remains black
+
+    return texts
 
 
 def format_metric_name(metric):

@@ -3,10 +3,13 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from icecream import ic
 from loguru import logger
+from matplotlib.lines import Line2D
 from matplotlib.ticker import MultipleLocator
+from matplotlib.lines import Line2D
 
-from src.utils import create_visualizations_out_dirs, color_text, bold_left_labels
+from src.utils import create_visualizations_out_dirs, color_text, append_chars_to_labels, bold_left_labels
 
 
 def plot_pareto(dataset, output_dir: str, plot_type: str) -> None:
@@ -68,7 +71,7 @@ def plot_pareto(dataset, output_dir: str, plot_type: str) -> None:
         legend1 = ax1.legend(loc='upper left')
         legend2 = ax2.legend(loc='upper right')
 
-        # Apply color to legend texts
+        # Apply color to legend original_labels
         color_text(legend1.get_texts())
         color_text(legend2.get_texts())
 
@@ -133,6 +136,9 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         data_groupwise['Percentage Group-wise Frequency'] = (data_groupwise['Group-wise Frequency'] / data_groupwise[
             'Group-wise Frequency'].sum()) * 100
 
+        # Ensure that group-wise data is ordered based on occurrence-wise data
+        data_groupwise = data_groupwise.set_index('Stereotype').reindex(data_occurrence['Stereotype']).reset_index()
+
         # Calculate cumulative percentages for occurrence-wise and group-wise data
         data_occurrence['Cumulative Percentage'] = data_occurrence['Percentage Frequency'].cumsum()
         data_groupwise['Group-wise Cumulative Percentage'] = data_groupwise['Percentage Group-wise Frequency'].cumsum()
@@ -166,10 +172,10 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         ax1.axhline(median_groupwise, color='green', linestyle='--', linewidth=1.5, label='Group-wise Median')
 
         # Annotate the medians at the rightmost end of the lines
-        ax1.annotate(f'{median_occurrence:.1f}%', xy=(len(data_occurrence) - 1, median_occurrence), xytext=(5, 5),
+        ax1.annotate(f'{median_occurrence:.2f}%', xy=(len(data_occurrence) - 1, median_occurrence), xytext=(5, 5),
                      textcoords='offset points', color='blue', fontsize=10, fontweight='bold')
 
-        ax1.annotate(f'{median_groupwise:.1f}%', xy=(len(data_groupwise) - 1, median_groupwise), xytext=(5, 5),
+        ax1.annotate(f'{median_groupwise:.2f}%', xy=(len(data_groupwise) - 1, median_groupwise), xytext=(5, 5),
                      textcoords='offset points', color='green', fontsize=10, fontweight='bold')
 
         # Set labels and title
@@ -210,8 +216,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
                                  textcoords='offset points', xytext=(5, -5), ha='left', va='top', fontsize=10,
                                  color='green')
 
-                    # Apply bold font to x-axis labels that are on or to the left of the red line
-                    bold_left_labels(ax1.get_xticklabels(), i)
+                    red_line_index = i
                     break
 
         # Set the y-axis label and ticks for the cumulative percentage
@@ -219,7 +224,34 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         ax2.set_yticks(range(0, 101, 10))
 
         ax1.tick_params(axis='x', rotation=45)  # Rotate by 45 degrees
-        color_text(ax1.get_xticklabels())  # Color specific x-axis labels
+        texts = ax1.get_xticklabels()  # Color specific x-axis labels
+        # Modify the labels with symbols
+        texts = append_chars_to_labels(texts, data_occurrence, data_groupwise,
+                                                             median_occurrence, median_groupwise)
+
+        bold_left_labels(texts, red_line_index)
+
+        for label in texts:
+            # Align labels to the right, so the last character is near the corresponding tick
+            label.set_ha('right')
+            # Adjust the label positioning slightly if needed (use pad for further fine-tuning)
+            label.set_position(
+                (label.get_position()[0] - 0.02, label.get_position()[1]))  # Adjust the x-position slightly
+
+        # Set the new x-tick labels
+        ax1.set_xticks(range(len(texts)))  # Make sure the number of ticks matches the number of labels
+        ax1.set_xticklabels(texts)  # Apply the new labels
+
+        color_text(ax1.get_xticklabels())
+
+        # Get the current x-tick positions
+        x_positions = range(len(texts))
+
+        # Explicitly set the x-tick positions to match the number of labels
+        ax1.set_xticks(x_positions)
+
+        # Apply the updated labels back to the axis
+        ax1.set_xticklabels(texts)
 
         ax2.set_axisbelow(True)  # Ensure gridlines are below other plot elements
         ax1.grid(False)
@@ -244,11 +276,27 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         # Customize the title: left-align and make it bold
         combined_legend.get_title().set_fontweight('bold')  # Make the title bold
 
+        # Create proxy artists for the symbols
+        legend_elements = [
+            Line2D([0], [0], marker='+', color='black', linestyle='None', markersize=7,
+                   label='value >= median (Occurrence-wise)'),
+            Line2D([0], [0], marker='*', color='black', linestyle='None', markersize=7, label='value >= median (Group-wise)')
+        ]
+
+        # Add these proxies to the existing legend
+        ax2.legend(
+            handles=combined_handles + legend_elements,  # Combine previous handles with new ones
+            loc='center right', bbox_to_anchor=(1, 0.5),
+            frameon=True, facecolor='white', edgecolor='black', framealpha=1, shadow=True,
+            handletextpad=1.5, borderaxespad=2, borderpad=1.5
+        )
+
         # Save the plot
         fig_name = f"pareto_combined_cov_{coverage_limit}.png"
         # Ensure tight layout for the figure before saving
         plt.tight_layout()
         fig.savefig(os.path.join(output_path, fig_name), dpi=300, bbox_inches='tight')
+
         logger.success(f"Figure {fig_name} successfully saved in {output_path}.")
         plt.close(fig)
 

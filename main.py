@@ -17,7 +17,7 @@ from src.visualization.learning_tree import build_tree, generate_dot
 from src.visualization.new_boxplot import plot_boxplot
 from src.visualization.non_ontouml_analysis import generate_non_ontouml_visualization, \
     generate_non_ontouml_combined_visualization
-from src.visualization.pareto import plot_pareto, plot_pareto_combined
+from src.visualization.pareto import plot_pareto_combined
 from src.visualization.scatter import plot_scatter
 
 CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
@@ -275,22 +275,18 @@ def generate_visualizations(datasets, output_dir):
             datasets = pickle.load(file)
         logger.success(f"Successfully loaded {len(datasets)} datasets.")
 
+    coverages = [0.5, 0.75, 0.9, 0.95]
     for dataset in datasets:
-
-        if dataset.name != "ontouml_non_classroom":
-            continue
-
         # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
         # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
         # plot_heatmap(dataset, output_dir)
         # plot_pareto(dataset, output_dir, "occurrence")
         # plot_pareto(dataset, output_dir, "group")
-        coverages = [0.5, 0.75, 0.9, 0.95]
         for coverage in coverages:
             plot_pareto_combined(dataset, output_dir, coverage)
         # plot_scatter(dataset, output_dir)
         # plot_learning_tree(dataset, OUTPUT_DIR_02, output_dir)
-        # execute_non_ontouml_analysis(dataset, output_dir)
+        execute_non_ontouml_analysis(dataset, output_dir)
 
 
 def quadrants_calculation():
