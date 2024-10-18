@@ -292,8 +292,7 @@ def generate_visualizations(datasets, output_dir):
         #     plot_pareto_combined(dataset, output_dir, coverage)
         # plot_scatter(dataset, output_dir)
         # plot_learning_tree(dataset, OUTPUT_DIR_02, output_dir)
-        if dataset.name == "ontouml_non_classroom":
-            execute_non_ontouml_analysis(dataset, output_dir)
+        execute_non_ontouml_analysis(dataset, output_dir)
 
 
 def quadrants_calculation():

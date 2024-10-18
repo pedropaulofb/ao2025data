@@ -1,5 +1,6 @@
 import os
 
+from icecream import ic
 from loguru import logger
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
@@ -8,6 +9,101 @@ import matplotlib.pyplot as plt
 
 import pandas as pd
 import os
+
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+from sklearn.linear_model import LinearRegression
+
+def linear_regression(df, column, period):
+    period_df = df[(df['year'].astype(int) >= period[0]) & (df['year'].astype(int) <= period[1])]
+    X = np.array(period_df['year'].astype(int)).reshape(-1, 1)
+    y = np.array(period_df[column])
+
+    if len(X) > 1:  # Ensure there's enough data for regression
+        model = LinearRegression().fit(X, y)
+        y_pred = model.predict(X)
+        coef = model.coef_[0]  # slope (only 1 coefficient for linear regression)
+        intercept = model.intercept_  # intercept
+        return X.flatten(), y_pred, coef, intercept
+    return [], [], None, None
+
+
+def export_regression_data_to_csv(df_occurrence, df_modelwise, output_dir, file_name):
+    # Ensure the output directory exists
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Helper function to perform quadratic regression and return the coefficients and predicted values
+    def quadratic_regression(df, column, period):
+        period_df = df[(df['year'].astype(int) >= period[0]) & (df['year'].astype(int) <= period[1])]
+        X = np.array(period_df['year'].astype(int)).reshape(-1, 1)
+        y = np.array(period_df[column])
+
+        if len(X) > 1:
+            poly = PolynomialFeatures(degree=2)
+            X_poly = poly.fit_transform(X)
+            model = LinearRegression().fit(X_poly, y)
+            y_pred = model.predict(X_poly)
+            coef_quad = model.coef_[2]  # quadratic coefficient
+            coef_lin = model.coef_[1]  # linear coefficient
+            intercept = model.intercept_  # intercept
+            return X.flatten(), y_pred, coef_quad, coef_lin, intercept
+        return [], [], None, None, None
+
+    # DataFrames to store regression results
+    linear_results = pd.DataFrame(columns=['year', 'category', 'period', 'predicted', 'slope', 'intercept'])
+    quadratic_results = pd.DataFrame(
+        columns=['year', 'category', 'period', 'predicted', 'a (quad)', 'b (linear)', 'intercept'])
+
+    # Perform linear and quadratic regression for both periods (2015-2018 and 2019-2024)
+    for category in ['none', 'other']:
+        for period in [(2015, 2018), (2019, 2024)]:
+            for df, name in [(df_occurrence, 'occurrence'), (df_modelwise, 'model-wise')]:
+                # Linear regression
+                X, y_pred, slope, intercept = linear_regression(df, category, period)
+                if len(X) > 0 and not pd.isna(slope) and not pd.isna(intercept):
+                    temp_df = pd.DataFrame({
+                        'year': X,
+                        'category': f'{category} ({name})',
+                        'period': f'{period[0]}-{period[1]}',
+                        'predicted': y_pred,
+                        'slope': slope,
+                        'intercept': intercept
+                    })
+                    if not temp_df.empty and not temp_df.isnull().all().all():  # Ensure temp_df is not empty and not all-NA
+                        linear_results = pd.concat([linear_results, temp_df], ignore_index=True)
+
+                # Quadratic regression
+                X, y_pred, a, b, intercept = quadratic_regression(df, category, period)
+                if len(X) > 0 and not pd.isna(a) and not pd.isna(b) and not pd.isna(intercept):
+                    temp_df = pd.DataFrame({
+                        'year': X,
+                        'category': f'{category} ({name})',
+                        'period': f'{period[0]}-{period[1]}',
+                        'predicted': y_pred,
+                        'a (quad)': a,
+                        'b (linear)': b,
+                        'intercept': intercept
+                    })
+                    if not temp_df.empty and not temp_df.isnull().all().all():  # Ensure temp_df is not empty and not all-NA
+                        quadratic_results = pd.concat([quadratic_results, temp_df], ignore_index=True)
+
+    # Save the results to CSV
+    linear_csv_name = os.path.join(output_dir, f'regression_linear_{file_name}.csv')
+    quadratic_csv_name = os.path.join(output_dir, f'regression_quadratic_{file_name}.csv')
+
+    # Actually save the DataFrames to CSV files
+    if not linear_results.empty:
+        linear_results.to_csv(linear_csv_name, index=False)
+
+    if not quadratic_results.empty:
+        quadratic_results.to_csv(quadratic_csv_name, index=False)
+
+    # Log success messages
+    logger.success(f"Linear regression results saved to: {linear_csv_name}")
+    logger.success(f"Quadratic regression results saved to: {quadratic_csv_name}")
+
 
 # Function to generate the regression visualization from two input CSV files
 def generate_trend_visualization(df_occurrence, df_modelwise, output_dir, file_name):
@@ -22,11 +118,8 @@ def generate_trend_visualization(df_occurrence, df_modelwise, output_dir, file_n
     df_occurrence = df_occurrence[['year', 'none', 'other']].copy()
     df_modelwise = df_modelwise[['year', 'none', 'other']].copy()
 
-    # Define the output file name based on the occurrence file name
-    final_file_name = f'regression_plot_{file_name}.png'
-
     # Call the generate_regression_visualization function to generate the plot
-    generate_regression_visualization(df_occurrence, df_modelwise, output_dir, final_file_name)
+    generate_regression_visualization(df_occurrence, df_modelwise, output_dir, file_name)
 
 
 
@@ -172,3 +265,7 @@ def generate_regression_visualization(df_occurrence, df_modelwise, out_dir_path,
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
     # Close the plot to free memory
     plt.close()
+
+    new_file_name = fig_name.replace("regression_visualization_","")
+    new_file_name = new_file_name.replace(".csv", "")
+    export_regression_data_to_csv(df_occurrence, df_modelwise, out_dir_path, new_file_name)

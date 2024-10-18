@@ -1,0 +1,13 @@
+year,category,period,predicted,slope,intercept
+2021,none (occurrence),2019-2024,0.0,0.0,0.0
+2022,none (occurrence),2019-2024,0.0,0.0,0.0
+2023,none (occurrence),2019-2024,0.0,0.0,0.0
+2021,none (model-wise),2019-2024,0.0,0.0,0.0
+2022,none (model-wise),2019-2024,0.0,0.0,0.0
+2023,none (model-wise),2019-2024,0.0,0.0,0.0
+2021,other (occurrence),2019-2024,0.0,0.0,0.0
+2022,other (occurrence),2019-2024,0.0,0.0,0.0
+2023,other (occurrence),2019-2024,0.0,0.0,0.0
+2021,other (model-wise),2019-2024,0.0,0.0,0.0
+2022,other (model-wise),2019-2024,0.0,0.0,0.0
+2023,other (model-wise),2019-2024,0.0,0.0,0.0

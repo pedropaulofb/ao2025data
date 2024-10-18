@@ -41,7 +41,6 @@ def consolidate_stereotypes_data(type: str, list_models: str, stereotypes_data_f
                 instances[model_id] = RelationStereotypesData(name=model_id)  # Initialize instances
             else:
                 logger.error("Unrecognized type.")
-                exit(1)
 
     # Step 2: Read the CSV file and populate the already initialized instances
     with open(stereotypes_data_file_path, 'r') as csvfile:
