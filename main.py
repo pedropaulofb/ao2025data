@@ -3,41 +3,30 @@ import os
 import pickle
 
 import pandas as pd
-from icecream import ic
 from loguru import logger
 
 from src.Dataset import Dataset
-from src.collect_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
+from src.directories_global import OUTPUT_DIR_01, BASE_OUTPUT_DIR, OUTPUT_DIR_02, OUTPUT_DIR_03
+from src.initial_setup import initialize_output_directories, get_catalog_path
+from src.load_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
 from src.load_models_data import instantiate_models_from_csv
 from src.quadrants_temporal import compare_and_generate_quadrant_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
-from src.utils import save_datasets
-from src.visualization.heatmap import plot_heatmap
 from src.visualization.learning_tree import build_tree, generate_dot
-from src.visualization.new_boxplot import plot_boxplot
-from src.visualization.non_ontouml_analysis import generate_non_ontouml_visualization, \
-    generate_non_ontouml_combined_visualization
-from src.visualization.pareto import plot_pareto_combined
-from src.visualization.scatter import plot_scatter
 from src.visualization.trend_analysis import generate_trend_visualization
-
-CATALOG_PATH = "C:/Users/FavatoBarcelosPP/Dev/ontouml-models"
-BASE_OUTPUT_DIR = "./outputs"
-OUTPUT_DIR_01 = os.path.join(BASE_OUTPUT_DIR, "01_loaded_data")
-OUTPUT_DIR_02 = os.path.join(BASE_OUTPUT_DIR, "02_datasets")
-OUTPUT_DIR_03 = os.path.join(BASE_OUTPUT_DIR, "03_visualizations")
 
 
 def load_data_from_catalog(catalog_path):
     """Load and save catalog models, and generate a CSV for model data."""
-    all_models = load_and_save_catalog_models(catalog_path, os.path.join(BASE_OUTPUT_DIR, "01_loaded_data/"))
+    
+    all_models = load_and_save_catalog_models(catalog_path, OUTPUT_DIR_01)
     generate_list_models_data_csv(all_models, os.path.join(OUTPUT_DIR_01, "models_data.csv"))
     return all_models
 
 
 def query_data(all_models):
     """Query class and relation stereotypes data for all models."""
-    query_models(all_models, "queries", os.path.join(BASE_OUTPUT_DIR, "01_loaded_data/"))
+    query_models(all_models, "queries", OUTPUT_DIR_01)
 
 
 def create_specific_datasets_instances(models_list, suffix: str = ""):
@@ -329,21 +318,25 @@ def quadrants_calculation():
 
 
 if __name__ == "__main__":
-    # UNCOMMENT TO LOAD MODELS
-    # all_models = load_data_from_catalog(CATALOG_PATH)
+    # Step 0: Initial setup
+    initialize_output_directories()
+    catalog_path = get_catalog_path()
 
-    # UNCOMMENT TO QUERY STEREOTYPES
-    # query_data(all_models)
+    # Step 1: Load models' data and execute queries
+    all_models_data = load_data_from_catalog(catalog_path)
+    query_data(all_models_data)
+
+    # Step 2: Generate statistics
 
     # UNCOMMENT TO GENERATE STATISTICS
-    # all_models = load_models_data()
-    # datasets = create_specific_datasets_instances(all_models)
+    # all_models_data = load_models_data()
+    # datasets = create_specific_datasets_instances(all_models_data)
     # calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
     # outliers = create_list_outliers(datasets, OUTPUT_DIR_02)
     # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets, outliers,OUTPUT_DIR_02)
     # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
     # quadrants_calculation()
     # save_datasets(all_datasets, OUTPUT_DIR_02)
-
-    generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+    #
+    # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
     # generate_visualizations(all_datasets, OUTPUT_DIR_03)

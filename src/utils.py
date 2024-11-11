@@ -3,6 +3,7 @@ import gzip
 import os
 import pickle
 import re
+from typing import Optional
 
 import pandas as pd
 from loguru import logger
@@ -101,6 +102,31 @@ def save_datasets(datasets, output_dir: str):
     with gzip.open(output_name, "wb") as file:
         pickle.dump(datasets, file)
     logger.success(f"Datasets successfully saved in {output_name}.")
+
+def save_object(object_to_save:object, output_dir: str, output_file_name:str, output_description: Optional[str] = None):
+    """Save an object to a compressed file using gzip and pickle."""
+    try:
+        # Ensure the output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Construct the full output file path
+        output_file_path = os.path.join(output_dir, f"{output_file_name}.object.gz")
+
+        # Save the object using gzip and pickle
+        with gzip.open(output_file_path, "wb") as file:
+            pickle.dump(object_to_save, file)
+
+        # Log success message
+        if output_description:
+            logger.success(f"{output_description} successfully saved as {output_file_path}.")
+        else:
+            logger.success(f"Object successfully saved as {output_file_path}.")
+
+    except (OSError, pickle.PickleError) as e:
+        logger.error(f"Failed to save the object. Error: {e}")
+    except Exception as e:
+        # Catch any other exceptions and log them
+        logger.error(f"An unexpected error occurred: {e}")
 
 
 def create_visualizations_out_dirs(output_dir, dataset_name):
