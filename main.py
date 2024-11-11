@@ -7,26 +7,13 @@ from loguru import logger
 
 from src.Dataset import Dataset
 from src.directories_global import OUTPUT_DIR_01, BASE_OUTPUT_DIR, OUTPUT_DIR_02, OUTPUT_DIR_03
-from src.initial_setup import initialize_output_directories, get_catalog_path
-from src.load_data import load_and_save_catalog_models, generate_list_models_data_csv, query_models
+from src.step0_initial_setup import initialize_output_directories, get_catalog_path
 from src.load_models_data import instantiate_models_from_csv
 from src.quadrants_temporal import compare_and_generate_quadrant_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
+from src.step1_load_models import load_data_from_catalog, query_data
 from src.visualization.learning_tree import build_tree, generate_dot
 from src.visualization.trend_analysis import generate_trend_visualization
-
-
-def load_data_from_catalog(catalog_path):
-    """Load and save catalog models, and generate a CSV for model data."""
-    
-    all_models = load_and_save_catalog_models(catalog_path, OUTPUT_DIR_01)
-    generate_list_models_data_csv(all_models, os.path.join(OUTPUT_DIR_01, "models_data.csv"))
-    return all_models
-
-
-def query_data(all_models):
-    """Query class and relation stereotypes data for all models."""
-    query_models(all_models, "queries", OUTPUT_DIR_01)
 
 
 def create_specific_datasets_instances(models_list, suffix: str = ""):
