@@ -428,13 +428,12 @@ class Dataset():
             logger.success(
                 f"Dataset '{self.name}', case '{subdir}': total model-wise correlation saved successfully in '{model_filepath}'.")
 
-    def classify_and_save_geometric_mean_correlation(self, output_dir: str) -> None:
-        """
-        Classifies and saves the geometric mean of the total correlations (occurrence-wise and model-wise)
-        for class/relation (raw/clean) stereotypes to a CSV file, with a rank column.
+    import math
+    from loguru import logger
 
-        :param output_dir: Directory where the CSV file will be saved.
-        """
+    # Existing code...
+
+    def classify_and_save_geometric_mean_correlation(self, output_dir: str) -> None:
         # Define subdirectories for class/relation and raw/clean data
         subdirs = {'class_raw': self.class_statistics_raw, 'relation_raw': self.relation_statistics_raw,
                    'class_clean': self.class_statistics_clean, 'relation_clean': self.relation_statistics_clean,
@@ -460,8 +459,16 @@ class Dataset():
                 model_sum = spearman_model_common.loc[
                                 stereotype].abs().sum() - 1  # Subtract 1 to exclude self-correlation
 
-                # Calculate geometric mean for the current stereotype
-                geometric_mean = math.sqrt(occurrence_sum * model_sum)
+                product = occurrence_sum * model_sum
+
+                # Check if the product is non-negative before calculating the square root
+                if product >= 0:
+                    geometric_mean = math.sqrt(product)
+                else:
+                    logger.error(f"Negative product encountered for stereotype '{stereotype}': {product}")
+                    exit(1)
+                    geometric_mean = float('nan')
+
                 geometric_mean_values.append(geometric_mean)
 
             # Step 4: Create a DataFrame for the geometric mean results

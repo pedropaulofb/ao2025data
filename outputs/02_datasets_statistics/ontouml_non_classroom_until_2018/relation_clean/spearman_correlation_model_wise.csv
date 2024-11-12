@@ -1,0 +1,6 @@
+Stereotype,characterization,componentOf,derivation,material,mediation
+characterization,1.0,0.5,0.5,-0.5,0.5
+componentOf,0.5,1.0,1.0,0.5,1.0
+derivation,0.5,1.0,1.0,0.5,1.0
+material,-0.5,0.5,0.5,1.0,0.5
+mediation,0.5,1.0,1.0,0.5,1.0

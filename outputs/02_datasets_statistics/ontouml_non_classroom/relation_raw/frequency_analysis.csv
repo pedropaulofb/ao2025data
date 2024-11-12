@@ -1,0 +1,22 @@
+Stereotype,Total Frequency,Total Frequency per Group,Group Frequency,Ubiquity Index,Global Relative Frequency (Occurrence-wise),Global Relative Frequency (Group-wise)
+bringsAbout,0,0.0,0,0.0,0.0,0.0
+characterization,10,2.5,3,0.75,0.07352941176470588,0.2
+comparative,0,0.0,0,0.0,0.0,0.0
+componentOf,14,3.5,2,0.5,0.10294117647058823,0.13333333333333333
+creation,0,0.0,0,0.0,0.0,0.0
+derivation,6,1.5,1,0.25,0.04411764705882353,0.06666666666666667
+externalDependence,0,0.0,0,0.0,0.0,0.0
+historicalDependence,0,0.0,0,0.0,0.0,0.0
+instantiation,0,0.0,0,0.0,0.0,0.0
+manifestation,0,0.0,0,0.0,0.0,0.0
+material,13,3.25,2,0.5,0.09558823529411764,0.13333333333333333
+mediation,2,0.5,1,0.25,0.014705882352941176,0.06666666666666667
+memberOf,0,0.0,0,0.0,0.0,0.0
+participation,0,0.0,0,0.0,0.0,0.0
+participational,0,0.0,0,0.0,0.0,0.0
+subCollectionOf,0,0.0,0,0.0,0.0,0.0
+subQuantityOf,0,0.0,0,0.0,0.0,0.0
+termination,0,0.0,0,0.0,0.0,0.0
+triggers,0,0.0,0,0.0,0.0,0.0
+none,81,20.25,4,1.0,0.5955882352941176,0.26666666666666666
+other,10,2.5,2,0.5,0.07352941176470588,0.13333333333333333

@@ -1,0 +1,22 @@
+Stereotype,Frequency,Rank,Cumulative Frequency,Cumulative Percentage
+subkind,29,1,29,51.78571428571429
+kind,11,2,40,71.42857142857143
+quality,6,3,46,82.14285714285714
+category,5,4,51,91.07142857142857
+role,3,5,54,96.42857142857143
+relator,2,6,56,100.0
+datatype,0,7,56,100.0
+collective,0,8,56,100.0
+abstract,0,9,56,100.0
+enumeration,0,10,56,100.0
+event,0,11,56,100.0
+historicalRole,0,12,56,100.0
+historicalRoleMixin,0,13,56,100.0
+phaseMixin,0,14,56,100.0
+phase,0,15,56,100.0
+mode,0,16,56,100.0
+mixin,0,17,56,100.0
+quantity,0,18,56,100.0
+roleMixin,0,19,56,100.0
+situation,0,20,56,100.0
+type,0,21,56,100.0

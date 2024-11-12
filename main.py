@@ -5,72 +5,16 @@ import pickle
 import pandas as pd
 from loguru import logger
 
-from src.Dataset import Dataset
-from src.directories_global import OUTPUT_DIR_01, BASE_OUTPUT_DIR, OUTPUT_DIR_02, OUTPUT_DIR_03
-from src.step0_initial_setup import initialize_output_directories, get_catalog_path
-from src.load_models_data import instantiate_models_from_csv
+from src.directories_global import OUTPUT_DIR_02
 from src.quadrants_temporal import compare_and_generate_quadrant_csv
 from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
-from src.step1_load_models import load_data_from_catalog, query_data
+from src.step0_setup import initialize_output_directories, get_catalog_path
+from src.step1_input import load_data_from_catalog, query_data, calculate_models_data, \
+    create_and_save_specific_datasets_instances
+from src.step2_processing import calculate_and_save_datasets_statistics, \
+    calculate_and_save_datasets_stereotypes_statistics
 from src.visualization.learning_tree import build_tree, generate_dot
 from src.visualization.trend_analysis import generate_trend_visualization
-
-
-def create_specific_datasets_instances(models_list, suffix: str = ""):
-    """Create datasets based on classroom and non-classroom models."""
-
-    datasets = []
-    datasets.append(Dataset("ontouml_all", models_list))
-
-    ontouml_classroom = [model for model in models_list if model.is_classroom]
-    datasets.append(Dataset("ontouml_classroom", ontouml_classroom))
-
-    ontouml_non_classroom = [model for model in models_list if not model.is_classroom]
-    datasets.append(Dataset("ontouml_non_classroom", ontouml_non_classroom))
-
-    ontouml_non_classroom_until_2018 = [model for model in ontouml_non_classroom if model.year <= 2018]
-    datasets.append(Dataset("ontouml_non_classroom_until_2018", ontouml_non_classroom_until_2018))
-
-    ontouml_non_classroom_after_2019 = [model for model in ontouml_non_classroom if model.year >= 2019]
-    datasets.append(Dataset("ontouml_non_classroom_after_2019", ontouml_non_classroom_after_2019))
-
-    return datasets
-
-
-def calculate_and_save_datasets_statistics(datasets, output_dir):
-    for dataset in datasets:
-        save_dataset_info(dataset)
-
-        dataset.calculate_dataset_statistics()
-        dataset.calculate_models_statistics()
-        dataset.save_models_statistics_to_csv(output_dir)
-        dataset.calculate_and_save_stereotypes_by_year(output_dir)
-        dataset.calculate_and_save_models_by_year(output_dir)
-        dataset.save_stereotypes_count_by_year(output_dir)
-
-
-def load_models_data():
-    """Load model data and count stereotypes for each model."""
-    models_list = instantiate_models_from_csv(os.path.join(OUTPUT_DIR_01, "models_data.csv"),
-                                              os.path.join(OUTPUT_DIR_01,
-                                                           "query_count_number_classes_relations_consolidated.csv"))
-
-    class_csv = os.path.join(OUTPUT_DIR_01, "query_get_all_class_stereotypes_consolidated.csv")
-    relation_csv = os.path.join(OUTPUT_DIR_01, "query_get_all_relation_stereotypes_consolidated.csv")
-
-    # Count stereotypes and calculate 'none' for each model
-    for model in models_list:
-        model.count_stereotypes("class", class_csv)
-        model.count_stereotypes("relation", relation_csv)
-        model.calculate_none()
-
-    return models_list
-
-
-def save_dataset_info(dataset):
-    dataset.save_dataset_general_data_csv(OUTPUT_DIR_02)
-    dataset.save_dataset_class_data_csv(OUTPUT_DIR_02)
-    dataset.save_dataset_relation_data_csv(OUTPUT_DIR_02)
 
 
 def create_list_outliers(datasets, output_dir):
@@ -92,7 +36,7 @@ def create_list_outliers(datasets, output_dir):
     return outliers
 
 
-def calculate_and_save_datasets_statistics_outliers(datasets, outliers,output_dir):
+def calculate_and_save_datasets_statistics_outliers(datasets, outliers, output_dir):
     # Create new datasets without the identified outliers
 
     filtered_datasets = []
@@ -120,7 +64,7 @@ def calculate_and_save_datasets_statistics_outliers(datasets, outliers,output_di
 
     all_datasets = datasets + filtered_datasets
 
-    new_outliers = create_list_outliers(filtered_datasets,output_dir)
+    new_outliers = create_list_outliers(filtered_datasets, output_dir)
 
     double_filtered_datasets = []
     for dataset in all_datasets:
@@ -145,19 +89,6 @@ def calculate_and_save_datasets_statistics_outliers(datasets, outliers,output_di
     save_datasets_statistics_to_csv(all_datasets, OUTPUT_DIR_02)
 
     return all_datasets
-
-
-def calculate_and_save_datasets_stereotypes_statistics(datasets):
-    for dataset in datasets:
-        dataset.calculate_stereotype_statistics()
-        dataset.save_stereotype_statistics(OUTPUT_DIR_02)
-        dataset.calculate_and_save_average_model(OUTPUT_DIR_02)
-        dataset.classify_and_save_spearman_correlation(OUTPUT_DIR_02)
-        dataset.classify_and_save_total_correlation(OUTPUT_DIR_02)
-        dataset.classify_and_save_geometric_mean_correlation(OUTPUT_DIR_02)
-        dataset.classify_and_save_geometric_mean_pairwise_correlation(OUTPUT_DIR_02)
-        dataset.calculate_and_save_quadrants(OUTPUT_DIR_02, 'frequency_analysis',
-                                             'Global Relative Frequency (Occurrence-wise)', 'Ubiquity Index')
 
 
 def select_root_element(in_root_file_path: str) -> str:
@@ -208,7 +139,6 @@ def plot_learning_tree(dataset, in_dir_path, out_dir_path):
 
 
 def execute_non_ontouml_analysis(dataset, out_dir_path):
-
     st_types = ['class', 'relation']
     st_norms = ['yearly', 'overall']
     st_wises = ['ow', 'mw']
@@ -229,24 +159,11 @@ def execute_non_ontouml_analysis(dataset, out_dir_path):
             # 1. Call generate_non_ontouml_combined_visualization without year_start (plot everything)
             # generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,
             #                                             f'{st_type}_{st_norm}')
-            generate_trend_visualization(df_occurrence, df_modelwise, final_out_dir,f'{st_type}_{st_norm}')
+            generate_trend_visualization(df_occurrence, df_modelwise, final_out_dir, f'{st_type}_{st_norm}')
 
-            # for year_start in years_start:
-                # 2. Call generate_non_ontouml_combined_visualization with year_start (plot from 'year_start' onwards)
-                # generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,
-                #                                             f'{st_type}_{st_norm}_{year_start}', year_start=year_start)
+            # for year_start in years_start:  # 2. Call generate_non_ontouml_combined_visualization with year_start (plot from 'year_start' onwards)  # generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, final_out_dir,  #                                             f'{st_type}_{st_norm}_{year_start}', year_start=year_start)
 
-
-            # for st_wise in st_wises:
-            #     analysis = f'{st_type}_{st_wise}_{st_norm}'
-            #
-            #     # 3. Call generate_non_ontouml_visualization without year_start (plot everything)
-            #     generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir, analysis)
-            #
-            #     for year_start in years_start:
-            #         # 4. Call generate_non_ontouml_visualization with year_start (plot from 'year_start' onwards)
-            #         generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir,
-            #                                            f"{analysis}_{year_start}", year_start=year_start)
+            # for st_wise in st_wises:  #     analysis = f'{st_type}_{st_wise}_{st_norm}'  #  #     # 3. Call generate_non_ontouml_visualization without year_start (plot everything)  #     generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir, analysis)  #  #     for year_start in years_start:  #         # 4. Call generate_non_ontouml_visualization with year_start (plot from 'year_start' onwards)  #         generate_non_ontouml_visualization(dataset.years_stereotypes_data[analysis], final_out_dir,  #                                            f"{analysis}_{year_start}", year_start=year_start)
 
 
 def generate_visualizations(datasets, output_dir):
@@ -272,14 +189,14 @@ def generate_visualizations(datasets, output_dir):
 
 
 def quadrants_calculation():
-
-    dataset_types = ["","_specific_filtered","_general_filtered","_double_specific_filtered", "_double_general_filtered"]
+    dataset_types = ["", "_specific_filtered", "_general_filtered", "_double_specific_filtered",
+                     "_double_general_filtered"]
 
     compared_datasets = []
     for dataset_type in dataset_types:
-        d_before = "ontouml_non_classroom_until_2018"+dataset_type
-        d_after = "ontouml_non_classroom_after_2019"+dataset_type
-        d_general = "ontouml_non_classroom"+dataset_type
+        d_before = "ontouml_non_classroom_until_2018" + dataset_type
+        d_after = "ontouml_non_classroom_after_2019" + dataset_type
+        d_general = "ontouml_non_classroom" + dataset_type
         compared_datasets.append((d_before, d_after, d_general))
 
     out_file_name = "quadrants_movement_2018_2019"
@@ -309,21 +226,16 @@ if __name__ == "__main__":
     initialize_output_directories()
     catalog_path = get_catalog_path()
 
-    # Step 1: Load models' data and execute queries
+    # Step 1: Input data - load all models' data, execute queries and create dataset
     all_models_data = load_data_from_catalog(catalog_path)
     query_data(all_models_data)
+    all_models_data = calculate_models_data()
+    datasets = create_and_save_specific_datasets_instances(all_models_data)
 
-    # Step 2: Generate statistics
-
-    # UNCOMMENT TO GENERATE STATISTICS
-    # all_models_data = load_models_data()
-    # datasets = create_specific_datasets_instances(all_models_data)
-    # calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
-    # outliers = create_list_outliers(datasets, OUTPUT_DIR_02)
-    # all_datasets = calculate_and_save_datasets_statistics_outliers(datasets, outliers,OUTPUT_DIR_02)
-    # calculate_and_save_datasets_stereotypes_statistics(all_datasets)
+    # Step 2: Data processing - generate statistics
+    calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
+    # calculate_and_save_datasets_stereotypes_statistics(datasets)
     # quadrants_calculation()
     # save_datasets(all_datasets, OUTPUT_DIR_02)
-    #
-    # generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
+    #  generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
     # generate_visualizations(all_datasets, OUTPUT_DIR_03)

@@ -1,0 +1,22 @@
+Stereotype,Frequency,Rank,Cumulative Frequency,Cumulative Percentage
+none,67,1,67,63.8095238095238
+material,13,2,80,76.19047619047619
+other,10,3,90,85.71428571428571
+derivation,6,4,96,91.42857142857143
+characterization,4,5,100,95.23809523809523
+componentOf,3,6,103,98.09523809523809
+mediation,2,7,105,100.0
+bringsAbout,0,8,105,100.0
+comparative,0,9,105,100.0
+creation,0,10,105,100.0
+historicalDependence,0,11,105,100.0
+instantiation,0,12,105,100.0
+externalDependence,0,13,105,100.0
+memberOf,0,14,105,100.0
+manifestation,0,15,105,100.0
+participation,0,16,105,100.0
+participational,0,17,105,100.0
+subQuantityOf,0,18,105,100.0
+subCollectionOf,0,19,105,100.0
+triggers,0,20,105,100.0
+termination,0,21,105,100.0

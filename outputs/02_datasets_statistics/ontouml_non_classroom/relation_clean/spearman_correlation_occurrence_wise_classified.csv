@@ -1,0 +1,21 @@
+Stereotype,Stereotype2,Absolute Value,Sign,Classification
+componentOf,characterization,0.6324555320336759,positive,strong
+derivation,characterization,0.2581988897471611,negative,weak
+material,characterization,0.7378647873726218,negative,strong
+mediation,characterization,0.2581988897471611,negative,weak
+characterization,componentOf,0.6324555320336759,positive,strong
+derivation,componentOf,0.2721655269759087,positive,weak
+material,componentOf,0.05555555555555555,negative,very_weak
+mediation,componentOf,0.2721655269759087,positive,weak
+characterization,derivation,0.2581988897471611,negative,weak
+componentOf,derivation,0.2721655269759087,positive,weak
+material,derivation,0.816496580927726,positive,very_strong
+mediation,derivation,1.0,positive,very_strong
+characterization,material,0.7378647873726218,negative,strong
+componentOf,material,0.05555555555555555,negative,very_weak
+derivation,material,0.816496580927726,positive,very_strong
+mediation,material,0.816496580927726,positive,very_strong
+characterization,mediation,0.2581988897471611,negative,weak
+componentOf,mediation,0.2721655269759087,positive,weak
+derivation,mediation,1.0,positive,very_strong
+material,mediation,0.816496580927726,positive,very_strong

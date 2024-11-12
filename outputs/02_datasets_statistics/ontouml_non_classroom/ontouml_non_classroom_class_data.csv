@@ -1,0 +1,5 @@
+model,abstract,category,collective,datatype,enumeration,event,historicalRole,historicalRoleMixin,kind,mixin,mode,phase,phaseMixin,quality,quantity,relator,role,roleMixin,situation,subkind,type,none,other
+abel2015petroleum-system,0,0,0,1,5,3,0,0,4,1,0,0,0,2,6,0,3,0,4,0,0,0,0
+abrahao2018agriculture-operations,0,3,0,0,0,0,0,0,9,0,0,0,0,0,0,6,0,0,0,2,0,0,2
+aguiar2018rdbs-o,0,4,1,0,0,0,0,0,12,0,3,0,0,0,0,0,2,0,0,21,0,0,0
+aguiar2019ooco,0,5,0,0,0,0,0,0,11,0,0,0,0,6,0,2,3,0,0,29,0,0,0

@@ -1,0 +1,11 @@
+Percentage,Top k Stereotypes (Occurrence-wise),Coverage (Occurrence-wise),Top k Stereotypes (Group-wise),Coverage (Group-wise)
+10.0,1,0.6470588235294118,1,0.5
+20.0,3,1.0,3,1.0
+30.0,5,1.0,5,1.0
+40.0,7,1.0,7,1.0
+50.0,9,1.0,9,1.0
+60.0,11,1.0,11,1.0
+70.0,13,1.0,13,1.0
+80.0,15,1.0,15,1.0
+90.0,17,1.0,17,1.0
+100.0,19,1.0,19,1.0

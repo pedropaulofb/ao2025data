@@ -1,0 +1,22 @@
+Stereotype,Shannon Entropy,Gini Coefficient,Simpson Index
+bringsAbout,0.0,0.0,0.0
+characterization,1.2954618399102367,0.5,0.45999999999999996
+comparative,0.0,0.0,0.0
+componentOf,0.74959525437409,0.6428571428571429,0.6632653061224489
+creation,0.0,0.0,0.0
+derivation,0.0,0.75,1.0
+externalDependence,0.0,0.0,0.0
+historicalDependence,0.0,0.0,0.0
+instantiation,0.0,0.0,0.0
+manifestation,0.0,0.0,0.0
+material,0.6193821917933737,0.6730769230769231,0.7396449704142012
+mediation,0.0,0.75,1.0
+memberOf,0.0,0.0,0.0
+participation,0.0,0.0,0.0
+participational,0.0,0.0,0.0
+subCollectionOf,0.0,0.0,0.0
+subQuantityOf,0.0,0.0,0.0
+termination,0.0,0.0,0.0
+triggers,0.0,0.0,0.0
+none,1.851020470704135,0.23148148148148148,0.29858253315043437
+other,0.4689955907038912,0.7,0.8200000000000001

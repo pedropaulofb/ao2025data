@@ -1,0 +1,24 @@
+Stereotype,Total Frequency,Total Frequency per Group,Group Frequency,Ubiquity Index,Global Relative Frequency (Occurrence-wise),Global Relative Frequency (Group-wise)
+abstract,0,0.0,0,0.0,0.0,0.0
+category,5,5.0,1,1.0,0.08928571428571429,0.16666666666666666
+collective,0,0.0,0,0.0,0.0,0.0
+datatype,0,0.0,0,0.0,0.0,0.0
+enumeration,0,0.0,0,0.0,0.0,0.0
+event,0,0.0,0,0.0,0.0,0.0
+historicalRole,0,0.0,0,0.0,0.0,0.0
+historicalRoleMixin,0,0.0,0,0.0,0.0,0.0
+kind,11,11.0,1,1.0,0.19642857142857142,0.16666666666666666
+mixin,0,0.0,0,0.0,0.0,0.0
+mode,0,0.0,0,0.0,0.0,0.0
+phase,0,0.0,0,0.0,0.0,0.0
+phaseMixin,0,0.0,0,0.0,0.0,0.0
+quality,6,6.0,1,1.0,0.10714285714285714,0.16666666666666666
+quantity,0,0.0,0,0.0,0.0,0.0
+relator,2,2.0,1,1.0,0.03571428571428571,0.16666666666666666
+role,3,3.0,1,1.0,0.05357142857142857,0.16666666666666666
+roleMixin,0,0.0,0,0.0,0.0,0.0
+situation,0,0.0,0,0.0,0.0,0.0
+subkind,29,29.0,1,1.0,0.5178571428571429,0.16666666666666666
+type,0,0.0,0,0.0,0.0,0.0
+none,0,0.0,0,0.0,0.0,0.0
+other,0,0.0,0,0.0,0.0,0.0
