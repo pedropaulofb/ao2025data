@@ -1,4 +1,3 @@
-import copy
 import csv
 import math
 import os
@@ -8,9 +7,10 @@ import pandas as pd
 from loguru import logger
 
 from src import ModelData
-from src.statistics_calculations_datasets import calculate_class_and_relation_metrics, calculate_stats, calculate_ratios
-from src.statistics_calculations_stereotypes import calculate_stereotype_metrics
-from src.statistics_calculations_stereotypes_extra import classify_and_save_spearman_correlations, \
+from src.calculations.statistics_calculations_datasets import calculate_class_and_relation_metrics, calculate_stats, \
+    calculate_ratios
+from src.calculations.statistics_calculations_stereotypes import calculate_stereotype_metrics
+from src.calculations.statistics_calculations_stereotypes_extra import classify_and_save_spearman_correlations, \
     calculate_quadrants_and_save
 from src.utils import append_unique_preserving_order, save_to_csv
 
@@ -212,102 +212,6 @@ class Dataset():
 
         logger.success(f"Statistics for models in dataset '{self.name}' successfully saved in {output_path}.")
 
-    def identify_outliers(self, output_dir) -> list:
-        """
-        Identify outliers in the dataset based on IQR for 'total_classes', 'total_relations', and the class-to-relation ratio.
-
-        :return: Dictionary of outlier models with the reason ('class', 'relation', 'ratio', or a combination of these).
-        """
-        # Retrieve the necessary statistics from the dataset's statistics dictionary
-        Q1_classes = self.statistics['class_total_q1']
-        Q3_classes = self.statistics['class_total_q3']
-        IQR_classes = self.statistics['class_total_iqr']
-
-        Q1_relations = self.statistics['relation_total_q1']
-        Q3_relations = self.statistics['relation_total_q3']
-        IQR_relations = self.statistics['relation_total_iqr']
-
-        # Calculate the class-to-relation ratio for each model
-        ratios = [model.total_class_number / model.total_relation_number if model.total_relation_number > 0 else np.nan
-                  for model in self.models]
-        df = pd.DataFrame({'model': [model.name for model in self.models],
-                           'total_classes': [model.total_class_number for model in self.models],
-                           'total_relations': [model.total_relation_number for model in self.models],
-                           'class_relation_ratio': ratios})
-
-        # Step 1: Define the bounds for non-outliers using the IQR method for total_classes and total_relations
-        lower_bound_classes = Q1_classes - 1.5 * IQR_classes
-        upper_bound_classes = Q3_classes + 1.5 * IQR_classes
-
-        lower_bound_relations = Q1_relations - 1.5 * IQR_relations
-        upper_bound_relations = Q3_relations + 1.5 * IQR_relations
-
-        # # Step 2: Calculate IQR for the class-to-relation ratio - DISCARDED
-
-        # Step 3: Identify outliers
-        outliers = {}
-
-        for index, model in df.iterrows():
-            class_outlier = (
-                    model['total_classes'] < lower_bound_classes or model['total_classes'] > upper_bound_classes)
-            relation_outlier = (model['total_relations'] < lower_bound_relations or model[
-                'total_relations'] > upper_bound_relations)
-
-            # Determine if it's a class outlier, a relation outlier, or a combination
-            if class_outlier and relation_outlier:
-                outliers[model['model']] = 'class, relation'
-            elif class_outlier:
-                outliers[model['model']] = 'class'
-            elif relation_outlier:
-                outliers[model['model']] = 'relation'
-
-        # Step 4: Log the results
-        if not outliers:
-            logger.info(f"No outliers found in dataset '{self.name}'. All models are within the normal range.")
-        else:
-            # Convert outliers dictionary to a DataFrame
-            outliers_df = pd.DataFrame(list(outliers.items()), columns=['model', 'reason'])
-
-            # Ensure the output directory exists
-            outliers_path = os.path.join(output_dir, self.name, "outliers.csv")
-            os.makedirs(os.path.dirname(outliers_path), exist_ok=True)
-
-            # Save the DataFrame to CSV
-            outliers_df.to_csv(outliers_path, index=False)
-
-            logger.info(f"Outliers found in dataset '{self.name}' and saved to {outliers_path}")
-
-        return list(outliers.keys())
-
-    def fork_without_outliers(self, outliers: list[str], suffix: str) -> 'Dataset':
-        """
-        Create a new Dataset instance by removing models that are in the outliers list.
-
-        :param outliers: List of model names that are outliers.
-        :return: A new Dataset instance without the outliers.
-        """
-        # Create a deep copy of the current dataset
-        new_dataset = copy.deepcopy(self)
-
-        new_dataset.name = self.name + suffix
-
-        # Remove models whose names are in the outliers list
-        new_dataset.models = [model for model in new_dataset.models if model.name not in outliers]
-        new_dataset.num_models: int = len(new_dataset.models)
-
-        new_dataset.reset_statistics()
-
-        return new_dataset
-
-    def reset_statistics(self) -> None:
-        """
-        Reset the statistics for the current Dataset instance by clearing the statistics dictionary.
-        """
-        self.statistics = {}
-        for model in self.models:
-            model.statistics = {}  # Reset statistics for each model as well
-        logger.info(f"Statistics reset for dataset '{self.name}' and all its models.")
-
     def calculate_stereotype_statistics(self) -> None:
         """
         Calculate stereotype statistics for class and relation stereotypes, both raw and clean,
@@ -427,9 +331,6 @@ class Dataset():
             total_corr_model_df.to_csv(model_filepath, index=False)
             logger.success(
                 f"Dataset '{self.name}', case '{subdir}': total model-wise correlation saved successfully in '{model_filepath}'.")
-
-    import math
-    from loguru import logger
 
     # Existing code...
 
@@ -675,7 +576,7 @@ class Dataset():
         yearly_data_relation_mw = {}
 
         cases = {'class': (self.data_class, yearly_data_class_ow, yearly_data_class_mw),
-            'relation': (self.data_relation, yearly_data_relation_ow, yearly_data_relation_mw)}
+                 'relation': (self.data_relation, yearly_data_relation_ow, yearly_data_relation_mw)}
 
         # Loop through each model and accumulate the stereotype counts by year
         for analysis, (content, yearly_data_ow, yearly_data_mw) in cases.items():
@@ -726,8 +627,8 @@ class Dataset():
 
         # Define the keys for saving the data
         keys = ['class_ow', 'relation_ow', 'class_mw', 'relation_mw', 'class_ow_overall', 'relation_ow_overall',
-            'class_ow_yearly', 'relation_ow_yearly', 'class_mw_overall', 'relation_mw_overall', 'class_mw_yearly',
-            'relation_mw_yearly']
+                'class_ow_yearly', 'relation_ow_yearly', 'class_mw_overall', 'relation_mw_overall', 'class_mw_yearly',
+                'relation_mw_yearly']
 
         # Save each of the DataFrames to CSV files
         for key in keys:

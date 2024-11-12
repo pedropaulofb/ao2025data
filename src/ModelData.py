@@ -1,10 +1,10 @@
 import csv
 
-from src.statistics_calculations_datasets import calculate_ratios
+from src.calculations.statistics_calculations_datasets import calculate_ratios
 
 
 class ModelData:
-    def __init__(self, name: str, year: int, is_classroom: bool, total_class:int, total_relation:int) -> None:
+    def __init__(self, name: str, year: int, is_classroom: bool, total_class: int, total_relation: int) -> None:
 
         self.name: str = name
         self.year: int = year
@@ -13,19 +13,21 @@ class ModelData:
         self.total_relation_number: int = total_relation
         self.statistics: dict = {}
 
-
         # List of attributes stored in the 'stats' dictionary
         self.class_stereotypes: list[str] = ["abstract", "category", "collective", "datatype", "enumeration", "event",
-                                       "historicalRole", "historicalRoleMixin", "kind", "mixin", "mode", "phase",
-                                       "phaseMixin", "quality", "quantity", "relator", "role", "roleMixin", "situation",
-                                       "subkind", "type", "none", "other"]
+                                             "historicalRole", "historicalRoleMixin", "kind", "mixin", "mode", "phase",
+                                             "phaseMixin", "quality", "quantity", "relator", "role", "roleMixin",
+                                             "situation",
+                                             "subkind", "type", "none", "other"]
 
         # List of attributes stored in the 'stats' dictionary
-        self.relation_stereotypes: list[str] = ["bringsAbout", "characterization", "comparative", "componentOf", "creation",
-                                          "derivation", "externalDependence", "historicalDependence", "instantiation",
-                                          "manifestation", "material", "mediation", "memberOf", "participation",
-                                          "participational", "subCollectionOf", "subQuantityOf", "termination",
-                                          "triggers", "none", "other"]
+        self.relation_stereotypes: list[str] = ["bringsAbout", "characterization", "comparative", "componentOf",
+                                                "creation",
+                                                "derivation", "externalDependence", "historicalDependence",
+                                                "instantiation",
+                                                "manifestation", "material", "mediation", "memberOf", "participation",
+                                                "participational", "subCollectionOf", "subQuantityOf", "termination",
+                                                "triggers", "none", "other"]
 
         # Initialize 'stats' dictionary with default value 0 for all attributes
         self.class_stereotypes: dict[str, int] = {attr: 0 for attr in self.class_stereotypes}

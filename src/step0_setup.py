@@ -17,11 +17,12 @@ def initialize_output_directories():
         except OSError as e:
             logger.error(f"Failed to create directory {directory}. Error: {e}")
 
+
 def create_parser():
     """Creates and returns an argument parser for the catalog path."""
     parser = argparse.ArgumentParser(description="Receives OntoUML models path.")
     parser.add_argument("catalog_path", nargs="?", default=CATALOG_PATH,
-        help=f"Path to the input data source directory. Defaults to '{CATALOG_PATH}' if not provided.")
+                        help=f"Path to the input data source directory. Defaults to '{CATALOG_PATH}' if not provided.")
     return parser
 
 

@@ -95,7 +95,9 @@ def append_unique_preserving_order(existing_list, new_keys):
             existing_list.append(key)
     return existing_list
 
-def save_object(object_to_save:object, output_dir: str, output_file_name:str, output_description: Optional[str] = None):
+
+def save_object(object_to_save: object, output_dir: str, output_file_name: str,
+                output_description: Optional[str] = None):
     """Save an object to a compressed file using gzip and pickle."""
     try:
         # Ensure the output directory exists
