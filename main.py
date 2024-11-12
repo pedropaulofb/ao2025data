@@ -1,94 +1,19 @@
-import gzip
 import os
-import pickle
 
 import pandas as pd
-from loguru import logger
 
-from src.directories_global import OUTPUT_DIR_02
+from src.directories_global import OUTPUT_DIR_02, OUTPUT_DIR_01, OUTPUT_DIR_03
 from src.quadrants_temporal import compare_and_generate_quadrant_csv
-from src.save_datasets_statistics_to_csv import save_datasets_statistics_to_csv
 from src.step0_setup import initialize_output_directories, get_catalog_path
 from src.step1_input import load_data_from_catalog, query_data, calculate_models_data, \
     create_and_save_specific_datasets_instances
 from src.step2_processing import calculate_and_save_datasets_statistics, \
     calculate_and_save_datasets_stereotypes_statistics
+from src.utils import load_object, save_object
 from src.visualization.learning_tree import build_tree, generate_dot
+from src.visualization.pareto import plot_pareto, plot_pareto_combined
+from src.visualization.scatter import plot_scatter
 from src.visualization.trend_analysis import generate_trend_visualization
-
-
-def create_list_outliers(datasets, output_dir):
-    # Initialize outlier lists to avoid UnboundLocalError if no outliers are found
-
-    outliers: dict = {}
-
-    # Identify outliers for each dataset
-    for dataset in datasets:
-        if 'ontouml_all' in dataset.name:
-            outliers["ontouml_all_outliers"] = dataset.identify_outliers(output_dir)
-        elif 'non_classroom' in dataset.name:
-            outliers["ontouml_non_classroom_outliers"] = dataset.identify_outliers(output_dir)
-        elif 'ontouml_classroom' in dataset.name:
-            outliers["ontouml_classroom_outliers"] = dataset.identify_outliers(output_dir)
-        else:
-            logger.error(f"No outlier calculated to dataset {dataset.name}.")
-
-    return outliers
-
-
-def calculate_and_save_datasets_statistics_outliers(datasets, outliers, output_dir):
-    # Create new datasets without the identified outliers
-
-    filtered_datasets = []
-
-    for dataset in datasets:
-        if 'non_classroom' in dataset.name:
-            filtered_datasets.append(
-                dataset.fork_without_outliers(outliers["ontouml_all_outliers"], "_general_filtered"))
-            filtered_datasets.append(
-                dataset.fork_without_outliers(outliers["ontouml_non_classroom_outliers"], "_specific_filtered"))
-        elif 'classroom' in dataset.name:
-            filtered_datasets.append(
-                dataset.fork_without_outliers(outliers["ontouml_all_outliers"], "_general_filtered"))
-            filtered_datasets.append(
-                dataset.fork_without_outliers(outliers["ontouml_classroom_outliers"], "_specific_filtered"))
-        elif dataset.name == 'ontouml_all':
-            filtered_datasets.append(dataset.fork_without_outliers(outliers["ontouml_all_outliers"], "_filtered"))
-        else:
-            logger.warning(f"Dataset {dataset.name} had no outliers cleaned.")
-
-    # Calculate and save statistics for the datasets without outliers
-    calculate_and_save_datasets_statistics(filtered_datasets, OUTPUT_DIR_02)
-
-    # Combine original datasets with filtered ones and save combined statistics
-
-    all_datasets = datasets + filtered_datasets
-
-    new_outliers = create_list_outliers(filtered_datasets, output_dir)
-
-    double_filtered_datasets = []
-    for dataset in all_datasets:
-        if "non_classroom" in dataset.name and "general_filtered" in dataset.name:
-            new_dataset = dataset.fork_without_outliers(outliers["ontouml_non_classroom_outliers"], "_double")
-            new_dataset.name = new_dataset.name.replace("_general_filtered_double", "_double_general_filtered")
-            double_filtered_datasets.append(new_dataset)
-            new_dataset = dataset.fork_without_outliers(new_outliers["ontouml_non_classroom_outliers"], "_double")
-            new_dataset.name = new_dataset.name.replace("_general_filtered_double", "_double_specific_filtered")
-            double_filtered_datasets.append(new_dataset)
-        elif "classroom" in dataset.name and "general_filtered" in dataset.name:
-            new_dataset = dataset.fork_without_outliers(outliers["ontouml_classroom_outliers"], "_double")
-            new_dataset.name = new_dataset.name.replace("_general_filtered_double", "_double_general_filtered")
-            double_filtered_datasets.append(new_dataset)
-            new_dataset = dataset.fork_without_outliers(new_outliers["ontouml_classroom_outliers"], "_double")
-            new_dataset.name = new_dataset.name.replace("_general_filtered_double", "_double_specific_filtered")
-            double_filtered_datasets.append(new_dataset)
-
-    calculate_and_save_datasets_statistics(double_filtered_datasets, OUTPUT_DIR_02)
-    all_datasets += double_filtered_datasets
-
-    save_datasets_statistics_to_csv(all_datasets, OUTPUT_DIR_02)
-
-    return all_datasets
 
 
 def select_root_element(in_root_file_path: str) -> str:
@@ -167,30 +92,21 @@ def execute_non_ontouml_analysis(dataset, out_dir_path):
 
 
 def generate_visualizations(datasets, output_dir):
-    if isinstance(datasets, str):
-        # Deserialize (unpickle) the object
-        logger.info(f"Loading datasets from {datasets}.")
-        with gzip.open(datasets, "rb") as file:
-            datasets = pickle.load(file)
-        logger.success(f"Successfully loaded {len(datasets)} datasets.")
+
+    datasets = load_object(datasets,"datasets")
 
     coverages = [0.5, 0.75, 0.9, 0.95]
     for dataset in datasets:
-        # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir)
-        # plot_boxplot(dataset, OUTPUT_DIR_02, output_dir, True)
-        # plot_heatmap(dataset, output_dir)
         # plot_pareto(dataset, output_dir, "occurrence")
         # plot_pareto(dataset, output_dir, "group")
-        # for coverage in coverages:
-        #     plot_pareto_combined(dataset, output_dir, coverage)
-        # plot_scatter(dataset, output_dir)
-        # plot_learning_tree(dataset, OUTPUT_DIR_02, output_dir)
+        for coverage in coverages:
+            plot_pareto_combined(dataset, output_dir, coverage)
+        plot_scatter(dataset, output_dir)
         execute_non_ontouml_analysis(dataset, output_dir)
 
 
-def quadrants_calculation():
-    dataset_types = ["", "_specific_filtered", "_general_filtered", "_double_specific_filtered",
-                     "_double_general_filtered"]
+def calculate_and_save_datasets_quadrants():
+    dataset_types = [""]
 
     compared_datasets = []
     for dataset_type in dataset_types:
@@ -223,19 +139,22 @@ def quadrants_calculation():
 
 if __name__ == "__main__":
     # Step 0: Initial setup
-    initialize_output_directories()
-    catalog_path = get_catalog_path()
+    # initialize_output_directories()
+    # catalog_path = get_catalog_path()
 
-    # Step 1: Input data - load all models' data, execute queries and create dataset
-    all_models_data = load_data_from_catalog(catalog_path)
-    query_data(all_models_data)
-    all_models_data = calculate_models_data()
-    datasets = create_and_save_specific_datasets_instances(all_models_data)
+    # # Step 1: Data input - load all models' data, execute queries and create dataset
+    # all_models_data = load_data_from_catalog(catalog_path)
+    # query_data(all_models_data)
+    # all_models_data = calculate_models_data()
+    # datasets = create_and_save_specific_datasets_instances(all_models_data)
 
-    # Step 2: Data processing - generate statistics
-    calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
-    # calculate_and_save_datasets_stereotypes_statistics(datasets)
-    # quadrants_calculation()
-    # save_datasets(all_datasets, OUTPUT_DIR_02)
-    #  generate_visualizations("outputs/02_datasets/datasets.object.gz", OUTPUT_DIR_03)
-    # generate_visualizations(all_datasets, OUTPUT_DIR_03)
+    # # Step 2: Data processing - generate statistics
+    # calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
+    # calculate_and_save_datasets_stereotypes_statistics(datasets, OUTPUT_DIR_02)
+    # calculate_and_save_datasets_quadrants()
+    # save_object(datasets, OUTPUT_DIR_02, "datasets","Updated datasets")
+
+    datasets = os.path.join(OUTPUT_DIR_02, "datasets.object.gz")
+
+    # # Step 3: Data output - visualizations
+    # generate_visualizations(datasets, OUTPUT_DIR_03)

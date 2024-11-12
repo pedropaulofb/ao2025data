@@ -3,7 +3,7 @@ import gzip
 import os
 import pickle
 import re
-from typing import Optional
+from typing import Optional, Union
 
 import pandas as pd
 from loguru import logger
@@ -95,14 +95,6 @@ def append_unique_preserving_order(existing_list, new_keys):
             existing_list.append(key)
     return existing_list
 
-
-def save_datasets(datasets, output_dir: str):
-    # Save datasets to a file
-    output_name = os.path.join(output_dir, "datasets.object.gz")
-    with gzip.open(output_name, "wb") as file:
-        pickle.dump(datasets, file)
-    logger.success(f"Datasets successfully saved in {output_name}.")
-
 def save_object(object_to_save:object, output_dir: str, output_file_name:str, output_description: Optional[str] = None):
     """Save an object to a compressed file using gzip and pickle."""
     try:
@@ -143,3 +135,25 @@ def create_visualizations_out_dirs(output_dir, dataset_name):
 
     # Unpack and return the paths
     return tuple(paths)
+
+
+def load_object(input_source: Union[object, str], description: Optional[str] = None) -> object:
+    """
+    Loads an object from a given source. If the input source is a string, it is assumed to be a file path to
+    a serialized (pickled and gzipped) object, which will be deserialized. If the input is already an object,
+    it is returned as-is.
+    """
+    if isinstance(input_source, str):
+        # Deserialize (unpickle) the object from the provided file path
+        description = description or "object"
+        logger.info(f"Loading {description} from {input_source}.")
+
+        try:
+            with gzip.open(input_source, "rb") as file:
+                input_source = pickle.load(file)
+            logger.success(f"Successfully loaded {description}.")
+        except (FileNotFoundError, OSError, pickle.PickleError) as e:
+            logger.error(f"Failed to load {description} from {input_source}: {e}")
+            raise
+
+    return input_source

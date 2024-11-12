@@ -8,14 +8,13 @@ from typing import Union
 from loguru import logger
 from ontouml_models_lib import Catalog, OntologyDevelopmentContext, Query, Model, OntologyRepresentationStyle
 
-from src.utils import save_object
+from src.utils import save_object, load_object
 
 
 def load_and_save_catalog_models(input_catalog_path: str, output_dir: str):
     """Load models from an OntoUML/UFO catalog and save them to an output directory."""
     # Load the catalog models
-    # TODO: Remove models restriction before release
-    catalog = Catalog(input_catalog_path, 5)
+    catalog = Catalog(input_catalog_path)
 
     # Save the loaded models to the specified output directory
     save_object(catalog.models, output_dir, "loaded_models", "Loaded catalog models")
@@ -25,12 +24,7 @@ def load_and_save_catalog_models(input_catalog_path: str, output_dir: str):
 
 
 def generate_list_models_data_csv(input_models_list, output_file_path):
-    if isinstance(input_models_list, str):
-        # Deserialize (unpickle) the object
-        logger.info(f"Loading models from {input_models_list}.")
-        with gzip.open(input_models_list, "rb") as file:
-            input_models_list = pickle.load(file)
-        logger.success(f"Successfully loaded {len(input_models_list)} models.")
+    input_models_list = load_object(input_models_list, "list of models")
 
     # Normalizing RELEASE DATE, creating IS_CLASSROOM attribute, and preparing data to be saved
     models_data = []
@@ -62,12 +56,8 @@ def generate_list_models_data_csv(input_models_list, output_file_path):
 
 def query_models(models_to_query: Union[list[Model], str], queries_dir: str, output_dir: str):
     # Load models from file, if necessary
-    if isinstance(models_to_query, str):
-        # Deserialize (unpickle) the object
-        logger.info(f"Loading models from {models_to_query}.")
-        with gzip.open(models_to_query, "rb") as file:
-            models_to_query = pickle.load(file)
-        logger.success(f"Successfully loaded {len(models_to_query)} models.")
+
+    models_to_query = load_object(models_to_query, "models to query")
 
     # Load and execute queries on the filtered models
     queries = Query.load_queries(queries_dir)
