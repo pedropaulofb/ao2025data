@@ -66,19 +66,19 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         # Bar plot for occurrence-wise frequency
         bar_width = 0.4
         ax1.bar(data_occurrence['Stereotype'], data_occurrence['Percentage Frequency'], width=bar_width,
-                label='Occurrence-wise Frequency', align='center', color='skyblue', zorder=1)
+                label='Aggregate Occurrence', align='center', color='skyblue', zorder=1)
 
         # Bar plot for group-wise frequency (shifted to the right)
         ax1.bar(data_groupwise['Stereotype'], data_groupwise['Percentage Group-wise Frequency'], width=bar_width,
-                label='Group-wise Frequency', align='edge', color='lightgreen', zorder=1)
+                label='Model Coverage', align='edge', color='lightgreen', zorder=1)
 
         # Calculate medians
         median_occurrence = np.median(data_occurrence['Percentage Frequency'])
         median_groupwise = np.median(data_groupwise['Percentage Group-wise Frequency'])
 
         # Plot horizontal dashed lines for the medians (keep simple labels for the legend)
-        ax1.axhline(median_occurrence, color='blue', linestyle='--', linewidth=1.5, label='Occurrence-wise Median')
-        ax1.axhline(median_groupwise, color='green', linestyle='--', linewidth=1.5, label='Group-wise Median')
+        ax1.axhline(median_occurrence, color='blue', linestyle='--', linewidth=2.0, label='Aggregate Occurrence Median')
+        ax1.axhline(median_groupwise, color='green', linestyle='--', linewidth=2.0, label='Model Coverage Median')
 
         # Annotate the medians at the rightmost end of the lines
         ax1.annotate(f'{median_occurrence:.2f}%', xy=(len(data_occurrence) - 1, median_occurrence), xytext=(5, 5),
@@ -88,7 +88,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
                      textcoords='offset points', color='green', fontsize=10, fontweight='bold')
 
         # Set labels and title
-        ax1.set_ylabel('Relative Frequency (%)', fontsize=12)
+        ax1.set_ylabel('Aggregate Occurrence (%)', fontsize=12)
         ax1.set_title(title, fontweight='bold', fontsize=14)
 
         # Rotate the labels by 90 degrees for better readability
@@ -98,11 +98,11 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         ax2 = ax1.twinx()  # Create a second y-axis
 
         ax2.plot(range(len(data_occurrence)), data_occurrence['Cumulative Percentage'], color='blue', marker='o',
-                 label='Occurrence-wise Cumulative', linestyle='-', linewidth=2, zorder=2)
+                 label='Cumulative Aggregate Occurrence', linestyle='-', linewidth=2, zorder=2)
 
         # Line plot for group-wise cumulative percentage
         ax2.plot(range(len(data_groupwise)), data_groupwise['Group-wise Cumulative Percentage'], color='green',
-                 marker='o', label='Group-wise Cumulative', linestyle='-', linewidth=2, zorder=2)
+                 marker='o', label='Cumulative Model Coverage', linestyle='-', linewidth=2, zorder=2)
 
         if coverage_limit is not None:
             coverage_limit_percent = coverage_limit * 100
@@ -113,7 +113,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
                 groupwise_cumulative = data_groupwise.loc[i, 'Group-wise Cumulative Percentage']
                 if min(occurrence_cumulative, groupwise_cumulative) >= coverage_limit_percent:
                     # Plot the vertical dashed line at this index
-                    ax1.axvline(x=i, color='red', linestyle='--', label=f'{coverage_limit_percent:.1f}% coverage')
+                    ax1.axvline(x=i, color='red', linestyle='--', linewidth=2.0, label=f'Projected Coverage ≥ {coverage_limit_percent:.1f}%')
 
                     # Annotate the occurrence-wise cumulative percentage, automatically adjusted
                     ax2.annotate(f'{occurrence_cumulative:.1f}%', xy=(i, occurrence_cumulative),
@@ -129,7 +129,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
                     break
 
         # Set the y-axis label and ticks for the cumulative percentage
-        ax2.set_ylabel('Cumulative Percentage (%)', fontsize=12)
+        ax2.set_ylabel('Model Coverage (%)', fontsize=12)
         ax2.set_yticks(range(0, 101, 10))
 
         ax1.tick_params(axis='x', rotation=45)  # Rotate by 45 degrees
@@ -186,9 +186,9 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
 
         # Create proxy artists for the symbols
         legend_elements = [Line2D([0], [0], marker='+', color='black', linestyle='None', markersize=7,
-                                  label='value >= median (Occurrence-wise)'),
+                                  label='Stereotype ≥ median (Aggregate Occurrence)'),
                            Line2D([0], [0], marker='*', color='black', linestyle='None', markersize=7,
-                                  label='value >= median (Group-wise)')]
+                                  label='Stereotype ≥ median (Model Coverage)')]
 
         # Add these proxies to the existing legend
         ax2.legend(handles=combined_handles + legend_elements,  # Combine previous handles with new ones
@@ -207,11 +207,11 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
     # Now generate Pareto charts for class clean and relation clean datasets
     create_pareto_chart(pd.DataFrame(dataset.class_statistics_clean['rank_frequency_distribution']),
                         pd.DataFrame(dataset.class_statistics_clean['rank_groupwise_frequency_distribution']),
-                        'Class Stereotypes Occurrences and Coverages', class_clean_out, coverage_limit)
+                        'Class Stereotypes: Aggregate Occurrence and Model Coverage Analysis', class_clean_out, coverage_limit)
 
     create_pareto_chart(pd.DataFrame(dataset.relation_statistics_clean['rank_frequency_distribution']),
                         pd.DataFrame(dataset.relation_statistics_clean['rank_groupwise_frequency_distribution']),
-                        'Relation Stereotypes Occurrences and Coverages', relation_clean_out, coverage_limit)
+                        'Relation Stereotypes: Aggregate Occurrence and Model Coverage Analysis', relation_clean_out, coverage_limit)
 
 
 def execute_non_ontouml_analysis(dataset, out_dir_path):
@@ -293,7 +293,7 @@ def generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, out
 
     # Set labels for the first y-axis (occurrence-wise)
     ax1.set_xlabel('Year')
-    ax1.set_ylabel('Occurrence-wise Frequency (%)', color='black')
+    ax1.set_ylabel('Aggregate Occurrence (%)', color='black')
     ax1.tick_params(axis='y', labelcolor='black')
 
     # Updated code to prevent y-lim warnings for occurrence-wise

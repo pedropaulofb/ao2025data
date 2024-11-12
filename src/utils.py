@@ -128,7 +128,7 @@ def create_visualizations_out_dirs(output_dir, dataset_name):
     output_dir = os.path.join(output_dir, dataset_name)
 
     # Subdirectories
-    subdirs = ["class_raw", "class_clean", "relation_raw", "relation_clean"]
+    subdirs = ["class_clean", "relation_clean"]
     paths = [os.path.join(output_dir, subdir) for subdir in subdirs]
 
     # Create directories if they don't exist
