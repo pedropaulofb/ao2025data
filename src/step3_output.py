@@ -297,9 +297,9 @@ def generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, out
 
     # Barplot for occurrence-wise frequencies ('none' and 'other') with bars side by side
     ax1.bar(df_occurrence['year'], df_occurrence['none'], color=bar_colors['none'], alpha=0.7,
-            label='none (occurrence-wise)', width=0.4, align='center')
+            label='none (Aggregate Occurence)', width=0.4, align='center')
     ax1.bar(df_occurrence['year'], df_occurrence['other'], color=bar_colors['other'], alpha=0.7,
-            label='other (occurrence-wise)', width=0.4, align='edge')
+            label='other (Aggregate Occurence)', width=0.4, align='edge')
 
     # Set labels for the first y-axis (occurrence-wise)
     ax1.set_xlabel('Year')
@@ -332,7 +332,7 @@ def generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, out
         ax2.set_ylim(0, 1)  # Set a default range if max_modelwise is zero or very small
 
     # Set labels for the second y-axis (model-wise)
-    ax2.set_ylabel('Model-wise Frequency (%)', color='black')
+    ax2.set_ylabel('Model Coverage (%)', color='black')
     ax2.tick_params(axis='y', labelcolor='black')
 
     # Align both y-axes to have their zero points match
@@ -352,24 +352,26 @@ def generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, out
     # Generate a figure name from the file_name (remove extension and append .png)
     fig_name = f"non_ontouml_combined_visualization_{file_name}.png"
 
-    # Add title
-    plt.title(title, fontweight='bold')
+    # Title ommited for the paper
+    # plt.title(title, fontweight='bold')
 
     # Plot model-wise frequencies ('none' and 'other') as lines without adding extra legends
     line_none, = ax2.plot(df_modelwise['year'], df_modelwise['none'], color=line_colors['none'], linewidth=2.5,
-                          label='none (model-wise)')
+                          label='none (Model Coverage)')
     line_other, = ax2.plot(df_modelwise['year'], df_modelwise['other'], color=line_colors['other'], linewidth=2.5,
-                           label='other (model-wise)')
+                           label='other (Model Coverage)')
 
     # Combine legends for both occurrence-wise and model-wise data
     handles1, labels1 = ax1.get_legend_handles_labels()  # Handles for the bars (occurrence-wise)
     handles2 = [line_none, line_other]  # Manually get handles for the lines (model-wise)
 
     # Display the combined legend in the top left corner
-    ax1.legend(handles1 + handles2, labels1 + ['none (model-wise)', 'other (model-wise)'], loc='upper right')
+    ax1.legend(handles1 + handles2, labels1 + ['none (Model Coverage)', 'other (Model Coverage)'], loc='upper right')
+
+    # plt.tight_layout()
 
     # Save the figure
-    plt.savefig(os.path.join(out_dir_path, fig_name), dpi=300)
+    plt.savefig(os.path.join(out_dir_path, fig_name), dpi=300, bbox_inches='tight')
     logger.success(f"Figure {fig_name} successfully saved in {out_dir_path}.")
 
     # Close the plot to free memory
