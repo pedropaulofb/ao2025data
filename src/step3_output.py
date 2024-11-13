@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from icecream import ic
 from loguru import logger
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
@@ -89,7 +90,8 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
 
         # Set labels and title
         ax1.set_ylabel('Aggregate Occurrence (%)', fontsize=12)
-        ax1.set_title(title, fontweight='bold', fontsize=14)
+        # Title ommited for the paper
+        # ax1.set_title(title, fontweight='bold', fontsize=14)
 
         # Rotate the labels by 90 degrees for better readability
         ax1.tick_params(axis='x', rotation=90)
@@ -173,9 +175,17 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         combined_handles = handles1 + handles2
         combined_labels = labels1 + labels2
 
+        # Reordering legend elements
+        combined_handles = [combined_handles[3], combined_handles[4], combined_handles[5],
+                            combined_handles[6], combined_handles[0], combined_handles[1],combined_handles[2]]
+        combined_labels = [combined_labels[3], combined_labels[4], combined_labels[5],
+                            combined_labels[6], combined_labels[0], combined_labels[1],combined_labels[2]]
+
+
         combined_legend = ax2.legend(combined_handles, combined_labels, loc='center right', bbox_to_anchor=(1, 0.5),
                                      frameon=True, facecolor='white', edgecolor='black', framealpha=1, shadow=True,
                                      handletextpad=1.5, borderaxespad=2, borderpad=1.5)
+
 
         # Set the zorder of the combined legend higher than other elements
         combined_legend.set_zorder(10)
@@ -187,7 +197,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         # Create proxy artists for the symbols
         legend_elements = [Line2D([0], [0], marker='+', color='black', linestyle='None', markersize=7,
                                   label='Stereotype ≥ median (Aggregate Occurrence)'),
-                           Line2D([0], [0], marker='*', color='black', linestyle='None', markersize=7,
+                           Line2D([0], [0], marker='$*$', color='black', linestyle='None', markersize=7,
                                   label='Stereotype ≥ median (Model Coverage)')]
 
         # Add these proxies to the existing legend
