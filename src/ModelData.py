@@ -17,17 +17,15 @@ class ModelData:
         self.class_stereotypes: list[str] = ["abstract", "category", "collective", "datatype", "enumeration", "event",
                                              "historicalRole", "historicalRoleMixin", "kind", "mixin", "mode", "phase",
                                              "phaseMixin", "quality", "quantity", "relator", "role", "roleMixin",
-                                             "situation",
-                                             "subkind", "type", "none", "other"]
+                                             "situation", "subkind", "type", "none", "other"]
 
         # List of attributes stored in the 'stats' dictionary
         self.relation_stereotypes: list[str] = ["bringsAbout", "characterization", "comparative", "componentOf",
-                                                "creation",
-                                                "derivation", "externalDependence", "historicalDependence",
-                                                "instantiation",
-                                                "manifestation", "material", "mediation", "memberOf", "participation",
-                                                "participational", "subCollectionOf", "subQuantityOf", "termination",
-                                                "triggers", "none", "other"]
+                                                "creation", "derivation", "externalDependence", "formal",
+                                                "historicalDependence", "instantiation", "manifestation", "material",
+                                                "mediation", "memberOf", "participation", "participational",
+                                                "subCollectionOf", "subQuantityOf", "termination", "triggers", "none",
+                                                "other"]
 
         # Initialize 'stats' dictionary with default value 0 for all attributes
         self.class_stereotypes: dict[str, int] = {attr: 0 for attr in self.class_stereotypes}
@@ -38,15 +36,13 @@ class ModelData:
         Count the stereotypes for the current model instance based on the provided CSV file.
         """
 
-        # Validate the stereotype_type argument
-        if stereotype_type not in ['class', 'relation']:
-            raise ValueError("Invalid stereotype_type. Must be 'class' or 'relation'.")
-
         # Choose the appropriate stereotypes dictionary based on stereotype_type
         if stereotype_type == 'class':
             stereotype_dict = self.class_stereotypes
         elif stereotype_type == 'relation':
             stereotype_dict = self.relation_stereotypes
+        else:
+            raise ValueError("Invalid stereotype_type. Must be 'class' or 'relation'.")
 
         # Read the CSV file containing stereotypes and counts
         with open(input_csv_path, mode='r', newline='') as file:
@@ -58,10 +54,22 @@ class ModelData:
 
                 # Process the row only if the model_id matches the current instance's name
                 if model_id == self.name:
-                    # Check if the stereotype is one of the predefined ones
-                    if stereotype in stereotype_dict:
+                    # Normalize the stereotype:
+                    # 1. Trim whitespace
+                    # 2. Make lowercase
+                    # 3. Remove dashes, underscores, and intermediate spaces
+                    normalized_stereotype = (
+                        stereotype.strip()
+                        .lower()
+                        .replace("-", "")
+                        .replace("_", "")
+                        .replace(" ", "")
+                    )
+
+                    # Check if the normalized stereotype is one of the predefined ones
+                    if normalized_stereotype in stereotype_dict:
                         # Update the corresponding stereotype count
-                        stereotype_dict[stereotype] += count
+                        stereotype_dict[normalized_stereotype] += count
                     else:
                         # If not in predefined stereotypes, add to 'other'
                         stereotype_dict["other"] += count
@@ -100,13 +108,9 @@ class ModelData:
         non_ontouml_relations = self.relation_stereotypes["none"] + self.relation_stereotypes["other"]
 
         # Step 1: Calculate ratios
-        ratios = calculate_ratios(
-            total_classes, total_relations,
-            stereotyped_classes, stereotyped_relations,
-            non_stereotyped_classes, non_stereotyped_relations,
-            ontouml_classes, ontouml_relations,
-            non_ontouml_classes, non_ontouml_relations
-        )
+        ratios = calculate_ratios(total_classes, total_relations, stereotyped_classes, stereotyped_relations,
+            non_stereotyped_classes, non_stereotyped_relations, ontouml_classes, ontouml_relations, non_ontouml_classes,
+            non_ontouml_relations)
 
         # Step 2: Count unique class and relation stereotypes (excluding "none" and "other")
         unique_class_stereotypes = sum(
@@ -115,20 +119,13 @@ class ModelData:
             1 for key, value in self.relation_stereotypes.items() if value > 0 and key not in ["none", "other"])
 
         # Step 3: Store statistics in self.statistics
-        self.statistics = {
-            "total_classes": total_classes,
-            "stereotyped_classes": stereotyped_classes,
-            "non_stereotyped_classes": non_stereotyped_classes,
-            "ontouml_classes": ontouml_classes,
-            "non_ontouml_classes": non_ontouml_classes,
-            "total_relations": total_relations,
-            "stereotyped_relations": stereotyped_relations,
-            "non_stereotyped_relations": non_stereotyped_relations,
-            "ontouml_relations": ontouml_relations,
-            "non_ontouml_relations": non_ontouml_relations,
+        self.statistics = {"total_classes": total_classes, "stereotyped_classes": stereotyped_classes,
+            "non_stereotyped_classes": non_stereotyped_classes, "ontouml_classes": ontouml_classes,
+            "non_ontouml_classes": non_ontouml_classes, "total_relations": total_relations,
+            "stereotyped_relations": stereotyped_relations, "non_stereotyped_relations": non_stereotyped_relations,
+            "ontouml_relations": ontouml_relations, "non_ontouml_relations": non_ontouml_relations,
             "unique_class_stereotypes": unique_class_stereotypes,
-            "unique_relation_stereotypes": unique_relation_stereotypes
-        }
+            "unique_relation_stereotypes": unique_relation_stereotypes}
 
         # Add the ratios to the statistics
         self.statistics.update(ratios)
