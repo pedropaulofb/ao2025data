@@ -3,7 +3,6 @@ import os
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from icecream import ic
 from loguru import logger
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
@@ -58,7 +57,8 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         data_groupwise = data_groupwise.reset_index(drop=True)
 
         # Create the plot
-        fig, ax1 = plt.subplots(figsize=(16, 9), tight_layout=True)
+        # fig, ax1 = plt.subplots(figsize=(16, 9), tight_layout=True)
+        fig, ax1 = plt.subplots(figsize=(8, 5), tight_layout=True)
 
         # Set solid white background for the figure
         fig.patch.set_alpha(1)  # Ensure complete figure background opacity
@@ -67,26 +67,28 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         # Bar plot for occurrence-wise frequency
         bar_width = 0.4
         ax1.bar(data_occurrence['Stereotype'], data_occurrence['Percentage Frequency'], width=bar_width,
-                label='Total Count', align='center', color='skyblue', zorder=1)
+                label='Total Count', align='center', color='skyblue', zorder=2)
 
         # Bar plot for group-wise frequency (shifted to the right)
         ax1.bar(data_groupwise['Stereotype'], data_groupwise['Percentage Group-wise Frequency'], width=bar_width,
-                label='Model Coverage', align='edge', color='lightgreen', zorder=1)
+                label='Model Coverage', align='edge', color='lightgreen', zorder=2)
 
         # Calculate medians
         median_occurrence = np.median(data_occurrence['Percentage Frequency'])
         median_groupwise = np.median(data_groupwise['Percentage Group-wise Frequency'])
 
         # Plot horizontal dashed lines for the medians (keep simple labels for the legend)
-        ax1.axhline(median_occurrence, color='blue', linestyle='--', linewidth=2.0, label='Total Count Median')
-        ax1.axhline(median_groupwise, color='green', linestyle='--', linewidth=2.0, label='Model Coverage Median')
+        ax1.axhline(median_occurrence, color='blue', linestyle='--', linewidth=2.0, label='Total Count Median', zorder=3)
+        ax1.axhline(median_groupwise, color='green', linestyle='--', linewidth=2.0, label='Model Coverage Median', zorder=3)
 
         # Annotate the medians at the rightmost end of the lines
-        ax1.annotate(f'{median_occurrence:.2f}%', xy=(len(data_occurrence) - 1, median_occurrence), xytext=(5, 5),
-                     textcoords='offset points', color='blue', fontsize=10, fontweight='bold')
+        # Used (-7, 10) and (-50, 2) for relation
 
-        ax1.annotate(f'{median_groupwise:.2f}%', xy=(len(data_groupwise) - 1, median_groupwise), xytext=(5, 5),
-                     textcoords='offset points', color='green', fontsize=10, fontweight='bold')
+        ax1.annotate(f'{median_occurrence:.2f}%', xy=(len(data_occurrence) - 1, median_occurrence), xytext=(-7, 2),
+                     textcoords='offset points', color='blue', fontsize=10, fontweight='bold', zorder=5)
+
+        ax1.annotate(f'{median_groupwise:.2f}%', xy=(len(data_groupwise) - 1, median_groupwise), xytext=(-7, 2),
+                     textcoords='offset points', color='green', fontsize=10, fontweight='bold', zorder=5)
 
         # Set labels and title
         ax1.set_ylabel('Total Count (%)', fontsize=12)
@@ -108,6 +110,14 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
 
         if coverage_limit is not None:
             coverage_limit_percent = coverage_limit * 100
+            ax2.axhline(
+                y=coverage_limit_percent,
+                color='lightgrey',
+                linestyle=(0, (5, 5)),  # More spaced-out dashes
+                linewidth=1.0,
+                zorder=-5,  # Ensure it remains in the background
+                label='90% Coverage'
+            )
 
             # Find the index where both cumulative percentages exceed the coverage limit
             for i in range(len(data_occurrence)):
@@ -115,16 +125,16 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
                 groupwise_cumulative = data_groupwise.loc[i, 'Group-wise Cumulative Percentage']
                 if min(occurrence_cumulative, groupwise_cumulative) >= coverage_limit_percent:
                     # Plot the vertical dashed line at this index
-                    ax1.axvline(x=i, color='red', linestyle='--', linewidth=2.0, label=f'Projected Coverage ≥ {coverage_limit_percent:.1f}%')
+                    ax1.axvline(x=i, color='red', linestyle='--', linewidth=2.0, label=f'Projected Cumulative ≥ {coverage_limit_percent:.1f}%')
 
                     # Annotate the occurrence-wise cumulative percentage, automatically adjusted
                     ax2.annotate(f'{occurrence_cumulative:.1f}%', xy=(i, occurrence_cumulative),
-                                 textcoords='offset points', xytext=(5, -5), ha='left', va='top', fontsize=10,
+                                 textcoords='offset points', xytext=(3, 14), ha='left', va='top', fontsize=10,
                                  color='blue')
 
                     # Annotate the group-wise cumulative percentage, automatically adjusted
                     ax2.annotate(f'{groupwise_cumulative:.1f}%', xy=(i, groupwise_cumulative),
-                                 textcoords='offset points', xytext=(5, -5), ha='left', va='top', fontsize=10,
+                                 textcoords='offset points', xytext=(3, -5), ha='left', va='top', fontsize=10,
                                  color='green')
 
                     red_line_index = i
@@ -163,9 +173,8 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         # Apply the updated labels back to the axis
         ax1.set_xticklabels(texts)
 
-        ax2.set_axisbelow(True)  # Ensure gridlines are below other plot elements
         ax1.grid(False)
-        ax2.grid(True, axis='y', which='major')
+        ax2.grid(False)
 
         # Extract handles and labels from both axes
         handles1, labels1 = ax1.get_legend_handles_labels()  # Bar plot legend info (ax1)
@@ -183,8 +192,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
 
 
         combined_legend = ax2.legend(combined_handles, combined_labels, loc='center right', bbox_to_anchor=(1, 0.5),
-                                     frameon=True, facecolor='white', edgecolor='black', framealpha=1, shadow=True,
-                                     handletextpad=1.5, borderaxespad=2, borderpad=1.5)
+                                     frameon=True, facecolor='white', edgecolor='black', framealpha=1, shadow=True)
 
 
         # Set the zorder of the combined legend higher than other elements
@@ -203,7 +211,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         # Add these proxies to the existing legend
         ax2.legend(handles=combined_handles + legend_elements,  # Combine previous handles with new ones
                    loc='center right', bbox_to_anchor=(1, 0.5), frameon=True, facecolor='white', edgecolor='black',
-                   framealpha=1, shadow=True, handletextpad=1.5, borderaxespad=2, borderpad=1.5)
+                   framealpha=1, shadow=True, handletextpad=1, borderaxespad=1, borderpad=0.5, fontsize=8)
 
         # Save the plot
         fig_name = f"pareto_combined_cov_{coverage_limit}.png"
@@ -287,7 +295,8 @@ def generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, out
     df_modelwise['year'] = df_modelwise['year'].astype(str)
 
     # Create the plot
-    fig, ax1 = plt.subplots(figsize=(16, 9))  # Adjusted figure size for better layout
+    # fig, ax1 = plt.subplots(figsize=(16, 9))  # Adjusted figure size for better layout
+    fig, ax1 = plt.subplots(figsize=(8, 3))  # Adjusted figure size for better layout
 
     # Define specific hex colors for 'none' and 'other' bars
     bar_colors = {'none': '#d62728', 'other': '#1f77b4'}  # Red for 'none' and blue for 'other' bars
@@ -297,12 +306,12 @@ def generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, out
 
     # Barplot for occurrence-wise frequencies ('none' and 'other') with bars side by side
     ax1.bar(df_occurrence['year'], df_occurrence['none'], color=bar_colors['none'], alpha=0.7,
-            label='none (Aggregate Occurence)', width=0.4, align='center')
+            label='none (Total Occurence)', width=0.4, align='center')
     ax1.bar(df_occurrence['year'], df_occurrence['other'], color=bar_colors['other'], alpha=0.7,
-            label='other (Aggregate Occurence)', width=0.4, align='edge')
+            label='other (Total Occurence)', width=0.4, align='edge')
 
     # Set labels for the first y-axis (occurrence-wise)
-    ax1.set_xlabel('Year')
+    # ax1.set_xlabel('Year')
     ax1.set_ylabel('Total Count (%)', color='black')
     ax1.tick_params(axis='y', labelcolor='black')
 
@@ -347,7 +356,7 @@ def generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, out
     ax2.grid(False)  # Disable gridlines on the secondary axis (y-axis)
 
     # Build the title
-    title = f"Combined Occurrence-wise and Model-wise Data for 'none' and 'other'"
+    # title = f"Combined Occurrence-wise and Model-wise Data for 'none' and 'other'"
 
     # Generate a figure name from the file_name (remove extension and append .png)
     fig_name = f"non_ontouml_combined_visualization_{file_name}.png"
@@ -366,7 +375,12 @@ def generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, out
     handles2 = [line_none, line_other]  # Manually get handles for the lines (model-wise)
 
     # Display the combined legend in the top left corner
-    ax1.legend(handles1 + handles2, labels1 + ['none (Model Coverage)', 'other (Model Coverage)'], loc='upper right')
+    ax1.legend(handles1 + handles2, labels1 + ['none (Model Coverage)', 'other (Model Coverage)'], loc='upper right',
+               fontsize=8,  # Reduce the font size
+               borderpad=0.5,  # Reduce space between the legend content and the border
+               handletextpad=0.5,  # Reduce space between legend handles and labels
+               labelspacing=0.4  # Reduce vertical space between legend entries
+               )
 
     # plt.tight_layout()
 
