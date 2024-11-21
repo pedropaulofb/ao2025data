@@ -91,7 +91,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
                      textcoords='offset points', color='green', fontsize=10, fontweight='bold', zorder=5)
 
         # Set labels and title
-        ax1.set_ylabel('Aggregated Frequency (%)', fontsize=12)
+        ax1.set_ylabel('Stereotype AF & MC (%)', fontsize=12)
         # Title omitted for the paper
         # ax1.set_title(title, fontweight='bold', fontsize=14)
 
@@ -141,7 +141,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
                     break
 
         # Set the y-axis label and ticks for the cumulative percentage
-        ax2.set_ylabel('Model Coverage (%)', fontsize=12)
+        ax2.set_ylabel('Cumulative AF & MC (%)', fontsize=12)
         ax2.set_yticks(range(0, 101, 10))
 
         ax1.tick_params(axis='x', rotation=45)  # Rotate by 45 degrees

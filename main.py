@@ -55,13 +55,15 @@ if __name__ == "__main__":
     # all_models_data = calculate_models_data()
     # datasets = create_and_save_specific_datasets_instances(all_models_data)
 
-    datasets = load_object(os.path.join(OUTPUT_DIR_01, "datasets.object.gz"), "Datasets")
+    # datasets = load_object(os.path.join(OUTPUT_DIR_01, "datasets.object.gz"), "Datasets")
 
-    # Step 2: Data processing - generate statistics
-    calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
-    calculate_and_save_datasets_stereotypes_statistics(datasets, OUTPUT_DIR_02)
-    calculate_and_save_datasets_quadrants()
-    save_object(datasets, OUTPUT_DIR_02, "datasets", "Updated datasets")
+    # # Step 2: Data processing - generate statistics
+    # calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
+    # calculate_and_save_datasets_stereotypes_statistics(datasets, OUTPUT_DIR_02)
+    # calculate_and_save_datasets_quadrants()
+    # save_object(datasets, OUTPUT_DIR_02, "datasets", "Updated datasets")
+
+    datasets = load_object(os.path.join(OUTPUT_DIR_02, "datasets.object.gz"), "Datasets")
 
     # Step 3: Data output - visualizations
     generate_visualizations(datasets, OUTPUT_DIR_03)
