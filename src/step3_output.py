@@ -67,18 +67,18 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         # Bar plot for occurrence-wise frequency
         bar_width = 0.4
         ax1.bar(data_occurrence['Stereotype'], data_occurrence['Percentage Frequency'], width=bar_width,
-                label='Total Count', align='center', color='skyblue', zorder=2)
+                label='Aggregated Frequency (AF)', align='center', color='skyblue', zorder=2)
 
         # Bar plot for group-wise frequency (shifted to the right)
         ax1.bar(data_groupwise['Stereotype'], data_groupwise['Percentage Group-wise Frequency'], width=bar_width,
-                label='Model Coverage', align='edge', color='lightgreen', zorder=2)
+                label='Model Coverage (MC)', align='edge', color='lightgreen', zorder=2)
 
         # Calculate medians
         median_occurrence = np.median(data_occurrence['Percentage Frequency'])
         median_groupwise = np.median(data_groupwise['Percentage Group-wise Frequency'])
 
         # Plot horizontal dashed lines for the medians (keep simple labels for the legend)
-        ax1.axhline(median_occurrence, color='blue', linestyle='--', linewidth=2.0, label='Total Count Median', zorder=3)
+        ax1.axhline(median_occurrence, color='blue', linestyle='--', linewidth=2.0, label='Aggregated Frequency Median', zorder=3)
         ax1.axhline(median_groupwise, color='green', linestyle='--', linewidth=2.0, label='Model Coverage Median', zorder=3)
 
         # Annotate the medians at the rightmost end of the lines
@@ -91,8 +91,8 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
                      textcoords='offset points', color='green', fontsize=10, fontweight='bold', zorder=5)
 
         # Set labels and title
-        ax1.set_ylabel('Total Count (%)', fontsize=12)
-        # Title ommited for the paper
+        ax1.set_ylabel('Aggregated Frequency (%)', fontsize=12)
+        # Title omitted for the paper
         # ax1.set_title(title, fontweight='bold', fontsize=14)
 
         # Rotate the labels by 90 degrees for better readability
@@ -102,7 +102,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         ax2 = ax1.twinx()  # Create a second y-axis
 
         ax2.plot(range(len(data_occurrence)), data_occurrence['Cumulative Percentage'], color='blue', marker='o',
-                 label='Cumulative Total Count', linestyle='-', linewidth=2, zorder=2)
+                 label='Cumulative Aggregated Frequency', linestyle='-', linewidth=2, zorder=2)
 
         # Line plot for group-wise cumulative percentage
         ax2.plot(range(len(data_groupwise)), data_groupwise['Group-wise Cumulative Percentage'], color='green',
@@ -204,9 +204,9 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
 
         # Create proxy artists for the symbols
         legend_elements = [Line2D([0], [0], marker='+', color='black', linestyle='None', markersize=7,
-                                  label='Stereotype ≥ median (Total Count)'),
+                                  label='Stereotype ≥ median (AF)'),
                            Line2D([0], [0], marker='$*$', color='black', linestyle='None', markersize=7,
-                                  label='Stereotype ≥ median (Model Coverage)')]
+                                  label='Stereotype ≥ median (MC)')]
 
         # Add these proxies to the existing legend
         ax2.legend(handles=combined_handles + legend_elements,  # Combine previous handles with new ones
@@ -225,11 +225,11 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
     # Now generate Pareto charts for class clean and relation clean datasets
     create_pareto_chart(pd.DataFrame(dataset.class_statistics_clean['rank_frequency_distribution']),
                         pd.DataFrame(dataset.class_statistics_clean['rank_groupwise_frequency_distribution']),
-                        'Class Stereotypes: Total Count and Model Coverage Analysis', class_clean_out, coverage_limit)
+                        'Class Stereotypes: Aggregated Frequency and Model Coverage Analysis', class_clean_out, coverage_limit)
 
     create_pareto_chart(pd.DataFrame(dataset.relation_statistics_clean['rank_frequency_distribution']),
                         pd.DataFrame(dataset.relation_statistics_clean['rank_groupwise_frequency_distribution']),
-                        'Relation Stereotypes: Total Count and Model Coverage Analysis', relation_clean_out, coverage_limit)
+                        'Relation Stereotypes: Aggregated Frequency and Model Coverage Analysis', relation_clean_out, coverage_limit)
 
 
 def execute_non_ontouml_analysis(dataset, out_dir_path):
@@ -306,13 +306,13 @@ def generate_non_ontouml_combined_visualization(df_occurrence, df_modelwise, out
 
     # Barplot for occurrence-wise frequencies ('none' and 'other') with bars side by side
     ax1.bar(df_occurrence['year'], df_occurrence['none'], color=bar_colors['none'], alpha=0.7,
-            label='none (Total Occurence)', width=0.4, align='center')
+            label='none (Aggregated Frequency)', width=0.4, align='center')
     ax1.bar(df_occurrence['year'], df_occurrence['other'], color=bar_colors['other'], alpha=0.7,
-            label='other (Total Occurence)', width=0.4, align='edge')
+            label='other (Aggregated Frequency)', width=0.4, align='edge')
 
     # Set labels for the first y-axis (occurrence-wise)
     # ax1.set_xlabel('Year')
-    ax1.set_ylabel('Total Count (%)', color='black')
+    ax1.set_ylabel('Aggregated Frequency (%)', color='black')
     ax1.tick_params(axis='y', labelcolor='black')
 
     # Updated code to prevent y-lim warnings for occurrence-wise

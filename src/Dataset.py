@@ -50,7 +50,7 @@ class Dataset():
         df = pd.DataFrame(data, columns=["model", "year", "total_class_number", "total_relation_number"])
 
         # Save to CSV using the common utility function
-        filepath = os.path.join(output_dir, f'{self.name}basic_data.csv')
+        filepath = os.path.join(output_dir, f'{self.name}_basic_data.csv')
         save_to_csv(df, filepath, f"General data for dataset '{self.name}' successfully saved to {filepath}.")
 
     def save_dataset_class_data_csv(self, output_dir: str) -> None:
