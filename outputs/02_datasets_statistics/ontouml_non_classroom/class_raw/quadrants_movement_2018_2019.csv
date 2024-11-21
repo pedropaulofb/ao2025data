@@ -16,9 +16,9 @@ quality,Q3,Q1,Q1
 quantity,Q3,Q3,Q3
 relator,Q1,Q1,Q1
 role,Q1,Q1,Q1
-roleMixin,Q3,Q3,Q3
+roleMixin,Q1,Q1,Q1
 situation,Q3,Q3,Q3
 subkind,Q1,Q1,Q1
-type,Q1,Q4,Q1
-none,Q1,Q4,Q4
-other,Q1,Q1,Q1
+type,Q4,Q4,Q1
+none,Q4,Q4,Q4
+other,Q1,Q3,Q3

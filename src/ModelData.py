@@ -31,16 +31,47 @@ class ModelData:
         self.class_stereotypes: dict[str, int] = {attr: 0 for attr in self.class_stereotypes}
         self.relation_stereotypes: dict[str, int] = {attr: 0 for attr in self.relation_stereotypes}
 
+        # Create a mapping from normalized keys to original keys
+        self.normalized_class_stereotypes = {
+            attr.strip().lower().replace("-", "").replace("_", "").replace(" ", ""): attr
+            for attr in [
+                "abstract", "category", "collective", "datatype", "enumeration", "event",
+                "historicalRole", "historicalRoleMixin", "kind", "mixin", "mode", "phase",
+                "phaseMixin", "quality", "quantity", "relator", "role", "roleMixin",
+                "situation", "subkind", "type", "none", "other"
+            ]
+        }
+
+        self.normalized_relation_stereotypes = {
+            attr.strip().lower().replace("-", "").replace("_", "").replace(" ", ""): attr
+            for attr in [
+                "bringsAbout", "characterization", "comparative", "componentOf", "creation",
+                "derivation", "externalDependence", "formal", "historicalDependence", "instantiation",
+                "manifestation", "material", "mediation", "memberOf", "participation",
+                "participational", "subCollectionOf", "subQuantityOf", "termination", "triggers", "none",
+                "other"
+            ]
+        }
+
+        # Separate dictionaries for invalid stereotypes and their counts
+        self.invalid_class_stereotypes: dict[str, int] = {}
+        self.invalid_relation_stereotypes: dict[str, int] = {}
+
     def count_stereotypes(self, stereotype_type: str, input_csv_path: str) -> None:
         """
         Count the stereotypes for the current model instance based on the provided CSV file.
+        Tracks invalid stereotypes in separate dictionaries for class and relation stereotypes.
         """
 
-        # Choose the appropriate stereotypes dictionary based on stereotype_type
+        # Choose the appropriate stereotypes dictionary and normalization map
         if stereotype_type == 'class':
             stereotype_dict = self.class_stereotypes
+            normalization_map = self.normalized_class_stereotypes
+            invalid_dict = self.invalid_class_stereotypes
         elif stereotype_type == 'relation':
             stereotype_dict = self.relation_stereotypes
+            normalization_map = self.normalized_relation_stereotypes
+            invalid_dict = self.invalid_relation_stereotypes
         else:
             raise ValueError("Invalid stereotype_type. Must be 'class' or 'relation'.")
 
@@ -54,10 +85,7 @@ class ModelData:
 
                 # Process the row only if the model_id matches the current instance's name
                 if model_id == self.name:
-                    # Normalize the stereotype:
-                    # 1. Trim whitespace
-                    # 2. Make lowercase
-                    # 3. Remove dashes, underscores, and intermediate spaces
+                    # Normalize the stereotype from the CSV
                     normalized_stereotype = (
                         stereotype.strip()
                         .lower()
@@ -66,13 +94,19 @@ class ModelData:
                         .replace(" ", "")
                     )
 
-                    # Check if the normalized stereotype is one of the predefined ones
-                    if normalized_stereotype in stereotype_dict:
-                        # Update the corresponding stereotype count
-                        stereotype_dict[normalized_stereotype] += count
+                    # Check if the normalized stereotype is valid
+                    if normalized_stereotype in normalization_map:
+                        # Use the normalization map to find the corresponding original stereotype
+                        original_stereotype = normalization_map[normalized_stereotype]
+                        stereotype_dict[original_stereotype] += count
                     else:
-                        # If not in predefined stereotypes, add to 'other'
-                        stereotype_dict["other"] += count
+                        # Add or update the count for invalid stereotypes in the appropriate dictionary
+                        if normalized_stereotype in invalid_dict:
+                            invalid_dict[normalized_stereotype] += count
+                        else:
+                            # Add to list of invalid and also to 'other' count.
+                            invalid_dict[normalized_stereotype] = count
+                            stereotype_dict["other"] += count
 
     def calculate_none(self) -> None:
         """

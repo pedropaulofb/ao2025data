@@ -8,6 +8,7 @@ phase,category,0.053351687022990486,positive,very_weak
 quality,category,0.2763420122464258,positive,weak
 relator,category,0.07488103277997057,positive,very_weak
 role,category,0.026591471309100362,positive,very_weak
+roleMixin,category,0.23933850630157866,positive,weak
 situation,category,0.24247418268112153,positive,weak
 subkind,category,0.1766152199393294,positive,very_weak
 type,category,0.2709528013985199,positive,weak
@@ -20,6 +21,7 @@ phase,collective,0.382458510180256,positive,weak
 quality,collective,0.03085303821561733,positive,very_weak
 relator,collective,0.31064371620568715,positive,weak
 role,collective,0.15732643590634351,positive,very_weak
+roleMixin,collective,0.015766464196888933,positive,very_weak
 situation,collective,0.29154429870345705,positive,weak
 subkind,collective,0.19909891268265856,positive,very_weak
 type,collective,0.11935619261133114,positive,very_weak
@@ -32,6 +34,7 @@ phase,datatype,0.010543446232179695,positive,very_weak
 quality,datatype,0.09726275769349195,positive,very_weak
 relator,datatype,0.05987965746247086,positive,very_weak
 role,datatype,0.03601842647008492,positive,very_weak
+roleMixin,datatype,0.0,negative,very_weak
 situation,datatype,0.13709184296489846,positive,very_weak
 subkind,datatype,0.10372505434961075,positive,very_weak
 type,datatype,0.0837619254532661,positive,very_weak
@@ -44,6 +47,7 @@ phase,event,0.1630331129030328,positive,very_weak
 quality,event,0.11795778381157292,positive,very_weak
 relator,event,0.09065458295308161,positive,very_weak
 role,event,0.02590605330941514,positive,very_weak
+roleMixin,event,0.273632034588517,positive,weak
 situation,event,0.4981218516683906,positive,moderate
 subkind,event,0.05784042863064973,positive,very_weak
 type,event,0.3371370345909599,positive,weak
@@ -56,6 +60,7 @@ phase,kind,0.27726653526511624,positive,weak
 quality,kind,0.1921810667193403,positive,very_weak
 relator,kind,0.2912623503361605,positive,weak
 role,kind,0.3970122472044328,positive,weak
+roleMixin,kind,0.15531756955795137,positive,very_weak
 situation,kind,0.20535918770073575,positive,weak
 subkind,kind,0.5431504089553695,positive,moderate
 type,kind,0.2992709395641005,positive,weak
@@ -68,6 +73,7 @@ phase,mode,0.1015746930366366,positive,very_weak
 quality,mode,0.31438538829228946,positive,weak
 relator,mode,0.12439286587875409,positive,very_weak
 role,mode,0.21244631031450836,positive,weak
+roleMixin,mode,0.20862994912742316,positive,weak
 situation,mode,0.042662712988808235,positive,very_weak
 subkind,mode,0.181298085640068,positive,very_weak
 type,mode,0.2502116596922639,positive,weak
@@ -80,6 +86,7 @@ mode,phase,0.1015746930366366,positive,very_weak
 quality,phase,0.08138049421095131,positive,very_weak
 relator,phase,0.23797802034290255,positive,weak
 role,phase,0.32972100613373984,positive,weak
+roleMixin,phase,0.011828918623951107,positive,very_weak
 situation,phase,0.06975037981844776,positive,very_weak
 subkind,phase,0.327631327895776,positive,weak
 type,phase,0.002008655705336402,positive,very_weak
@@ -92,6 +99,7 @@ mode,quality,0.31438538829228946,positive,weak
 phase,quality,0.08138049421095131,positive,very_weak
 relator,quality,0.20010145737798296,positive,weak
 role,quality,0.1541780671388059,positive,very_weak
+roleMixin,quality,0.038788776261881534,positive,very_weak
 situation,quality,0.16669762121900875,positive,very_weak
 subkind,quality,0.23967736708549647,positive,weak
 type,quality,0.13630334733580418,positive,very_weak
@@ -104,6 +112,7 @@ mode,relator,0.12439286587875409,positive,very_weak
 phase,relator,0.23797802034290255,positive,weak
 quality,relator,0.20010145737798296,positive,weak
 role,relator,0.26280715989199255,positive,weak
+roleMixin,relator,0.09046098191026991,positive,very_weak
 situation,relator,0.12604779426303722,positive,very_weak
 subkind,relator,0.2069568975792839,positive,weak
 type,relator,0.047738543937625534,positive,very_weak
@@ -116,9 +125,23 @@ mode,role,0.21244631031450836,positive,weak
 phase,role,0.32972100613373984,positive,weak
 quality,role,0.1541780671388059,positive,very_weak
 relator,role,0.26280715989199255,positive,weak
+roleMixin,role,0.09959289848673036,positive,very_weak
 situation,role,0.19509851752471255,positive,very_weak
 subkind,role,0.120401501213743,positive,very_weak
 type,role,0.14055683028022897,positive,very_weak
+category,roleMixin,0.23933850630157866,positive,weak
+collective,roleMixin,0.015766464196888933,positive,very_weak
+datatype,roleMixin,0.0,negative,very_weak
+event,roleMixin,0.273632034588517,positive,weak
+kind,roleMixin,0.15531756955795137,positive,very_weak
+mode,roleMixin,0.20862994912742316,positive,weak
+phase,roleMixin,0.011828918623951107,positive,very_weak
+quality,roleMixin,0.038788776261881534,positive,very_weak
+relator,roleMixin,0.09046098191026991,positive,very_weak
+role,roleMixin,0.09959289848673036,positive,very_weak
+situation,roleMixin,0.1908606980388432,positive,very_weak
+subkind,roleMixin,0.06965060771721762,positive,very_weak
+type,roleMixin,0.3296283663990337,positive,weak
 category,situation,0.24247418268112153,positive,weak
 collective,situation,0.29154429870345705,positive,weak
 datatype,situation,0.13709184296489846,positive,very_weak
@@ -129,6 +152,7 @@ phase,situation,0.06975037981844776,positive,very_weak
 quality,situation,0.16669762121900875,positive,very_weak
 relator,situation,0.12604779426303722,positive,very_weak
 role,situation,0.19509851752471255,positive,very_weak
+roleMixin,situation,0.1908606980388432,positive,very_weak
 subkind,situation,0.08526986453534356,positive,very_weak
 type,situation,0.06755077072382566,positive,very_weak
 category,subkind,0.1766152199393294,positive,very_weak
@@ -141,6 +165,7 @@ phase,subkind,0.327631327895776,positive,weak
 quality,subkind,0.23967736708549647,positive,weak
 relator,subkind,0.2069568975792839,positive,weak
 role,subkind,0.120401501213743,positive,very_weak
+roleMixin,subkind,0.06965060771721762,positive,very_weak
 situation,subkind,0.08526986453534356,positive,very_weak
 type,subkind,0.0727844610660045,positive,very_weak
 category,type,0.2709528013985199,positive,weak
@@ -153,5 +178,6 @@ phase,type,0.002008655705336402,positive,very_weak
 quality,type,0.13630334733580418,positive,very_weak
 relator,type,0.047738543937625534,positive,very_weak
 role,type,0.14055683028022897,positive,very_weak
+roleMixin,type,0.3296283663990337,positive,weak
 situation,type,0.06755077072382566,positive,very_weak
 subkind,type,0.0727844610660045,positive,very_weak

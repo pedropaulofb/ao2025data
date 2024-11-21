@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from icecream import ic
 from loguru import logger
 
 from src import ModelData
@@ -26,6 +27,7 @@ class Dataset():
         self.num_relations: int = -1
 
         self.statistics = {}
+        self.statistics_invalids = {}
 
         self.years_stereotypes_data = {}
 
@@ -835,3 +837,153 @@ class Dataset():
         df_year_data.to_csv(csv_path, index=False)
 
         logger.success(f"Stereotypes count by year data saved to {csv_path}.")
+
+    def calculate_invalid_stereotypes_metrics(self) -> None:
+        """
+        Calculate metrics for invalid stereotypes across all models in the dataset
+        and store them in self.statistics_invalids as separate dictionaries for
+        class and relation invalid stereotypes.
+        """
+        # Initialize dictionaries to track metrics for class and relation stereotypes
+        invalid_class_metrics = {}
+        invalid_relation_metrics = {}
+
+        # Iterate over all models in the dataset
+        for model in self.models:
+            # Collect invalid class stereotypes
+            for stereotype, count in model.invalid_class_stereotypes.items():
+                if stereotype not in invalid_class_metrics:
+                    invalid_class_metrics[stereotype] = {'accumulated_frequency': 0, 'model_coverage': 0}
+                invalid_class_metrics[stereotype]['accumulated_frequency'] += count
+                invalid_class_metrics[stereotype]['model_coverage'] += 1  # Each model contributes once per stereotype
+
+            # Collect invalid relation stereotypes
+            for stereotype, count in model.invalid_relation_stereotypes.items():
+                if stereotype not in invalid_relation_metrics:
+                    invalid_relation_metrics[stereotype] = {'accumulated_frequency': 0, 'model_coverage': 0}
+                invalid_relation_metrics[stereotype]['accumulated_frequency'] += count
+                invalid_relation_metrics[stereotype][
+                    'model_coverage'] += 1  # Each model contributes once per stereotype
+
+        # Store results in self.statistics_invalids
+        self.statistics_invalids = {
+            'class': invalid_class_metrics,
+            'relation': invalid_relation_metrics
+        }
+
+    def save_invalid_stereotypes_metrics_to_csv(self, output_dir: str) -> None:
+        """
+        Save the calculated invalid stereotypes metrics to two separate CSV files:
+        - One for invalid class stereotypes
+        - One for invalid relation stereotypes
+
+        Args:
+            output_dir (str): Directory where the CSV files will be saved.
+        """
+        # Ensure the metrics are calculated
+        if not self.statistics_invalids:
+            logger.warning(
+                "Invalid stereotypes metrics have not been calculated. Call calculate_invalid_stereotypes_metrics() first."
+            )
+            return
+
+        # Extract class and relation invalid metrics
+        invalid_class_metrics = self.statistics_invalids.get('class', {})
+        invalid_relation_metrics = self.statistics_invalids.get('relation', {})
+
+        # Prepare output directory
+        output_dir = os.path.join(output_dir, self.name)
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Save class invalid stereotypes
+        if invalid_class_metrics:
+            class_data = [
+                {
+                    'stereotype': stereotype,
+                    'accumulated_frequency': metrics['accumulated_frequency'],
+                    'model_coverage': metrics['model_coverage']
+                }
+                for stereotype, metrics in invalid_class_metrics.items()
+            ]
+            class_filepath = os.path.join(output_dir, f"{self.name}_invalid_class_stereotypes_metrics.csv")
+            class_df = pd.DataFrame(class_data)
+            class_df.to_csv(class_filepath, index=False, sep=';', header=True)
+            logger.success(f"Invalid class stereotypes metrics saved successfully to {class_filepath}.")
+        else:
+            logger.info(f"No invalid class stereotypes found for dataset '{self.name}'.")
+
+        # Save relation invalid stereotypes
+        if invalid_relation_metrics:
+            relation_data = [
+                {
+                    'stereotype': stereotype,
+                    'accumulated_frequency': metrics['accumulated_frequency'],
+                    'model_coverage': metrics['model_coverage']
+                }
+                for stereotype, metrics in invalid_relation_metrics.items()
+            ]
+            relation_filepath = os.path.join(output_dir, f"{self.name}_invalid_relation_stereotypes_metrics.csv")
+            relation_df = pd.DataFrame(relation_data)
+            relation_df.to_csv(relation_filepath, index=False, sep=';', header=True)
+            logger.success(f"Invalid relation stereotypes metrics saved successfully to {relation_filepath}.")
+        else:
+            logger.info(f"No invalid relation stereotypes found for dataset '{self.name}'.")
+
+    def general_validation(self) -> None:
+        """
+        Perform general validations to ensure the integrity of the dataset calculations.
+        Validates:
+        - Consistency of class ratios
+        - Consistency of relation ratios
+        - OntoUML class ratios
+        - OntoUML relation ratios
+        - Classes to relations ratio
+        """
+
+        # Validate class ratios
+        class_ratio_sum = (
+                self.statistics.get('ratio_stereotyped_classes_total', 0) +
+                self.statistics.get('ratio_non_stereotyped_classes_total', 0)
+        )
+        assert math.isclose(class_ratio_sum, 1.0, rel_tol=1e-5), \
+            f"Class ratios should sum to 1. Found: {class_ratio_sum}. " \
+            f"stereotyped={self.statistics.get('ratio_stereotyped_classes_total', 0)}, " \
+            f"non_stereotyped={self.statistics.get('ratio_non_stereotyped_classes_total', 0)}"
+
+        # Validate relation ratios
+        relation_ratio_sum = (
+                self.statistics.get('ratio_stereotyped_relations_total', 0) +
+                self.statistics.get('ratio_non_stereotyped_relations_total', 0)
+        )
+        assert math.isclose(relation_ratio_sum, 1.0, rel_tol=1e-5), \
+            f"Relation ratios should sum to 1. Found: {relation_ratio_sum}. " \
+            f"stereotyped={self.statistics.get('ratio_stereotyped_relations_total', 0)}, " \
+            f"non_stereotyped={self.statistics.get('ratio_non_stereotyped_relations_total', 0)}"
+
+        # Validate OntoUML class ratios
+        ontouml_class_ratio_sum = (
+                self.statistics.get('ratio_ontouml_classes_total', 0) +
+                self.statistics.get('ratio_non_ontouml_classes_total', 0)
+        )
+        assert math.isclose(ontouml_class_ratio_sum, 1.0, rel_tol=1e-5), \
+            f"OntoUML class ratios should sum to 1. Found: {ontouml_class_ratio_sum}. " \
+            f"OntoUML={self.statistics.get('ratio_ontouml_classes_total', 0)}, " \
+            f"Non-OntoUML={self.statistics.get('ratio_non_ontouml_classes_total', 0)}"
+
+        # Validate OntoUML relation ratios
+        ontouml_relation_ratio_sum = (
+                self.statistics.get('ratio_ontouml_relations_total', 0) +
+                self.statistics.get('ratio_non_ontouml_relations_total', 0)
+        )
+        assert math.isclose(ontouml_relation_ratio_sum, 1.0, rel_tol=1e-5), \
+            f"OntoUML relation ratios should sum to 1. Found: {ontouml_relation_ratio_sum}. " \
+            f"OntoUML={self.statistics.get('ratio_ontouml_relations_total', 0)}, " \
+            f"Non-OntoUML={self.statistics.get('ratio_non_ontouml_relations_total', 0)}"
+
+        # Validate classes to relations ratio
+        ratio_classes_relations = self.statistics.get('ratio_classes_relations', 0)
+        assert ratio_classes_relations > 0, \
+            f"Classes to relations ratio should be positive. Found: {ratio_classes_relations}"
+
+        logger.success("All general validations passed successfully.")
+

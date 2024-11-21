@@ -3,8 +3,8 @@ import os
 from src.calculations.quadrants_temporal import compare_and_generate_quadrant_csv
 from src.directories_global import OUTPUT_DIR_02, OUTPUT_DIR_03, OUTPUT_DIR_01
 from src.step0_setup import initialize_output_directories, get_catalog_path
-from src.step1_input import load_data_from_catalog, query_data, calculate_models_data, \
-    create_and_save_specific_datasets_instances
+from src.step1_input import load_data_from_catalog, calculate_models_data, create_and_save_specific_datasets_instances, \
+    query_data
 from src.step2_processing import calculate_and_save_datasets_statistics, \
     calculate_and_save_datasets_stereotypes_statistics
 from src.step3_output import generate_visualizations
@@ -54,14 +54,14 @@ if __name__ == "__main__":
     # query_data(all_models_data)
     # all_models_data = calculate_models_data()
     # datasets = create_and_save_specific_datasets_instances(all_models_data)
-    #
-    # # Step 2: Data processing - generate statistics
-    # calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
-    # calculate_and_save_datasets_stereotypes_statistics(datasets, OUTPUT_DIR_02)
-    # calculate_and_save_datasets_quadrants()
-    # save_object(datasets, OUTPUT_DIR_02, "datasets", "Updated datasets")
 
-    datasets = load_object(os.path.join(OUTPUT_DIR_02, "datasets.object.gz"), "Non-calculated datasets")
+    datasets = load_object(os.path.join(OUTPUT_DIR_01, "datasets.object.gz"), "Datasets")
+
+    # Step 2: Data processing - generate statistics
+    calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
+    calculate_and_save_datasets_stereotypes_statistics(datasets, OUTPUT_DIR_02)
+    calculate_and_save_datasets_quadrants()
+    save_object(datasets, OUTPUT_DIR_02, "datasets", "Updated datasets")
 
     # Step 3: Data output - visualizations
     generate_visualizations(datasets, OUTPUT_DIR_03)
