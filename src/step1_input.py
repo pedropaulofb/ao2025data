@@ -84,12 +84,6 @@ def create_and_save_specific_datasets_instances(models_list):
     ontouml_non_classroom = [model for model in models_list if not model.is_classroom]
     datasets.append(Dataset("ontouml_non_classroom", ontouml_non_classroom))
 
-    ontouml_non_classroom_until_2018 = [model for model in ontouml_non_classroom if model.year <= 2018]
-    datasets.append(Dataset("ontouml_non_classroom_until_2018", ontouml_non_classroom_until_2018))
-
-    ontouml_non_classroom_after_2019 = [model for model in ontouml_non_classroom if model.year >= 2019]
-    datasets.append(Dataset("ontouml_non_classroom_after_2019", ontouml_non_classroom_after_2019))
-
     save_object(datasets, OUTPUT_DIR_01, "datasets", "List of datasets instances")
 
     return datasets

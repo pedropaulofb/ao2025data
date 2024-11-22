@@ -38,7 +38,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
                                                                          dataset.name)
 
     # Define a helper function to create Pareto charts for a given dataset
-    def create_pareto_chart(data_occurrence, data_groupwise, title, output_path, coverage_limit=None):
+    def create_pareto_chart(data_occurrence, data_groupwise, output_path, coverage_limit=None):
         # Calculate the percentage frequency for occurrence-wise and group-wise data
         data_occurrence['Percentage Frequency'] = (data_occurrence['Frequency'] / data_occurrence[
             'Frequency'].sum()) * 100

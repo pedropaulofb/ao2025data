@@ -29,12 +29,4 @@ def calculate_and_save_datasets_stereotypes_statistics(datasets, output_dir):
         dataset.save_stereotype_statistics(output_dir)
         dataset.calculate_invalid_stereotypes_metrics()
         dataset.save_invalid_stereotypes_metrics_to_csv(output_dir)
-        dataset.calculate_and_save_average_model(output_dir)
-        dataset.classify_and_save_spearman_correlation(output_dir)
-        dataset.classify_and_save_total_correlation(output_dir)
-        dataset.classify_and_save_geometric_mean_correlation(output_dir)
-        dataset.classify_and_save_geometric_mean_pairwise_correlation(output_dir)
-        dataset.calculate_and_save_quadrants(output_dir, 'frequency_analysis',
-                                             'Global Relative Frequency (Occurrence-wise)', 'Ubiquity Index')
-
         dataset.general_validation()
