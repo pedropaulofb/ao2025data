@@ -29,4 +29,6 @@ def calculate_and_save_datasets_stereotypes_statistics(datasets, output_dir):
         dataset.save_stereotype_statistics(output_dir)
         dataset.calculate_invalid_stereotypes_metrics()
         dataset.save_invalid_stereotypes_metrics_to_csv(output_dir)
+        dataset.calculate_analysis2()
+        dataset.save_analysis2_to_csv(output_dir)
         dataset.general_validation()

@@ -225,11 +225,11 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
     # Now generate Pareto charts for class clean and relation clean datasets
     create_pareto_chart(pd.DataFrame(dataset.class_statistics_clean['rank_frequency_distribution']),
                         pd.DataFrame(dataset.class_statistics_clean['rank_groupwise_frequency_distribution']),
-                        'Class Stereotypes: Aggregated Frequency and Model Coverage Analysis', class_clean_out, coverage_limit)
+                        class_clean_out, coverage_limit)
 
     create_pareto_chart(pd.DataFrame(dataset.relation_statistics_clean['rank_frequency_distribution']),
                         pd.DataFrame(dataset.relation_statistics_clean['rank_groupwise_frequency_distribution']),
-                        'Relation Stereotypes: Aggregated Frequency and Model Coverage Analysis', relation_clean_out, coverage_limit)
+                        relation_clean_out, coverage_limit)
 
 
 def execute_non_ontouml_analysis(dataset, out_dir_path):

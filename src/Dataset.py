@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from icecream import ic
 from loguru import logger
 
 from src import ModelData
@@ -596,51 +597,245 @@ class Dataset():
         else:
             logger.info(f"No invalid relation stereotypes found for dataset '{self.name}'.")
 
+    def calculate_analysis2(self):
+        """
+        Calculate AF (Aggregate Frequency), MC (Model Coverage), and their ratios for specific groups of stereotypes,
+        and store the results in the analysis2 attribute. Includes "all" metrics for OntoUML, None, and Other.
+        """
+
+        # Initialize the analysis2 dictionary
+        self.analysis2 = {
+            "class": {},
+            "relation": {}
+        }
+
+        # Define groups and their conditions
+        def group_conditions(ontouml_count, none_count, other_count):
+            return {
+                "ontouml_and_other_and_none": ontouml_count > 0 and other_count > 0 and none_count > 0,
+                "ontouml_and_other_and_not_none": ontouml_count > 0 and other_count > 0 and none_count == 0,
+                "ontouml_and_not_other_and_none": ontouml_count > 0 and other_count == 0 and none_count > 0,
+                "ontouml_and_not_other_and_not_none": ontouml_count > 0 and other_count == 0 and none_count == 0,
+                "not_ontouml_and_other_and_none": ontouml_count == 0 and other_count > 0 and none_count > 0,
+                "not_ontouml_and_other_and_not_none": ontouml_count == 0 and other_count > 0 and none_count == 0,
+                "not_ontouml_and_not_other_and_none": ontouml_count == 0 and other_count == 0 and none_count > 0,
+                "not_ontouml_and_not_other_and_not_none": ontouml_count == 0 and other_count == 0 and none_count == 0,
+            }
+
+        # Helper function to calculate AF, MC, their ratios, and all metrics
+        def calculate_metrics(models, stereotype_type):
+            # Initialize metrics dictionary
+            metrics = {
+                "af": {key: 0 for key in group_conditions(0, 0, 0)},
+                "mc": {key: 0 for key in group_conditions(0, 0, 0)},
+                "ratio_af": {},
+                "ratio_mc": {},
+                "all": {"ontouml": 0, "none": 0, "other": 0},  # Aggregated metrics
+            }
+
+            # Total counts for ratios
+            total_stereotypes = sum(
+                sum(value for key, value in model.class_stereotypes.items())
+                if stereotype_type == "class"
+                else sum(value for key, value in model.relation_stereotypes.items())
+                for model in models
+            )
+            total_models = len(models)
+
+            # Iterate over models to calculate AF and MC
+            # Inside calculate_metrics
+            for model in models:
+                # Extract the stereotype dictionary based on the stereotype type
+                stereotypes = (
+                    model.class_stereotypes if stereotype_type == "class" else model.relation_stereotypes
+                )
+
+                # Calculate the total number of stereotypes for this model
+                total_count = sum(stereotypes.values())
+
+                # Skip processing if there are no stereotypes
+                if total_count == 0:
+                    continue
+
+                # Aggregate counts for groups
+                ontouml_count = sum(value for key, value in stereotypes.items() if key not in ["none", "other"])
+                none_count = stereotypes["none"]
+                other_count = stereotypes["other"]
+
+                # Apply group conditions and update metrics
+                for condition, check in group_conditions(ontouml_count, none_count, other_count).items():
+                    if check:
+                        metrics["af"][condition] += ontouml_count + none_count + other_count
+                        metrics["mc"][condition] += 1
+
+                # Update "all" metrics
+                metrics["all"]["ontouml"] += ontouml_count
+                metrics["all"]["none"] += none_count
+                metrics["all"]["other"] += other_count
+
+            # Generate ratio keys for group conditions
+            for condition in metrics["af"]:
+                af_value = metrics["af"][condition]
+                mc_value = metrics["mc"][condition]
+
+                metrics["ratio_af"][condition] = af_value / total_stereotypes if total_stereotypes > 0 else 0
+                metrics["ratio_mc"][condition] = mc_value / total_models if total_models > 0 else 0
+
+            # Add "all" metrics (AF and MC)
+            metrics["af"]["all_ontouml"] = metrics["all"]["ontouml"]
+            metrics["af"]["all_none"] = metrics["all"]["none"]
+            metrics["af"]["all_other"] = metrics["all"]["other"]
+
+            metrics["mc"]["all_ontouml"] = sum(1 for model in models if sum(
+                value for key, value in
+                (model.class_stereotypes if stereotype_type == "class" else model.relation_stereotypes).items()
+                if key not in ["none", "other"]
+            ) > 0)
+            metrics["mc"]["all_none"] = sum(1 for model in models if (
+                model.class_stereotypes if stereotype_type == "class" else model.relation_stereotypes)["none"] > 0)
+            metrics["mc"]["all_other"] = sum(1 for model in models if (
+                model.class_stereotypes if stereotype_type == "class" else model.relation_stereotypes)["other"] > 0)
+
+            # Generate "all" ratios
+            metrics["ratio_af"]["all_ontouml"] = metrics["all"][
+                                                     "ontouml"] / total_stereotypes if total_stereotypes > 0 else 0
+            metrics["ratio_af"]["all_none"] = metrics["all"]["none"] / total_stereotypes if total_stereotypes > 0 else 0
+            metrics["ratio_af"]["all_other"] = metrics["all"][
+                                                   "other"] / total_stereotypes if total_stereotypes > 0 else 0
+
+            metrics["ratio_mc"]["all_ontouml"] = metrics["mc"]["all_ontouml"] / total_models if total_models > 0 else 0
+            metrics["ratio_mc"]["all_none"] = metrics["mc"]["all_none"] / total_models if total_models > 0 else 0
+            metrics["ratio_mc"]["all_other"] = metrics["mc"]["all_other"] / total_models if total_models > 0 else 0
+
+            # Remove the "all" key to avoid duplicate columns
+            del metrics["all"]
+
+            return metrics
+
+        # Calculate metrics for class and relation stereotypes
+        self.analysis2["class"] = calculate_metrics(self.models, "class")
+        self.analysis2["relation"] = calculate_metrics(self.models, "relation")
+
+        # Log the results for debugging or confirmation
+        logger.success("Analysis2 (AF, MC, Ratios, and All metrics) calculated and stored successfully.")
+
+    def save_analysis2_to_csv(self, output_dir: str) -> None:
+        """
+        Save the `analysis2` results to a CSV file with two rows: one for the header and one for the values.
+
+        - Columns: {type}_{metric}, where type = class | relation, and metric = af | mc | ratio_af | ratio_mc
+        - Rows: All eight combinations of (ontouml | other | none) and (true | false), plus all_(ontouml | none | other).
+        """
+
+        # Ensure the output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Prepare the output file path
+        file_path = os.path.join(output_dir, f'{self.name}_analysis2.csv')
+
+        # Define rows (all combinations and "all" metrics)
+        rows = ["ontouml_and_other_and_none", "ontouml_and_other_and_not_none", "ontouml_and_not_other_and_none",
+                "ontouml_and_not_other_and_not_none", "not_ontouml_and_other_and_none",
+                "not_ontouml_and_other_and_not_none", "not_ontouml_and_not_other_and_none",
+                "not_ontouml_and_not_other_and_not_none", "all_ontouml", "all_none", "all_other", ]
+
+        # Define columns (class and relation with all metrics)
+        columns = []
+        for stereotype_type in ["class", "relation"]:
+            for metric in ["af", "mc", "ratio_af", "ratio_mc"]:
+                columns.append(f"{stereotype_type}_{metric}")
+
+        # Initialize a dictionary to hold the row values for each combination
+        results = {row: [] for row in rows}
+
+        # Fill in the results for each combination and each column
+        for stereotype_type in ["class", "relation"]:
+            metrics = self.analysis2[stereotype_type]
+
+            for metric in ["af", "mc", "ratio_af", "ratio_mc"]:
+                for row in rows:
+                    # Get the value for the specific combination and metric
+                    value = metrics[metric].get(row, "N/A")  # Use "N/A" if the value is missing
+                    results[row].append(value)
+
+        # Write the results to a CSV file
+        with open(file_path, mode="w", newline="") as file:
+            writer = csv.writer(file)
+
+            # Write the header (columns)
+            writer.writerow(["combination"] + columns)
+
+            # Write the rows
+            for row, values in results.items():
+                writer.writerow([row] + values)
+
+        # Log success message
+        logger.success(f"Analysis2 results saved in alternate format successfully to {file_path}.")
+
+
     def general_validation(self) -> None:
         """
         Perform general validations to ensure the integrity of the dataset calculations.
         Validates:
-        - Consistency of class ratios
-        - Consistency of relation ratios
-        - OntoUML class ratios
-        - OntoUML relation ratios
-        - Classes to relations ratio
+        - Consistency of class and relation ratios.
+        - Consistency of AF, MC, and ratio calculations in analysis2.
         """
 
-        # Validate class ratios
-        class_ratio_sum = (self.statistics.get('ratio_stereotyped_classes_total', 0) + self.statistics.get(
-            'ratio_non_stereotyped_classes_total', 0))
-        assert math.isclose(class_ratio_sum, 1.0,
-                            rel_tol=1e-5), f"Class ratios should sum to 1. Found: {class_ratio_sum}. " \
-                                           f"stereotyped={self.statistics.get('ratio_stereotyped_classes_total', 0)}, " \
-                                           f"non_stereotyped={self.statistics.get('ratio_non_stereotyped_classes_total', 0)}"
+        # Validate AF and MC for both class and relation stereotypes
+        for stereotype_type in ["class", "relation"]:
+            metrics = self.analysis2[stereotype_type]
 
-        # Validate relation ratios
-        relation_ratio_sum = (self.statistics.get('ratio_stereotyped_relations_total', 0) + self.statistics.get(
-            'ratio_non_stereotyped_relations_total', 0))
-        assert math.isclose(relation_ratio_sum, 1.0,
-                            rel_tol=1e-5), f"Relation ratios should sum to 1. Found: {relation_ratio_sum}. " \
-                                           f"stereotyped={self.statistics.get('ratio_stereotyped_relations_total', 0)}, " \
-                                           f"non_stereotyped={self.statistics.get('ratio_non_stereotyped_relations_total', 0)}"
+            # Calculate expected total AF and MC dynamically
+            expected_af = sum(
+                model.total_class_number if stereotype_type == "class" else model.total_relation_number
+                for model in self.models
+            )
+            total_af = sum(value for key, value in metrics["af"].items() if not key.startswith("all_"))
+            assert math.isclose(total_af, expected_af, rel_tol=1e-5), (
+                f"Total AF for {stereotype_type} does not match. Found: {total_af}, Expected: {expected_af}."
+            )
 
-        # Validate OntoUML class ratios
-        ontouml_class_ratio_sum = (self.statistics.get('ratio_ontouml_classes_total', 0) + self.statistics.get(
-            'ratio_non_ontouml_classes_total', 0))
-        assert math.isclose(ontouml_class_ratio_sum, 1.0,
-                            rel_tol=1e-5), f"OntoUML class ratios should sum to 1. Found: {ontouml_class_ratio_sum}. " \
-                                           f"OntoUML={self.statistics.get('ratio_ontouml_classes_total', 0)}, " \
-                                           f"Non-OntoUML={self.statistics.get('ratio_non_ontouml_classes_total', 0)}"
+            # Calculate expected total MC
+            expected_mc = len(self.models)
+            total_mc = sum(value for key, value in metrics["mc"].items() if not key.startswith("all_"))
+            assert total_mc <= expected_mc, (
+                f"Total MC for {stereotype_type} exceeds the number of models. Found: {total_mc}, Expected: {expected_mc}."
+            )
 
-        # Validate OntoUML relation ratios
-        ontouml_relation_ratio_sum = (self.statistics.get('ratio_ontouml_relations_total', 0) + self.statistics.get(
-            'ratio_non_ontouml_relations_total', 0))
-        assert math.isclose(ontouml_relation_ratio_sum, 1.0,
-                            rel_tol=1e-5), f"OntoUML relation ratios should sum to 1. Found: {ontouml_relation_ratio_sum}. " \
-                                           f"OntoUML={self.statistics.get('ratio_ontouml_relations_total', 0)}, " \
-                                           f"Non-OntoUML={self.statistics.get('ratio_non_ontouml_relations_total', 0)}"
+            # Validate ratio consistency
+            for condition, af_value in metrics["af"].items():
+                if condition.startswith("all_"):  # Skip aggregated keys
+                    continue
 
-        # Validate classes to relations ratio
-        ratio_classes_relations = self.statistics.get('ratio_classes_relations', 0)
-        assert ratio_classes_relations > 0, f"Classes to relations ratio should be positive. Found: {ratio_classes_relations}"
+                ratio_af = metrics["ratio_af"].get(condition, 0)
+                assert math.isclose(ratio_af, af_value / expected_af if expected_af > 0 else 0, rel_tol=1e-5), (
+                    f"AF ratio mismatch for {stereotype_type}, condition {condition}. Found: {ratio_af}, "
+                    f"Expected: {af_value / expected_af if expected_af > 0 else 0}."
+                )
+
+            for condition, mc_value in metrics["mc"].items():
+                if condition.startswith("all_"):  # Skip aggregated keys
+                    continue
+
+                ratio_mc = metrics["ratio_mc"].get(condition, 0)
+                assert math.isclose(ratio_mc, mc_value / expected_mc if expected_mc > 0 else 0, rel_tol=1e-5), (
+                    f"MC ratio mismatch for {stereotype_type}, condition {condition}. Found: {ratio_mc}, "
+                    f"Expected: {mc_value / expected_mc if expected_mc > 0 else 0}."
+                )
+
+            # Validate "all_*" keys consistency
+            total_all_af = metrics["af"]["all_ontouml"] + metrics["af"]["all_none"] + metrics["af"]["all_other"]
+            assert math.isclose(total_af, total_all_af, rel_tol=1e-5), (
+                f"Mismatch in total AF for {stereotype_type}. Found: {total_af}, Sum of all_*: {total_all_af}."
+            )
+
+            total_ratio_af = (
+                    metrics["ratio_af"]["all_ontouml"]
+                    + metrics["ratio_af"]["all_none"]
+                    + metrics["ratio_af"]["all_other"]
+            )
+            assert math.isclose(total_ratio_af, 1.0, rel_tol=1e-5), (
+                f"Sum of AF ratios for all_* in {stereotype_type} does not equal 1. Found: {total_ratio_af}."
+            )
 
         logger.success("All general validations passed successfully.")
