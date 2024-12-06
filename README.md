@@ -61,6 +61,9 @@ After the execution, the software will create an output folder (e.g., `caise2025
 - **Calculated Statistics**: Available in `output/02_datasets_statistics`.
 - **Graphs and Visualizations**: Available in `output/03_visualizations`.
 
+The data used in the paper is available in the output folder of this repository, ensuring validation by the community.
+
+
 
 ## Developer
 
