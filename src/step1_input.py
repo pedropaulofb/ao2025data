@@ -113,7 +113,11 @@ def generate_list_models_data_csv(input_models_list, output_file_path):
             continue
 
         model.modified = model.issued if not model.modified else model.modified
-        model.is_classroom = True if OntologyDevelopmentContext.CLASSROOM in model.context else False
+        model.is_classroom = True if (
+                OntologyDevelopmentContext.CLASSROOM in model.context
+                and OntologyDevelopmentContext.RESEARCH not in model.context
+                and OntologyDevelopmentContext.INDUSTRY not in model.context
+        ) else False
         models_data.append((model.id, model.modified, model.is_classroom))
 
     # Generating CSV output
