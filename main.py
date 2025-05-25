@@ -1,6 +1,6 @@
 import os
 
-from src.directories_global import OUTPUT_DIR_02, OUTPUT_DIR_03, OUTPUT_DIR_01
+from src.directories_global import OUTPUT_DIR_02, OUTPUT_DIR_03
 from src.step0_setup import initialize_output_directories, get_catalog_path
 from src.step1_input import load_data_from_catalog, calculate_models_data, create_and_save_specific_datasets_instances, \
     query_data
