@@ -639,7 +639,11 @@ class Dataset():
                 else sum(value for key, value in model.relation_stereotypes.items())
                 for model in models
             )
-            total_models = len(models)
+            if stereotype_type == "relation":
+                models_with_relations = [model for model in models if sum(model.relation_stereotypes.values()) > 0]
+                total_models = len(models_with_relations)
+            else:
+                total_models = len(models)
 
             # Iterate over models to calculate AF and MC
             # Inside calculate_metrics
@@ -794,7 +798,10 @@ class Dataset():
             )
 
             # Calculate expected total MC
-            expected_mc = len(self.models)
+            if stereotype_type == "relation":
+                expected_mc = sum(1 for model in self.models if sum(model.relation_stereotypes.values()) > 0)
+            else:
+                expected_mc = len(self.models)
             total_mc = sum(value for key, value in metrics["mc"].items() if not key.startswith("all_"))
             assert total_mc <= expected_mc, (
                 f"Total MC for {stereotype_type} exceeds the number of models. Found: {total_mc}, Expected: {expected_mc}."
