@@ -4,7 +4,6 @@ import os
 
 import numpy as np
 import pandas as pd
-from icecream import ic
 from loguru import logger
 
 from src import ModelData
@@ -771,7 +770,6 @@ class Dataset():
 
         # Log success message
         logger.success(f"Analysis2 results saved in alternate format successfully to {file_path}.")
-
 
     def general_validation(self) -> None:
         """

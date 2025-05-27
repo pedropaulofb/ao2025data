@@ -1,5 +1,3 @@
-import os
-
 from src.directories_global import OUTPUT_DIR_02, OUTPUT_DIR_03
 from src.step0_setup import initialize_output_directories, get_catalog_path
 from src.step1_input import load_data_from_catalog, calculate_models_data, create_and_save_specific_datasets_instances, \
@@ -7,7 +5,7 @@ from src.step1_input import load_data_from_catalog, calculate_models_data, creat
 from src.step2_processing import calculate_and_save_datasets_statistics, \
     calculate_and_save_datasets_stereotypes_statistics
 from src.step3_output import generate_visualizations
-from src.utils import save_object, load_object
+from src.utils import save_object
 
 if __name__ == "__main__":
     # Step 0: Initial setup

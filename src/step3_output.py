@@ -6,7 +6,7 @@ from loguru import logger
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 
-from src.utils import load_object, create_visualizations_out_dirs, append_chars_to_labels, bold_left_labels, color_text
+from src.utils import load_object, append_chars_to_labels, bold_left_labels, color_text
 
 
 def generate_visualizations(datasets, output_dir):
@@ -32,11 +32,11 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
     :param coverage_limit: Optional coverage limit value (between 0 and 1) to draw a vertical line on the plot.
     """
     # Create output directories
-    class_clean_out, relation_clean_out = create_visualizations_out_dirs(output_dir,
-                                                                         dataset.name)
+    common_output_path = os.path.join(output_dir, dataset.name)
+    os.makedirs(common_output_path, exist_ok=True)
 
     # Define a helper function to create Pareto charts for a given dataset
-    def create_pareto_chart(data_occurrence, data_groupwise, output_path, coverage_limit=None):
+    def create_pareto_chart(data_occurrence, data_groupwise, output_path, coverage_limit=None, suffix=""):
         # Calculate the percentage frequency for occurrence-wise and group-wise data
         data_occurrence['Percentage Frequency'] = (data_occurrence['Frequency'] / data_occurrence[
             'Frequency'].sum()) * 100
@@ -213,7 +213,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
                    framealpha=1, shadow=True, handletextpad=1, borderaxespad=1, borderpad=0.5, fontsize=8)
 
         # Save the plot
-        fig_name = f"pareto_combined_cov_{coverage_limit}.png"
+        fig_name = f"pareto_combined_cov_{coverage_limit}_{suffix}.png"
         # Ensure tight layout for the figure before saving
         plt.tight_layout()
         fig.savefig(os.path.join(output_path, fig_name), dpi=300, bbox_inches='tight')
@@ -224,8 +224,8 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
     # Now generate Pareto charts for class clean and relation clean datasets
     create_pareto_chart(pd.DataFrame(dataset.class_statistics_clean['rank_frequency_distribution']),
                         pd.DataFrame(dataset.class_statistics_clean['rank_groupwise_frequency_distribution']),
-                        class_clean_out, coverage_limit)
+                        common_output_path, coverage_limit, suffix="class")
 
     create_pareto_chart(pd.DataFrame(dataset.relation_statistics_clean['rank_frequency_distribution']),
                         pd.DataFrame(dataset.relation_statistics_clean['rank_groupwise_frequency_distribution']),
-                        relation_clean_out, coverage_limit)
+                        common_output_path, coverage_limit, suffix="relation")

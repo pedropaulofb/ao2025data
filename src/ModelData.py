@@ -143,8 +143,9 @@ class ModelData:
 
         # Step 1: Calculate ratios
         ratios = calculate_ratios(total_classes, total_relations, stereotyped_classes, stereotyped_relations,
-            non_stereotyped_classes, non_stereotyped_relations, ontouml_classes, ontouml_relations, non_ontouml_classes,
-            non_ontouml_relations)
+                                  non_stereotyped_classes, non_stereotyped_relations, ontouml_classes,
+                                  ontouml_relations, non_ontouml_classes,
+                                  non_ontouml_relations)
 
         # Step 2: Count unique class and relation stereotypes (excluding "none" and "other")
         unique_class_stereotypes = sum(
@@ -154,12 +155,13 @@ class ModelData:
 
         # Step 3: Store statistics in self.statistics
         self.statistics = {"total_classes": total_classes, "stereotyped_classes": stereotyped_classes,
-            "non_stereotyped_classes": non_stereotyped_classes, "ontouml_classes": ontouml_classes,
-            "non_ontouml_classes": non_ontouml_classes, "total_relations": total_relations,
-            "stereotyped_relations": stereotyped_relations, "non_stereotyped_relations": non_stereotyped_relations,
-            "ontouml_relations": ontouml_relations, "non_ontouml_relations": non_ontouml_relations,
-            "unique_class_stereotypes": unique_class_stereotypes,
-            "unique_relation_stereotypes": unique_relation_stereotypes}
+                           "non_stereotyped_classes": non_stereotyped_classes, "ontouml_classes": ontouml_classes,
+                           "non_ontouml_classes": non_ontouml_classes, "total_relations": total_relations,
+                           "stereotyped_relations": stereotyped_relations,
+                           "non_stereotyped_relations": non_stereotyped_relations,
+                           "ontouml_relations": ontouml_relations, "non_ontouml_relations": non_ontouml_relations,
+                           "unique_class_stereotypes": unique_class_stereotypes,
+                           "unique_relation_stereotypes": unique_relation_stereotypes}
 
         # Add the ratios to the statistics
         self.statistics.update(ratios)
