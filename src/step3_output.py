@@ -37,18 +37,37 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
 
     # Define a helper function to create Pareto charts for a given dataset
     def create_pareto_chart(data_occurrence, data_groupwise, output_path, coverage_limit=None, suffix=""):
-        # Calculate the percentage frequency for occurrence-wise and group-wise data
-        data_occurrence['Percentage Frequency'] = (data_occurrence['Frequency'] / data_occurrence[
-            'Frequency'].sum()) * 100
-        data_groupwise['Percentage Group-wise Frequency'] = (data_groupwise['Group-wise Frequency'] / data_groupwise[
+
+        # === Centralized Color Config ===
+        COLORS = {
+            # RTC = Green (bright)
+            "rtc_bar": "#00E676",  # Bright neon green
+            "rtc_line": "#0D6E34",  # Dark green
+            "rtc_median": "#0D6E34",
+            "rtc_annotation": "#0D6E34",
+
+            # RMC = Purple (bright)
+            "rmc_bar": "#EAA9F5",  # Light orchid/lavender
+            "rmc_line": "#C61BE3",  # Bright vivid purple
+            "rmc_median": "#C61BE3",
+            "rmc_annotation": "#C61BE3",
+
+            # Other
+            "coverage_line": "lightgrey",
+            "coverage_marker": "red"
+        }
+
+        # Calculate RTC and RMC as percentages
+        data_occurrence['RTC (%)'] = (data_occurrence['Frequency'] / data_occurrence['Frequency'].sum()) * 100
+        data_groupwise['RMC (%)'] = (data_groupwise['Group-wise Frequency'] / data_groupwise[
             'Group-wise Frequency'].sum()) * 100
 
         # Ensure that group-wise data is ordered based on occurrence-wise data
         data_groupwise = data_groupwise.set_index('Stereotype').reindex(data_occurrence['Stereotype']).reset_index()
 
         # Calculate cumulative percentages for occurrence-wise and group-wise data
-        data_occurrence['Cumulative Percentage'] = data_occurrence['Percentage Frequency'].cumsum()
-        data_groupwise['Group-wise Cumulative Percentage'] = data_groupwise['Percentage Group-wise Frequency'].cumsum()
+        data_occurrence['Cumulative RTC (%)'] = data_occurrence['RTC (%)'].cumsum()
+        data_groupwise['Cumulative RMC (%)'] = data_groupwise['RMC (%)'].cumsum()
 
         # Reset index to ensure integer indexing
         data_occurrence = data_occurrence.reset_index(drop=True)
@@ -64,34 +83,31 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
 
         # Bar plot for occurrence-wise frequency
         bar_width = 0.4
-        ax1.bar(data_occurrence['Stereotype'], data_occurrence['Percentage Frequency'], width=bar_width,
-                label='Aggregated Frequency (AF)', align='center', color='skyblue', zorder=2)
+        ax1.bar(data_occurrence['Stereotype'], data_occurrence['RTC (%)'], width=bar_width,
+                label='Relative Total Count (RTC)', align='center', color=COLORS["rtc_bar"], zorder=2)
 
-        # Bar plot for group-wise frequency (shifted to the right)
-        ax1.bar(data_groupwise['Stereotype'], data_groupwise['Percentage Group-wise Frequency'], width=bar_width,
-                label='Model Coverage (MC)', align='edge', color='lightgreen', zorder=2)
+        ax1.bar(data_groupwise['Stereotype'], data_groupwise['RMC (%)'], width=bar_width,
+                label='Relative Model Coverage (RMC)', align='edge', color=COLORS["rmc_bar"], zorder=2)
 
         # Calculate medians
-        median_occurrence = np.median(data_occurrence['Percentage Frequency'])
-        median_groupwise = np.median(data_groupwise['Percentage Group-wise Frequency'])
+        median_occurrence = np.median(data_occurrence['RTC (%)'])
+        median_groupwise = np.median(data_groupwise['RMC (%)'])
 
         # Plot horizontal dashed lines for the medians (keep simple labels for the legend)
-        ax1.axhline(median_occurrence, color='blue', linestyle='--', linewidth=2.0, label='Aggregated Frequency Median',
-                    zorder=3)
-        ax1.axhline(median_groupwise, color='green', linestyle='--', linewidth=2.0, label='Model Coverage Median',
-                    zorder=3)
+        ax1.axhline(median_occurrence, color=COLORS["rtc_median"], linestyle='--', linewidth=2.0, label='RTC Median', zorder=3)
+        ax1.axhline(median_groupwise, color=COLORS["rmc_median"], linestyle='--', linewidth=2.0, label='RMC Median', zorder=3)
 
         # Annotate the medians at the rightmost end of the lines
         # Used (-7, 10) and (-50, 2) for relation
 
         ax1.annotate(f'{median_occurrence:.2f}%', xy=(len(data_occurrence) - 1, median_occurrence), xytext=(-7, 2),
-                     textcoords='offset points', color='blue', fontsize=10, fontweight='bold', zorder=5)
+                     textcoords='offset points', color=COLORS["rtc_annotation"], fontsize=10, fontweight='bold', zorder=5)
 
         ax1.annotate(f'{median_groupwise:.2f}%', xy=(len(data_groupwise) - 1, median_groupwise), xytext=(-7, 2),
-                     textcoords='offset points', color='green', fontsize=10, fontweight='bold', zorder=5)
+                     textcoords='offset points', color=	COLORS["rmc_annotation"], fontsize=10, fontweight='bold', zorder=5)
 
         # Set labels and title
-        ax1.set_ylabel('Stereotype AF & MC (%)', fontsize=12)
+        ax1.set_ylabel('Stereotype RTC & RMC (%)', fontsize=12)
         # Title omitted for the paper
         # ax1.set_title(title, fontweight='bold', fontsize=14)
 
@@ -101,18 +117,17 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
         # Line plot for occurrence-wise cumulative percentage
         ax2 = ax1.twinx()  # Create a second y-axis
 
-        ax2.plot(range(len(data_occurrence)), data_occurrence['Cumulative Percentage'], color='blue', marker='o',
-                 label='Cumulative Aggregated Frequency', linestyle='-', linewidth=2, zorder=2)
+        ax2.plot(range(len(data_occurrence)), data_occurrence['Cumulative RTC (%)'], color=COLORS["rtc_line"], marker='o',
+                 label='Cumulative RTC', linestyle='-', linewidth=2, zorder=2)
 
-        # Line plot for group-wise cumulative percentage
-        ax2.plot(range(len(data_groupwise)), data_groupwise['Group-wise Cumulative Percentage'], color='green',
-                 marker='o', label='Cumulative Model Coverage', linestyle='-', linewidth=2, zorder=2)
+        ax2.plot(range(len(data_groupwise)), data_groupwise['Cumulative RMC (%)'], color=COLORS["rmc_line"],
+                 marker='o', label='Cumulative RMC', linestyle='-', linewidth=2, zorder=2)
 
         if coverage_limit is not None:
             coverage_limit_percent = coverage_limit * 100
             ax2.axhline(
                 y=coverage_limit_percent,
-                color='lightgrey',
+                color=COLORS["coverage_line"],
                 linestyle=(0, (5, 5)),  # More spaced-out dashes
                 linewidth=1.0,
                 zorder=-5,  # Ensure it remains in the background
@@ -121,28 +136,28 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
 
             # Find the index where both cumulative percentages exceed the coverage limit
             for i in range(len(data_occurrence)):
-                occurrence_cumulative = data_occurrence.loc[i, 'Cumulative Percentage']
-                groupwise_cumulative = data_groupwise.loc[i, 'Group-wise Cumulative Percentage']
+                occurrence_cumulative = data_occurrence.loc[i, 'Cumulative RTC (%)']
+                groupwise_cumulative = data_groupwise.loc[i, 'Cumulative RMC (%)']
                 if min(occurrence_cumulative, groupwise_cumulative) >= coverage_limit_percent:
                     # Plot the vertical dashed line at this index
-                    ax1.axvline(x=i, color='red', linestyle='--', linewidth=2.0,
+                    ax1.axvline(x=i, color=COLORS["coverage_marker"], linestyle='--', linewidth=2.0,
                                 label=f'Projected Cumulative ≥ {coverage_limit_percent:.1f}%')
 
                     # Annotate the occurrence-wise cumulative percentage, automatically adjusted
                     ax2.annotate(f'{occurrence_cumulative:.1f}%', xy=(i, occurrence_cumulative),
                                  textcoords='offset points', xytext=(3, 14), ha='left', va='top', fontsize=10,
-                                 color='blue')
+                                 color=COLORS["rtc_annotation"])
 
                     # Annotate the group-wise cumulative percentage, automatically adjusted
                     ax2.annotate(f'{groupwise_cumulative:.1f}%', xy=(i, groupwise_cumulative),
                                  textcoords='offset points', xytext=(3, -5), ha='left', va='top', fontsize=10,
-                                 color='green')
+                                 color=COLORS["rmc_annotation"])
 
                     red_line_index = i
                     break
 
         # Set the y-axis label and ticks for the cumulative percentage
-        ax2.set_ylabel('Cumulative AF & MC (%)', fontsize=12)
+        ax2.set_ylabel('Cumulative RTC & RMC (%)', fontsize=12)
         ax2.set_yticks(range(0, 101, 10))
 
         ax1.tick_params(axis='x', rotation=45)  # Rotate by 45 degrees
@@ -203,9 +218,9 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
 
         # Create proxy artists for the symbols
         legend_elements = [Line2D([0], [0], marker='+', color='black', linestyle='None', markersize=7,
-                                  label='Stereotype ≥ median (AF)'),
+                                  label='Stereotype ≥ median (RTC)'),
                            Line2D([0], [0], marker='$*$', color='black', linestyle='None', markersize=7,
-                                  label='Stereotype ≥ median (MC)')]
+                                  label='Stereotype ≥ median (RMC)')]
 
         # Add these proxies to the existing legend
         ax2.legend(handles=combined_handles + legend_elements,  # Combine previous handles with new ones

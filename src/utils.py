@@ -41,8 +41,8 @@ def append_chars_to_labels(texts, data_occurrence, data_groupwise, median_occurr
 
     for i, text in enumerate(texts):
         label = text.get_text()  # Get the current label text
-        occurrence_value = data_occurrence.loc[i, 'Percentage Frequency']
-        groupwise_value = data_groupwise.loc[i, 'Percentage Group-wise Frequency']
+        occurrence_value = data_occurrence.loc[i, 'RTC (%)']
+        groupwise_value = data_groupwise.loc[i, 'RMC (%)']
 
         # Reset the label by removing any previous chars if necessary
         clean_label = label.split()[0]  # Get the original label without any appended chars
