@@ -38,7 +38,7 @@ def plot_pareto_combined(dataset, output_dir: str, coverage_limit: float = None)
     # Define a helper function to create Pareto charts for a given dataset
     def create_pareto_chart(data_occurrence, data_groupwise, output_path, coverage_limit=None, suffix=""):
 
-        # === Centralized Color Config ===
+        # Centralized Color Config
         COLORS = {
             # RTC = Green (bright)
             "rtc_bar": "#00E676",  # Bright neon green
