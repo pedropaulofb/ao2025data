@@ -10,17 +10,17 @@ from src.step3_output import generate_visualizations
 from src.utils import save_object, load_object
 
 if __name__ == "__main__":
-    # # Step 0: Initial setup
-    # initialize_output_directories()
-    # catalog_path = get_catalog_path()
-    #
-    # # Step 1: Data input - load all models' data, execute queries and create dataset
-    # all_models_data = load_data_from_catalog(catalog_path)
-    # query_data(all_models_data)
-    # all_models_data = calculate_models_data()
-    # datasets = create_and_save_specific_datasets_instances(all_models_data)
+    # Step 0: Initial setup
+    initialize_output_directories()
+    catalog_path = get_catalog_path()
 
-    datasets = load_object(os.path.join(OUTPUT_DIR_01, "datasets.object.gz"), "Datasets")
+    # Step 1: Data input - load all models' data, execute queries and create dataset
+    all_models_data = load_data_from_catalog(catalog_path)
+    query_data(all_models_data)
+    all_models_data = calculate_models_data()
+    datasets = create_and_save_specific_datasets_instances(all_models_data)
+
+    # datasets = load_object(os.path.join(OUTPUT_DIR_01, "datasets.object.gz"), "Datasets")
 
     # Step 2: Data processing - generate statistics
     calculate_and_save_datasets_statistics(datasets, OUTPUT_DIR_02)
