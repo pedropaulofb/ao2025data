@@ -62,20 +62,3 @@ After the execution, the software will create an output folder (e.g., `er2025dat
 - **Graphs and Visualizations**: Available in `output/03_visualizations`.
 
 The data used in the paper is available in the output folder of this repository, ensuring validation by the community.
-
-
-
-## Developer
-
-This script was developed by:
-
-<table>
-  <tr>
-    <td><strong>Pedro Paulo F. Barcelos</strong></td>
-    <td>
-      <a href="https://orcid.org/0000-0003-2736-7817"><img src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" alt="ORCID" width="20"/></a>
-      <a href="https://github.com/pedropaulofb"><img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="20"/></a>
-      <a href="https://www.linkedin.com/in/pedro-paulo-favato-barcelos/"><img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn" width="20"/></a>
-    </td>
-  </tr>
-</table>
