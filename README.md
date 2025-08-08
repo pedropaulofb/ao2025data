@@ -1,12 +1,11 @@
+# AO 2025 Data Analysis Script
 
-# ER 2025 Data Analysis Script
-
-This repository contains a Python script developed to automate the data processing and analysis workflows used in a manuscript submitted to ER 2025. The script is designed to extract data from the OntoUML/UFO Catalog, apply selection criteria, and calculate statistics used in the quantitative analyses described in the paper. It ensures the reproducibility of results, generates structured outputs (e.g., CSV files), and produces the visualizations and graphs included in the study.
+This repository contains a Python script developed to automate the data processing and analysis workflows used in a manuscript submitted to AO 2025. The script is designed to extract data from the OntoUML/UFO Catalog, apply selection criteria, and calculate statistics used in the quantitative analyses described in the paper. It ensures the reproducibility of results, generates structured outputs (e.g., CSV files), and produces the visualizations and graphs included in the study.
 
 ## Repository Purpose
 
 This repository serves two main purposes:
-1. **Reproducibility**: Allow users to replicate the analyses described in the ER 2025 paper.
+1. **Reproducibility**: Allow users to replicate the analyses described in the AO 2025 paper.
 2. **Data Accessibility**: Provide access to the data used in the paper.
 
 ## Getting Started
@@ -16,7 +15,7 @@ To replicate the analysis, follow these steps:
 ### 1. Clone This Repository
 Open a terminal and execute the following command:
 ```bash
-git clone https://github.com/pedropaulofb/er2025data.git
+git clone https://github.com/pedropaulofb/ao2025data.git
 ```
 
 ### 2. Clone the OntoUML/UFO Catalog
@@ -38,12 +37,12 @@ To reproduce the exact data used in the paper:
 Ensure both repositories are placed in the same root directory. For example:
 ```
 my_folder/
-├── er2025data/
+├── ao2025data/
 ├── ontouml-models/
 ```
 
 ### 4. Install Dependencies
-Navigate to the `er2025data` directory and install the required Python libraries:
+Navigate to the `ao2025data` directory and install the required Python libraries:
 ```bash
 pip install -r requirements.txt
 ```
@@ -56,7 +55,7 @@ python main.py
 
 ## Output
 
-After the execution, the software will create an output folder (e.g., `er2025data/output`). Inside this folder, the results will be organized as follows:
+After the execution, the software will create an output folder (e.g., `ao2025data/output`). Inside this folder, the results will be organized as follows:
 
 - **Calculated Statistics**: Available in `output/02_datasets_statistics`.
 - **Graphs and Visualizations**: Available in `output/03_visualizations`.
